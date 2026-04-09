@@ -1,109 +1,120 @@
-# Roman Holiday Planner — Kurzanleitung
+# Roman Holiday Planner
 
-Unser gemeinsamer Rom-Planer. Mobile-first, kollaborativ, pro Familie farbcodiert, mit echten Google-Maps-Daten und Tagestouren-Routing zu Fuß.
+> Hab da mal ne App gebaut für unseren Rom-Trip. Ist kein Produkt, kein AppStore, kein nix — nur ein Bookmark im Browser. Aber dafür richtig praktisch, versprochen. 🇮🇹
 
-**→ https://stekum.github.io/roman-holiday-planner/**
+**→ https://stekum.github.io/roman-holiday-planner/beta/**
 
-**Passwort:** siehe private Nachricht
+**Passwort:** Frag Stefan (kriegt ihr per Signal)
 
-> 💡 Am besten auf dem Handy benutzen. Die App merkt sich alles lokal im Browser — auf jedem Gerät hast du deine eigene Sammlung, bis wir eine echte Synchronisation einbauen.
+> 💡 Am besten auf dem **Handy** öffnen und zum Homescreen hinzufügen (Safari: Teilen → „Zum Home-Bildschirm"). Dann öffnet sie sich wie eine echte App.
+
+---
+
+## Was das Ding kann
+
+**Wir sammeln gemeinsam Orte für Rom** — Restaurants, Sehenswürdigkeiten, Trattorias, Gelaterias, das komische Boutique-Geschäft das jemand auf Instagram gesehen hat. Alles in einer gemeinsamen Karte, pro Familie farbig markiert. Und am Ende kann man sich pro Tag eine **Fußgänger-Route** basteln, die einem sagt welcher Ort nach welchem kommt.
+
+Und das Geilste: **alles läuft in Echtzeit synchron**. Wenn ich auf meinem Handy in der Schlange beim Bäcker was eintrage, poppt es 2 Sekunden später auf deinem Laptop auf. Kein Refresh, kein Export, kein „ich hab dir gerade ne Liste geschickt". Genau wie in einem Google-Doc, nur mit Karte.
 
 ---
 
 ## Die drei Tabs
 
 ### 🧭 Entdecken
-Karte oben, POI-Liste unten. Hier sammelst du alle Orte, die euch interessieren.
+Karte oben, Orte-Liste unten. Hier sammelst du alles was euch einfällt.
 
 ### 🗺️ Reise
-Pro Tag eine eigene Route. Du ziehst POIs aus der Entdecken-Liste in einen Tag, ordnest sie an, und die App zeichnet dir die Fuß-Route mit Zeit + Distanz.
+Deine Tagestouren. Jeder Tag hat seinen eigenen Tab, du wählst aus den Orten im Entdecken-Tab aus welche du am Tag X besuchen willst, sortierst sie mit den Pfeilen, und die App zeichnet dir die **echte Fußgänger-Route** mit Distanz und Dauer dazu. Ein Ort kann auch an mehreren Tagen auftauchen — wenn ihr z.B. zweimal am Pantheon vorbeikommt, ist das kein Problem.
 
 ### ⚙️ Settings
-Reise-Zeitraum (bestimmt wie viele Tage im Reise-Tab auftauchen) und Familien-Liste (Name + Farbe für jede Familie, beliebig viele).
+- **Reise-Zeitraum** — bestimmt wie viele Tage im Reise-Tab auftauchen
+- **Familien** — Name + Farbe, so viele wie ihr wollt
+- Unten die „Gefahrenzone" (Papierkorb für den lokalen Browser-Cache, falls mal was komisch ist)
 
 ---
 
-## So legst du einen Ort an
+## Einen Ort hinzufügen — 4 Wege
 
-Tippe unten rechts auf den **„+"-Button**. Vier Wege:
+Unten rechts ist ein **„+"-Button**. Tippe drauf, wähle einen von vier Wegen:
 
 ### 🔍 Suchen
-Tippe den Namen ein — Restaurant, Hotel, Airbnb, Sehenswürdigkeit, egal was. Die App durchsucht Google Places wie Google Maps selbst. Foto, Adresse und Rating werden direkt angezeigt, bevor du speicherst.
+**Der goldene Standard.** Tipp den Namen ein — Restaurant, Airbnb, Hotel, Sehenswürdigkeit — und die App sucht in Google Places. Genau wie Google Maps selbst, nur dass du das Ergebnis direkt in unsere Sammlung packen kannst. Bild, Adresse, Sterne kommen automatisch mit.
 
-### 📍 Auf Karte
-Tipp einfach auf ein **Restaurant-/Hotel-/Sehenswürdigkeit-Icon** direkt auf der Karte. Die App holt alle Daten von Google und öffnet sofort den Hinzufügen-Dialog.
+### 📍 Auf Karte tippen
+Du kannst **direkt auf die Karte tippen** und eins dieser kleinen Icons für Restaurants, Hotels, Cafés, Museen auswählen. Die App holt alle Daten von Google (Foto, Name, Adresse, Rating) und öffnet sofort den Dialog. Geht auch **ohne den „+"-Button** vorher — einfach tippen und los.
 
-> Geht auch **direkt ohne „+"-Button**: einfach auf der Karte ein Icon antippen → Dialog ist sofort da.
+> ⚠️ **Achtung**: Google versteckt Airbnbs und Ferienwohnungen auf der eingebetteten Karte (keine Ahnung warum, Google-Politik). Wenn du ein Airbnb hinzufügen willst → nimm „Suchen" statt „Auf Karte".
 
 ### ✍️ Manuell
-Für Orte ohne genaue Adresse, z.B. „Der Aussichtspunkt den XY empfohlen hat". Du gibst nur Name + Notiz ein. Der Ort landet in der **Inbox** und kann später verortet werden.
+Für „ich hab da was auf Reddit gelesen, weiß nur den Namen". Du tippst Name + Notiz rein, der Ort landet in der **Inbox** (dazu gleich mehr) und wird später verortet.
 
 ### 📸 Instagram
-Kopiere einen Instagram-Post-Link rein → „Holen" → die App versucht Bild, Titel und Beschreibung zu extrahieren. Funktioniert oft, aber nicht immer (Instagram blockiert manches).
-
-> Instagram-Posts haben **keine Koordinaten**. Du kannst unten im Dialog optional den Ort suchen (Places-Suche), oder den POI ohne Ort speichern — er landet in der **Inbox**.
+Kopiere den Link eines Instagram-Posts rein → „Holen" → die App versucht Bild, Titel und Beschreibung zu extrahieren. **Klappt nicht immer** (Instagram blockt gerne), aber wenn's klappt ist es ganz nett. Ohne Ort landet der Eintrag in der Inbox und du kannst ihn später verorten.
 
 ---
 
-## Inbox (Orte ohne Koordinaten)
+## Die Inbox
 
-Oben auf dem Entdecken-Tab erscheint ein **oranger Banner**, wenn Orte noch nicht verortet sind (aus manuellen Einträgen oder Instagram-Importen).
-
-Auf jeder betroffenen POI-Card siehst du einen **„Verorten"**-Button → öffnet die Places-Suche, und sobald du einen Ort wählst, bekommt der POI seine Koordinaten.
+Wenn ein Ort noch keine Koordinaten hat (aus „Manuell" oder „Instagram ohne Ort"), erscheint auf dem Entdecken-Tab oben ein **oranger Banner**: „3 Orte warten auf Verortung". Die betroffenen Karten haben einen **„Verorten"**-Button — anklicken, Google-Suche, Ort auswählen, fertig.
 
 ---
 
-## Was du mit einer POI-Card machen kannst
+## Was du mit einer Karte in der Liste machen kannst
 
-- **Bildbereich antippen** → Karte zoomt zum Ort und zeigt ein Info-Fenster
-- **❤️ Herz** → liken (zählt hoch)
-- **+ Zum Tag** → fügt den Ort in den aktuell aktiven Tag im Reise-Tab ein
-- **✏️ Stift** (oben rechts) → Name, Familie, Kategorie, Notiz, Bild editieren
-- **🗑️ Papierkorb** → löschen (wird auch aus allen Tagen entfernt)
-- Wenn verlinkt: **Google Maps** und **Instagram** als klickbare Chips
+- **Bild antippen** → Karte zoomt zu dem Ort, kleines Info-Fensterchen mit Foto + Adresse
+- **❤️ Herz** → liken (mehr Like = mehr „das will ich!"-Signal)
+- **+ Zum Tag** → fügt den Ort zum aktuell im Reise-Tab ausgewählten Tag hinzu
+- **✏️ Stift** → editieren: Titel, Familie, Kategorie, Notiz, Bild-URL (falls du ein besseres Foto hast)
+- **🗑️ Papierkorb** → löscht **für alle** (Achtung: kein Undo!)
+- Wenn verlinkt: **Google Maps** + **Instagram** als Chips direkt auf der Karte
 
-Die **Tage-Chips** unter dem Titel zeigen, an welchen Tagen dieser Ort bereits im Plan steht (z.B. „Tag 3 · Do, 16. Okt"). Ein Ort kann mehreren Tagen zugeordnet sein.
-
----
-
-## Tagestour planen
-
-1. Geh in den **Reise-Tab**
-2. Oben kannst du zwischen den Tagen wechseln (Chip pro Tag)
-3. Wechsle zurück zu **Entdecken**, tippe „+ Zum Tag" auf den Orten die du am ausgewählten Tag besuchen willst
-4. Zurück im Reise-Tab: Reihenfolge mit den ↑ ↓ Pfeilen ändern
-5. Die Karte zeigt die **Fuß-Route** zwischen allen Stopps mit Gesamtdistanz und -zeit
-
-Jeder Tag hat seine eigene Auswahl und Route. Ein Ort kann an mehreren Tagen liegen.
+Unter dem Titel siehst du **Tag-Chips** wie „Tag 3 · So, 01. Nov" — zeigt euch an welchen Tagen dieser Ort schon im Plan steht.
 
 ---
 
 ## Familien
 
-In den Settings legst du an, welche Familien/Leute dabei sind. Jede bekommt eine Farbe, und diese Farbe taucht überall wieder auf — Pins auf der Karte, Card-Badges, Nummerierung im Tagesplan. Beim Anlegen eines POIs wählst du aus, wer den Tipp gebracht hat.
+In den Settings legst du ein **Familien an**, jede mit Namen und Farbe. Die Farbe taucht überall wieder auf:
+- **Pins** auf der Karte in Familienfarbe
+- **Badge** auf jeder Karte (z.B. „Kummert" in Grün)
+- Die **Nummerierung** im Tagesplaner bekommt ihre Farbe
+
+Beim Anlegen eines Ortes wählst du aus, welche Familie den Tipp gebracht hat. Kleine Eifersuchts-Statistik am Ende der Reise inklusive. 😏
 
 ---
 
-## Das musst du wissen
+## Ein paar Dinge die du wissen solltest
 
-### Daten liegen nur in deinem Browser
-Alles — POIs, Likes, Tagesplan, Settings — wird in `localStorage` gespeichert. Das heißt:
-- **Jedes Gerät hat seine eigene Sammlung** (Handy ≠ Laptop)
-- **Privater Modus funktioniert nicht** (wird beim Schließen gelöscht)
-- **Browser-Daten löschen = alles weg**
+### Alles läuft live synchron
+Änderungen sind **sofort für alle sichtbar**. Kein „ich schick dir gleich die neue Liste". Gleichzeitig heißt das auch: **Wenn jemand auf den Papierkorb drückt, ist es für alle weg**. Vorsicht mit dem Löschen.
 
-### Kollaboration ist (noch) manuell
-Wenn zwei Familien Orte sammeln, müssen wir das gelegentlich zusammenführen — aktuell noch per Hand. Echte Sync kommt später falls die App sich bewährt.
+### Passwortgeschützt
+Damit nicht wahllos Leute aus dem Internet mit unserer Planung rumspielen, hab ich nen Passwort-Riegel vorgebaut. Ist nicht Fort Knox, aber hält Zufalls-Besucher raus.
 
-### Die App ist passwortgeschützt
-Das Passwort hält Zufalls-Besucher raus. Es ist **kein** hartes Security-Feature — wer es drauf anlegt, kommt rein. Aber der Google-Maps-Key ist serverseitig über die Cloud Console eingeschränkt und kann nicht missbraucht werden.
+### Die App ist noch Bastelarbeit
+Das ist kein glattgeschliffenes Produkt, sondern ein privates Tool für uns. Wenn was komisch aussieht, bitte einfach Stefan Bescheid geben — meistens ist's in 5 Minuten gefixt.
 
-### Wenn mal was nicht geht
-- **Seite neu laden** (`Cmd+Shift+R` oder lange tippen → Neu laden)
-- **Settings → Gefahrenzone → Alles zurücksetzen** — löscht alle lokalen Daten und startet frisch
+### Wenn mal gar nichts geht
+- **Seite neu laden** (`Cmd+Shift+R` am Laptop, lange tippen → Neu laden auf Handy)
+- **Settings → Gefahrenzone → Alle Daten zurücksetzen** (löscht lokalen Cache, Firebase-Daten bleiben erhalten)
+- **Stefan anschreiben** mit Screenshot
+
+### Browser-Kompatibilität
+Funktioniert in **Safari, Chrome, Firefox, Edge** — auf Handy und Desktop. Internet Explorer wird nicht unterstützt. (Falls jemand noch IE benutzt: kauf dir ein neues Leben.)
 
 ---
 
-## Habt Spaß dabei 🇮🇹
+## Tipp: So würde ich das machen
 
-Wenn ihr Feedback habt, Bugs findet oder eine Funktion vermisst: einfach Bescheid geben.
+1. **Jetzt schon mal einige Favoriten reinkloppen** — die offensichtlichen Sehenswürdigkeiten, die Restaurants die jemand empfohlen hat, die Airbnbs falls noch nicht gebucht
+2. Während der Reise **nach jedem Tag kurz durchgehen** — was hat sich bewährt, was kommt für morgen?
+3. **Instagram-Links im Vorfeld sammeln**: wenn ihr was scrollt und denkt „huh, sieht cool aus" → Link kopieren, in die App pasten, in die Inbox damit
+4. **Am Anreisetag die Route für Tag 1 fixieren**: Reise-Tab → Tag 1 → Orte reinziehen → Reihenfolge so setzen dass die Route zu Fuß Sinn ergibt → los geht's
+
+---
+
+## Feedback willkommen
+
+Die App wird gebaut während wir sie benutzen. Wenn dir was fehlt, wenn was nervt, wenn ein Bug auftaucht — schick mir einfach ne Nachricht mit Screenshot. Fast alles lässt sich in einer Stunde fixen.
+
+**Buon viaggio!** 🍕🍝🍦
