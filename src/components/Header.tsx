@@ -1,0 +1,50 @@
+import { Compass, Route, Settings as SettingsIcon } from 'lucide-react';
+
+export type Tab = 'discover' | 'trip' | 'settings';
+
+interface Props {
+  tab: Tab;
+  onTabChange: (t: Tab) => void;
+}
+
+const TABS: { id: Tab; label: string; Icon: typeof Compass; activeClass: string }[] = [
+  { id: 'discover', label: 'Entdecken', Icon: Compass, activeClass: 'bg-terracotta text-white' },
+  { id: 'trip', label: 'Reise', Icon: Route, activeClass: 'bg-olive text-white' },
+  { id: 'settings', label: 'Settings', Icon: SettingsIcon, activeClass: 'bg-ink text-cream' },
+];
+
+export function Header({ tab, onTabChange }: Props) {
+  return (
+    <header className="sticky top-0 z-30 border-b border-cream-dark bg-cream/90 backdrop-blur">
+      <div className="mx-auto flex max-w-2xl items-center justify-between gap-2 px-4 py-3">
+        <div className="min-w-0">
+          <h1
+            className="truncate text-2xl leading-none text-ink"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            Roman Holiday
+          </h1>
+          <p className="truncate text-xs uppercase tracking-widest text-olive">
+            Planner · Autunno
+          </p>
+        </div>
+        <nav className="flex flex-shrink-0 gap-1 rounded-full bg-white p-1 shadow-sm shadow-ink/5">
+          {TABS.map(({ id, label, Icon, activeClass }) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => onTabChange(id)}
+              className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium transition ${
+                tab === id ? activeClass : 'text-ink/60 hover:text-ink'
+              }`}
+              aria-label={label}
+            >
+              <Icon className="h-4 w-4" />
+              <span className="hidden sm:inline">{label}</span>
+            </button>
+          ))}
+        </nav>
+      </div>
+    </header>
+  );
+}

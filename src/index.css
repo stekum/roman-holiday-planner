@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+@theme {
+  --color-terracotta: #C96F4A;
+  --color-terracotta-dark: #A85637;
+  --color-ocker: #D4A24C;
+  --color-ocker-light: #E8C78A;
+  --color-olive: #6B7A3F;
+  --color-olive-dark: #4F5B2D;
+  --color-cream: #FBF7F0;
+  --color-cream-dark: #F1EADC;
+  --color-ink: #3B2E2A;
+
+  --font-display: "Playfair Display", ui-serif, Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hide Google Maps InfoWindow's default padding, close button and scrollbars */
+.gm-style-iw.gm-style-iw-c {
+  padding: 0 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 30px rgb(59 46 42 / 0.18) !important;
+}
+.gm-style-iw-d {
+  overflow: hidden !important;
+  max-height: none !important;
+}
+.gm-style-iw-chr {
+  display: none !important;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+
+.animate-shake {
+  animation: shake 0.45s ease-in-out;
+}
