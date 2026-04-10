@@ -166,6 +166,7 @@ function AppInner() {
                     setAddMode('map');
                   }
                 }}
+                onDismiss={() => setHighlightedPoiId(null)}
                 onRouteSummary={setSummary}
               />
             ) : (

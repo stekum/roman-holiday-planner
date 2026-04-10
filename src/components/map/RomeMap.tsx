@@ -33,6 +33,8 @@ interface Props {
   pickMode?: boolean;
   onMarkerClick?: (poi: POI) => void;
   onMapClick?: (pick: { coords: { lat: number; lng: number }; placeId?: string }) => void;
+  /** Called when user clicks map background — parent should clear highlightedPoiId. */
+  onDismiss?: () => void;
   onRouteSummary?: (s: RouteSummary | null) => void;
 }
 
@@ -100,6 +102,7 @@ export function RomeMap({
   pickMode = false,
   onMarkerClick,
   onMapClick,
+  onDismiss,
   onRouteSummary,
 }: Props) {
   const [internalSelectedId, setInternalSelectedId] = useState<string | null>(null);
@@ -147,6 +150,7 @@ export function RomeMap({
       onClick={(e) => {
         // Any click on the map background dismisses the InfoWindow
         setInternalSelectedId(null);
+        onDismiss?.();
 
         const latLng = e.detail.latLng;
         if (!latLng || !onMapClick) return;
