@@ -1,41 +1,24 @@
 /**
- * Google Gemini API client — lazy-initialized singleton.
+ * Gemini AI via Firebase AI Logic — server-side proxied.
  *
- * Uses Gemini 2.5 Flash for cost-effective AI features.
- * Requires VITE_GEMINI_API_KEY in .env.local.
+ * The API key is managed by Firebase (never in the client bundle).
+ * No VITE_GEMINI_API_KEY needed anymore.
  *
- * All AI features (day planner, NL search, briefing, etc.) import
- * getModel() from here.
+ * Requires: Firebase AI Logic enabled in the Firebase Console.
  */
 
-import { GoogleGenerativeAI, type GenerativeModel } from '@google/generative-ai';
+import { getAI, getGenerativeModel, GoogleAIBackend } from 'firebase/ai';
+import { getFirebase } from '../firebase/firebase';
 
-const env = import.meta.env;
+export const isGeminiConfigured = true; // Always available when Firebase is configured
 
-export const isGeminiConfigured = !!(env.VITE_GEMINI_API_KEY as string | undefined)?.trim();
+let model: ReturnType<typeof getGenerativeModel> | null = null;
 
-let client: GoogleGenerativeAI | null = null;
-let model: GenerativeModel | null = null;
-
-export function getGeminiModel(): GenerativeModel {
-  if (!isGeminiConfigured) {
-    throw new Error('Gemini API key not set. Add VITE_GEMINI_API_KEY to .env.local');
-  }
+export function getGeminiModel() {
   if (model) return model;
 
-  client = new GoogleGenerativeAI((env.VITE_GEMINI_API_KEY as string).trim());
-  model = client.getGenerativeModel({
-    model: 'gemini-2.5-flash',
-  });
+  const { app } = getFirebase();
+  const ai = getAI(app, { backend: new GoogleAIBackend() });
+  model = getGenerativeModel(ai, { model: 'gemini-2.5-flash' });
   return model;
-}
-
-/**
- * Quick smoke test — call from browser console:
- *   import('/src/lib/gemini.ts').then(m => m.smokeTest())
- */
-export async function smokeTest(): Promise<string> {
-  const m = getGeminiModel();
-  const result = await m.generateContent('Sag "Ciao Roma!" auf Italienisch und Deutsch.');
-  return result.response.text();
 }
