@@ -14,6 +14,7 @@
     "deploy:beta": "npm run build:beta && gh-pages -d dist --dest beta --add"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@tailwindcss/vite": "^4.2.2",
     "@vis.gl/react-google-maps": "^1.8.2",
     "firebase": "^12.12.0",
