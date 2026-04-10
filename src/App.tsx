@@ -63,6 +63,7 @@ function AppInner() {
     getDay,
     togglePoi,
     movePoi,
+    setDayOrder,
     clearDay,
     removePoiFromAll,
   } = workspace;
@@ -217,6 +218,9 @@ function AppInner() {
               onMove={(id, dir) => activeDay && movePoi(activeDay, id, dir)}
               onRemove={(id) => activeDay && togglePoi(activeDay, id)}
               onClear={() => activeDay && clearDay(activeDay)}
+              onReorder={(newOrder) => {
+                if (activeDay) void setDayOrder(activeDay, newOrder);
+              }}
             />
           )}
           {tab === 'settings' && (
