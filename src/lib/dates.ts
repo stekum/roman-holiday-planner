@@ -1,6 +1,15 @@
+/** Formats a Date as local YYYY-MM-DD without timezone shifting. */
+function toLocalIso(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 /**
  * Liefert alle ISO-Tage (YYYY-MM-DD) zwischen start und end einschließlich.
- * Leer wenn end < start oder ungültig.
+ * Rechnet komplett in Lokalzeit, um Off-by-one-Verschiebungen in Zeitzonen
+ * östlich von UTC zu vermeiden. Leer wenn end < start oder ungültig.
  */
 export function eachDayInRange(start: string, end: string): string[] {
   if (!start || !end) return [];
@@ -12,7 +21,7 @@ export function eachDayInRange(start: string, end: string): string[] {
   const days: string[] = [];
   const cursor = new Date(startDate);
   while (cursor <= endDate) {
-    days.push(cursor.toISOString().slice(0, 10));
+    days.push(toLocalIso(cursor));
     cursor.setDate(cursor.getDate() + 1);
   }
   return days;

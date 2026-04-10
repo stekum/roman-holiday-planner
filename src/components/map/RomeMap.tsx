@@ -7,7 +7,7 @@ import {
   useMap,
 } from '@vis.gl/react-google-maps';
 import { CATEGORY_EMOJI, ROME_CENTER, type POI } from '../../data/pois';
-import type { Family } from '../../settings/types';
+import type { Family, Homebase } from '../../settings/types';
 import { RoutePolyline, type RouteSummary } from './RoutePolyline';
 
 const CATEGORY_GRADIENT: Record<POI['category'], string> = {
@@ -26,6 +26,7 @@ interface Props {
   /** Ordered POI ids for the currently active day (plan mode). */
   planOrder?: string[];
   families: Family[];
+  homebase?: Homebase;
   /** External selection — app-controlled. Pans map and shows InfoWindow. */
   highlightedPoiId?: string | null;
   /** When true the map cursor is a crosshair and clicks fire onMapClick instead of deselecting. */
@@ -65,6 +66,7 @@ export function RomeMap({
   mode,
   planOrder = [],
   families,
+  homebase,
   highlightedPoiId,
   pickMode = false,
   onMarkerClick,
@@ -107,7 +109,7 @@ export function RomeMap({
   return (
     <GMap
       mapId="rhp-main"
-      defaultCenter={ROME_CENTER}
+      defaultCenter={homebase?.coords ?? ROME_CENTER}
       defaultZoom={14}
       gestureHandling="greedy"
       disableDefaultUI={false}
@@ -126,7 +128,13 @@ export function RomeMap({
         onMapClick({ coords: { lat: latLng.lat, lng: latLng.lng }, placeId });
       }}
     >
-      <MapFocus target={selected ? selected.coords : null} />
+      <MapFocus
+        target={
+          selectedId === '__homebase__' && homebase?.coords
+            ? homebase.coords
+            : selected?.coords ?? null
+        }
+      />
 
       {visiblePois.map((poi, idx) => {
         const family = familyMap.get(poi.familyId);
@@ -153,7 +161,66 @@ export function RomeMap({
         );
       })}
 
-      {selected && (
+      {homebase?.coords && (
+        <AdvancedMarker
+          position={homebase.coords}
+          zIndex={999}
+          onClick={() => setInternalSelectedId('__homebase__')}
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ink text-white shadow-lg ring-2 ring-white">
+            <span className="text-lg">🏠</span>
+          </div>
+        </AdvancedMarker>
+      )}
+
+      {selectedId === '__homebase__' && homebase?.coords && (
+        <InfoWindow
+          position={homebase.coords}
+          onCloseClick={() => setInternalSelectedId(null)}
+          pixelOffset={[0, -44]}
+          headerDisabled
+        >
+          <div
+            className="-m-[1px] w-[240px] overflow-hidden rounded-xl font-sans text-ink"
+            style={{ fontFamily: 'var(--font-sans)' }}
+          >
+            <div
+              className="relative flex h-28 w-full items-center justify-center overflow-hidden"
+              style={
+                homebase.image
+                  ? undefined
+                  : { background: 'linear-gradient(135deg, #3B2E2A 0%, #6B7A3F 100%)' }
+              }
+            >
+              {homebase.image ? (
+                <img
+                  src={homebase.image}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="text-5xl">🏠</span>
+              )}
+              <span className="absolute left-2 top-2 rounded-full bg-ink px-2 py-0.5 text-[10px] font-semibold text-white shadow">
+                🏠 Homebase
+              </span>
+            </div>
+            <div className="space-y-1 p-3">
+              <h3
+                className="text-base leading-tight text-ink"
+                style={{ fontFamily: 'var(--font-display)' }}
+              >
+                {homebase.name}
+              </h3>
+              {homebase.address && (
+                <p className="text-xs text-ink/60">{homebase.address}</p>
+              )}
+            </div>
+          </div>
+        </InfoWindow>
+      )}
+
+      {selected && selectedId !== '__homebase__' && (
         <InfoWindow
           position={selected.coords}
           onCloseClick={() => setInternalSelectedId(null)}
@@ -263,7 +330,7 @@ export function RomeMap({
       )}
 
       {mode === 'plan' && planPois.length >= 2 && (
-        <RoutePolyline pois={planPois} onSummary={onRouteSummary} />
+        <RoutePolyline pois={planPois} homebase={homebase?.coords} onSummary={onRouteSummary} />
       )}
     </GMap>
   );

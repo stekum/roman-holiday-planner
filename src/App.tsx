@@ -4,44 +4,74 @@ import { Header, type Tab } from './components/Header';
 import { PasswordGate } from './components/PasswordGate';
 import { MissingKeyNotice } from './components/MissingKeyNotice';
 import { RomeMap } from './components/map/RomeMap';
-import { PoiList } from './components/poi/PoiList';
+import { PoiList, type ViewMode } from './components/poi/PoiList';
 import { DayPlanner } from './components/dayplanner/DayPlanner';
 import { SettingsView } from './components/settings/SettingsView';
 import { AddPoiMenu, type AddMode } from './components/add/AddPoiMenu';
 import { LocatePoiModal } from './components/inbox/LocatePoiModal';
 import { EditPoiModal } from './components/poi/EditPoiModal';
-import { useLocalPOIs } from './hooks/useLocalPOIs';
-import { useTripPlan } from './hooks/useTripPlan';
-import { useSettings } from './hooks/useSettings';
+import { useWorkspace } from './firebase/useWorkspace';
+import { isFirebaseConfigured } from './firebase/firebase';
 import { eachDayInRange } from './lib/dates';
 import type { RouteSummary } from './components/map/RoutePolyline';
+import { Loader2, WifiOff } from 'lucide-react';
+
+function FirebaseMissingNotice() {
+  return (
+    <div className="flex h-full items-center justify-center p-6">
+      <div className="max-w-md rounded-3xl bg-white p-6 shadow-md shadow-ink/10">
+        <h2
+          className="mb-2 text-xl text-ink"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
+          Firebase nicht konfiguriert
+        </h2>
+        <p className="text-sm text-ink/60">
+          Diese Version der App nutzt Firebase für die kollaborative
+          Synchronisation. Setze <code>VITE_FIREBASE_*</code> in{' '}
+          <code>.env.local</code> und lade neu.
+        </p>
+      </div>
+    </div>
+  );
+}
 
 function AppInner() {
   const apiKey = (import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined)?.trim();
   const hasKey = !!apiKey;
 
-  const { pois, addPoi, likePoi, removePoi, updatePoi, setLocation } = useLocalPOIs();
+  const workspace = useWorkspace();
   const {
+    status,
+    error: workspaceError,
+    pois,
+    addPoi,
+    updatePoi,
+    setLocation,
+    likePoi,
+    removePoi,
     settings,
     setTripDates,
     addFamily,
     updateFamily,
     removeFamily,
     getFamily,
-  } = useSettings();
-  const {
+    setHomebase,
     plan,
     getDay,
     togglePoi,
     movePoi,
     clearDay,
     removePoiFromAll,
-  } = useTripPlan();
+  } = workspace;
 
   const [tab, setTab] = useState<Tab>('discover');
   const [summary, setSummary] = useState<RouteSummary | null>(null);
   const [highlightedPoiId, setHighlightedPoiId] = useState<string | null>(null);
   const [addMode, setAddMode] = useState<AddMode>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    () => (typeof window !== 'undefined' && window.innerWidth < 640) ? 'compact' : 'grid',
+  );
   const [pickedCoords, setPickedCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [pickedPlaceId, setPickedPlaceId] = useState<string | null>(null);
   const [locatingPoiId, setLocatingPoiId] = useState<string | null>(null);
@@ -77,22 +107,53 @@ function AppInner() {
   }
 
   const handleRemove = (id: string) => {
-    removePoi(id);
-    removePoiFromAll(id);
+    void removePoi(id);
+    void removePoiFromAll(id);
   };
+
+  const handleSetAsHomebase = (id: string) => {
+    const poi = pois.find((p) => p.id === id);
+    if (!poi?.coords) return;
+    if (!confirm(`„${poi.title}" als Homebase setzen?`)) return;
+    void setHomebase({
+      name: poi.title,
+      address: poi.address ?? poi.description ?? '',
+      coords: poi.coords,
+      placeId: poi.placeId,
+      image: poi.image || undefined,
+    });
+  };
+
+  const connectionBanner =
+    status === 'connecting' ? (
+      <div className="flex items-center gap-2 bg-olive/10 px-4 py-2 text-xs text-olive-dark">
+        <Loader2 className="h-3 w-3 animate-spin" />
+        Verbinde mit Firebase…
+      </div>
+    ) : status === 'error' ? (
+      <div className="flex items-start gap-2 bg-terracotta/10 px-4 py-2 text-xs text-terracotta">
+        <WifiOff className="mt-0.5 h-3 w-3 flex-shrink-0" />
+        <div>
+          <strong>Firebase-Verbindung fehlgeschlagen.</strong>{' '}
+          {workspaceError ?? 'Änderungen werden nicht synchronisiert.'}
+        </div>
+      </div>
+    ) : null;
 
   const content = (
     <div className="flex h-full flex-col">
       <Header tab={tab} onTabChange={setTab} />
+      {connectionBanner}
       <main className="flex flex-1 flex-col overflow-hidden">
         {tab !== 'settings' && (
-          <div className="relative h-[45vh] w-full flex-shrink-0 bg-cream-dark">
+          <div className={`relative w-full flex-shrink-0 bg-cream-dark ${viewMode === 'compact' ? 'h-[60vh]' : 'h-[45vh]'}`}>
             {hasKey ? (
               <RomeMap
                 pois={pois}
                 mode={tab === 'trip' ? 'plan' : 'discover'}
                 planOrder={activeDayOrder}
                 families={settings.families}
+                homebase={settings.homebase}
                 highlightedPoiId={highlightedPoiId}
                 pickMode={addMode === 'map'}
                 onMapClick={(pick) => {
@@ -129,7 +190,11 @@ function AppInner() {
               onHighlight={(id) =>
                 setHighlightedPoiId((prev) => (prev === id ? null : id))
               }
+              onSetAsHomebase={handleSetAsHomebase}
+              homebase={settings.homebase}
               onLocate={(id) => setLocatingPoiId(id)}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
             />
           )}
           {tab === 'trip' && (
@@ -154,6 +219,8 @@ function AppInner() {
               onAddFamily={addFamily}
               onUpdateFamily={updateFamily}
               onRemoveFamily={removeFamily}
+              onSetHomebase={setHomebase}
+              onMigrateFromLocal={workspace.migrateFromLocal}
             />
           )}
         </div>
@@ -214,7 +281,7 @@ function AppInner() {
 function App() {
   return (
     <PasswordGate>
-      <AppInner />
+      {isFirebaseConfigured ? <AppInner /> : <FirebaseMissingNotice />}
     </PasswordGate>
   );
 }

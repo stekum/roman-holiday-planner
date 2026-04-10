@@ -1,0 +1,32 @@
+rules_version = '2';
+
+// Roman Holiday Planner — Firestore Security Rules
+//
+// Modell:
+// - Ein Workspace pro Reisegruppe (workspaceId kommt aus VITE_FIREBASE_WORKSPACE_ID).
+// - Jede Person bekommt eine anonyme Firebase-Session (signInAnonymously).
+// - Regel: Wer eingeloggt ist (egal ob anonymous oder nicht) darf Workspaces
+//   lesen und schreiben. Zusätzlicher Schutz: das Passwort-Gate im Client sperrt
+//   die App vor Unbekannten weg, bevor Firebase überhaupt gesprochen wird.
+//
+// Es gibt bewusst KEIN Owner-Model — jeder in der Gruppe darf alles editieren,
+// genau wie in einem gemeinsamen Google-Doc.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Workspace-Hauptdokument (settings + tripPlan)
+    match /workspaces/{workspaceId} {
+      allow read, write: if request.auth != null;
+
+      // POI-Subkollektion
+      match /pois/{poiId} {
+        allow read, write: if request.auth != null;
+      }
+    }
+
+    // Alles andere verbieten
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
