@@ -99,24 +99,22 @@ export async function generateDayPlan(
   const model = getGeminiModel();
   const systemPrompt = buildSystemPrompt(context);
 
-  const result = await model.generateContent({
-    contents: [
-      { role: 'user', parts: [{ text: systemPrompt + '\n\nUser-Wunsch: ' + userPrompt }] },
-    ],
-    generationConfig: {
-      temperature: 0.7,
-      maxOutputTokens: 4096,
-      responseMimeType: 'application/json',
-    },
-  });
+  const fullPrompt = systemPrompt + '\n\nUser-Wunsch: ' + userPrompt;
+  const result = await model.generateContent(fullPrompt);
+  const response = result.response;
 
-  // Don't use result.response.text() — it concatenates ALL parts including
-  // Gemini 2.5 Flash's "thinking" parts, which breaks JSON parsing.
-  // Instead, find the last text part (the actual response, not the thought).
-  const parts = result.response.candidates?.[0]?.content?.parts ?? [];
-  const textParts = parts.filter((p: { text?: string }) => p.text).map((p: { text?: string }) => p.text ?? '');
-  // The actual JSON is typically the last text part
-  const rawText = textParts[textParts.length - 1] ?? result.response.text();
+  // Get the text — Firebase AI SDK's text() should work correctly
+  let rawText: string;
+  try {
+    rawText = response.text();
+  } catch {
+    // Fallback: try to extract from candidates
+    const resp = response as unknown as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
+    const candidates = resp.candidates;
+    const parts = candidates?.[0]?.content?.parts ?? [];
+    const textParts = parts.filter((p) => p.text).map((p) => p.text ?? '');
+    rawText = textParts[textParts.length - 1] ?? '';
+  }
 
   // Gemini sometimes wraps JSON in markdown fences even with responseMimeType set
   const cleanJson = rawText
