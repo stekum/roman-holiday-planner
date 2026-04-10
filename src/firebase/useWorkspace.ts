@@ -55,6 +55,7 @@ export interface WorkspaceAPI {
     poiId: string,
     direction: 'up' | 'down',
   ) => Promise<void>;
+  setDayOrder: (dayIso: string, order: string[]) => Promise<void>;
   clearDay: (dayIso: string) => Promise<void>;
   removePoiFromAll: (poiId: string) => Promise<void>;
 
@@ -345,6 +346,15 @@ export function useWorkspace(): WorkspaceAPI {
     [doc_.tripPlan, workspaceDocRef],
   );
 
+  const setDayOrder = useCallback(
+    async (dayIso: string, order: string[]) => {
+      await updateDoc(workspaceDocRef(), {
+        [`tripPlan.${dayIso}`]: order,
+      });
+    },
+    [workspaceDocRef],
+  );
+
   const clearDay = useCallback(
     async (dayIso: string) => {
       await updateDoc(workspaceDocRef(), {
@@ -411,6 +421,7 @@ export function useWorkspace(): WorkspaceAPI {
     getDay,
     togglePoi,
     movePoi,
+    setDayOrder,
     clearDay,
     removePoiFromAll,
     migrateFromLocal,

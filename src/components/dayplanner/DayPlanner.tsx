@@ -1,4 +1,6 @@
-import { ArrowDown, ArrowUp, Trash2, X } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowDown, ArrowUp, Loader2, Sparkles, Trash2, X } from 'lucide-react';
+import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import type { POI } from '../../data/pois';
 import type { Family } from '../../settings/types';
 import type { RouteSummary as Summary } from '../map/RoutePolyline';
@@ -19,6 +21,8 @@ interface Props {
   onMove: (id: string, direction: 'up' | 'down') => void;
   onRemove: (id: string) => void;
   onClear: () => void;
+  /** Called with the optimized order of POI ids. */
+  onReorder: (newOrder: string[]) => void;
 }
 
 export function DayPlanner({
@@ -34,10 +38,93 @@ export function DayPlanner({
   onMove,
   onRemove,
   onClear,
+  onReorder,
 }: Props) {
+  const routesLib = useMapsLibrary('routes');
+  const [optimizing, setOptimizing] = useState(false);
+  const [optimizeResult, setOptimizeResult] = useState<string | null>(null);
+
   const selected = dayOrder
     .map((id) => pois.find((p) => p.id === id))
     .filter(Boolean) as POI[];
+
+  const canOptimize =
+    !!routesLib && selected.length >= 3 && selected.every((p) => !!p.coords);
+
+  const handleOptimize = async () => {
+    if (!routesLib || selected.length < 3) return;
+    setOptimizing(true);
+    setOptimizeResult(null);
+
+    try {
+      const withCoords = selected.filter((p) => p.coords) as (POI & {
+        coords: { lat: number; lng: number };
+      })[];
+
+      const service = new routesLib.DirectionsService();
+      const origin = withCoords[0].coords;
+      const destination = withCoords[withCoords.length - 1].coords;
+      const waypoints = withCoords.slice(1, -1).map((p) => ({
+        location: p.coords,
+        stopover: true,
+      }));
+
+      const result = await service.route({
+        origin,
+        destination,
+        waypoints,
+        travelMode: google.maps.TravelMode.WALKING,
+        optimizeWaypoints: true,
+      });
+
+      const route = result.routes[0];
+      if (!route) {
+        setOptimizeResult('Keine Route gefunden.');
+        return;
+      }
+
+      // waypoint_order maps the middle waypoints to their optimal position.
+      // First and last stop stay fixed (origin/destination).
+      const waypointOrder = route.waypoint_order;
+      const middlePois = withCoords.slice(1, -1);
+      const optimizedMiddle = waypointOrder.map((i: number) => middlePois[i]);
+      const optimizedFull = [
+        withCoords[0],
+        ...optimizedMiddle,
+        withCoords[withCoords.length - 1],
+      ];
+      const newOrder = optimizedFull.map((p) => p.id);
+
+      // Check if order actually changed
+      const changed = newOrder.some((id, i) => id !== dayOrder[i]);
+      if (!changed) {
+        setOptimizeResult('Reihenfolge ist bereits optimal! 👌');
+        return;
+      }
+
+      onReorder(newOrder);
+
+      // Calculate saved distance
+      const totalOptimized = route.legs.reduce(
+        (sum, leg) => sum + (leg.distance?.value ?? 0),
+        0,
+      );
+      const savedKm =
+        summary && summary.distanceMeters > totalOptimized
+          ? ((summary.distanceMeters - totalOptimized) / 1000).toFixed(1)
+          : null;
+
+      setOptimizeResult(
+        savedKm
+          ? `Route optimiert — ${savedKm} km kürzer! 🎉`
+          : 'Route optimiert! 🎉',
+      );
+    } catch {
+      setOptimizeResult('Optimierung fehlgeschlagen (API-Fehler).');
+    } finally {
+      setOptimizing(false);
+    }
+  };
 
   if (days.length === 0) {
     return (
@@ -71,17 +158,46 @@ export function DayPlanner({
             Reihenfolge mit den Pfeilen ändern. Route wird zu Fuß geplant.
           </p>
         </div>
-        {selected.length > 0 && (
-          <button
-            type="button"
-            onClick={onClear}
-            className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-sm text-ink/60 shadow-sm hover:text-terracotta"
-          >
-            <Trash2 className="h-4 w-4" />
-            Leeren
-          </button>
-        )}
+        <div className="flex gap-2">
+          {canOptimize && (
+            <button
+              type="button"
+              onClick={handleOptimize}
+              disabled={optimizing}
+              className="flex items-center gap-1 rounded-full bg-olive px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-olive-dark disabled:opacity-60"
+            >
+              {optimizing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
+              Optimieren
+            </button>
+          )}
+          {selected.length > 0 && (
+            <button
+              type="button"
+              onClick={onClear}
+              className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-sm text-ink/60 shadow-sm hover:text-terracotta"
+            >
+              <Trash2 className="h-4 w-4" />
+              Leeren
+            </button>
+          )}
+        </div>
       </div>
+
+      {optimizeResult && (
+        <div
+          className={`rounded-2xl px-4 py-2 text-sm font-semibold ${
+            optimizeResult.includes('🎉') || optimizeResult.includes('👌')
+              ? 'bg-olive/10 text-olive-dark'
+              : 'bg-terracotta/10 text-terracotta'
+          }`}
+        >
+          {optimizeResult}
+        </div>
+      )}
 
       <RouteSummary summary={summary} stops={selected.length} />
 
