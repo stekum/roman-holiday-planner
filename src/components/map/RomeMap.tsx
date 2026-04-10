@@ -8,6 +8,7 @@ import {
 } from '@vis.gl/react-google-maps';
 import { CATEGORY_EMOJI, ROME_CENTER, type POI } from '../../data/pois';
 import type { Family, Homebase } from '../../settings/types';
+import type { MyLocation } from '../../hooks/useMyLocation';
 import { RoutePolyline, type RouteSummary } from './RoutePolyline';
 
 const CATEGORY_GRADIENT: Record<POI['category'], string> = {
@@ -27,6 +28,7 @@ interface Props {
   planOrder?: string[];
   families: Family[];
   homebase?: Homebase;
+  myLocation?: MyLocation | null;
   /** External selection — app-controlled. Pans map and shows InfoWindow. */
   highlightedPoiId?: string | null;
   /** When true the map cursor is a crosshair and clicks fire onMapClick instead of deselecting. */
@@ -98,6 +100,7 @@ export function RomeMap({
   planOrder = [],
   families,
   homebase,
+  myLocation,
   highlightedPoiId,
   pickMode = false,
   onMarkerClick,
@@ -204,6 +207,18 @@ export function RomeMap({
           </AdvancedMarker>
         );
       })}
+
+      {myLocation && (
+        <AdvancedMarker
+          position={{ lat: myLocation.lat, lng: myLocation.lng }}
+          zIndex={1000}
+        >
+          <div className="relative flex items-center justify-center">
+            <span className="absolute h-8 w-8 animate-ping rounded-full bg-blue-400/30" />
+            <span className="relative h-4 w-4 rounded-full border-2 border-white bg-blue-500 shadow-lg" />
+          </div>
+        </AdvancedMarker>
+      )}
 
       {homebase?.coords && (
         <AdvancedMarker

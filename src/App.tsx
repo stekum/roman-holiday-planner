@@ -12,6 +12,7 @@ import { LocatePoiModal } from './components/inbox/LocatePoiModal';
 import { EditPoiModal } from './components/poi/EditPoiModal';
 import { useWorkspace } from './firebase/useWorkspace';
 import { useWeather } from './hooks/useWeather';
+import { useMyLocation } from './hooks/useMyLocation';
 import { isFirebaseConfigured } from './firebase/firebase';
 import { eachDayInRange } from './lib/dates';
 import type { RouteSummary } from './components/map/RoutePolyline';
@@ -67,6 +68,7 @@ function AppInner() {
   } = workspace;
 
   const weatherByDay = useWeather(settings.homebase?.coords);
+  const { location: myLocation } = useMyLocation();
   const [tab, setTab] = useState<Tab>('discover');
   const [summary, setSummary] = useState<RouteSummary | null>(null);
   const [highlightedPoiId, setHighlightedPoiId] = useState<string | null>(null);
@@ -156,6 +158,7 @@ function AppInner() {
                 planOrder={activeDayOrder}
                 families={settings.families}
                 homebase={settings.homebase}
+                myLocation={myLocation}
                 highlightedPoiId={highlightedPoiId}
                 pickMode={addMode === 'map'}
                 onMapClick={(pick) => {
