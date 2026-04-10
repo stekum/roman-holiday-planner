@@ -110,7 +110,13 @@ export async function generateDayPlan(
     },
   });
 
-  const rawText = result.response.text();
+  // Don't use result.response.text() — it concatenates ALL parts including
+  // Gemini 2.5 Flash's "thinking" parts, which breaks JSON parsing.
+  // Instead, find the last text part (the actual response, not the thought).
+  const parts = result.response.candidates?.[0]?.content?.parts ?? [];
+  const textParts = parts.filter((p: { text?: string }) => p.text).map((p: { text?: string }) => p.text ?? '');
+  // The actual JSON is typically the last text part
+  const rawText = textParts[textParts.length - 1] ?? result.response.text();
 
   // Gemini sometimes wraps JSON in markdown fences even with responseMimeType set
   const cleanJson = rawText
