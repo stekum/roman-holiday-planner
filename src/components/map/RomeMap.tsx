@@ -61,6 +61,35 @@ function MapFocus({
   return null;
 }
 
+/**
+ * Fits the map viewport to show all given points (+ some padding).
+ * Only fires when the set of points actually changes (stable key).
+ */
+function MapFitBounds({
+  points,
+}: {
+  points: { lat: number; lng: number }[];
+}) {
+  const map = useMap();
+  const key = points
+    .map((p) => `${p.lat.toFixed(5)},${p.lng.toFixed(5)}`)
+    .join('|');
+
+  useEffect(() => {
+    if (!map || points.length === 0) return;
+    void key;
+    if (points.length === 1) {
+      map.panTo(points[0]);
+      map.setZoom(16);
+      return;
+    }
+    const bounds = new google.maps.LatLngBounds();
+    for (const p of points) bounds.extend(p);
+    map.fitBounds(bounds, { top: 50, right: 50, bottom: 50, left: 50 });
+  }, [map, key, points]);
+  return null;
+}
+
 export function RomeMap({
   pois,
   mode,
@@ -135,6 +164,15 @@ export function RomeMap({
             : selected?.coords ?? null
         }
       />
+
+      {mode === 'plan' && planPois.length > 0 && (
+        <MapFitBounds
+          points={[
+            ...(homebase?.coords ? [homebase.coords] : []),
+            ...planPois.map((p) => p.coords),
+          ]}
+        />
+      )}
 
       {visiblePois.map((poi, idx) => {
         const family = familyMap.get(poi.familyId);
