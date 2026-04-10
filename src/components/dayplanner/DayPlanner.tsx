@@ -2,6 +2,7 @@ import { ArrowDown, ArrowUp, Trash2, X } from 'lucide-react';
 import type { POI } from '../../data/pois';
 import type { Family } from '../../settings/types';
 import type { RouteSummary as Summary } from '../map/RoutePolyline';
+import type { DayWeather } from '../../lib/weather';
 import { DayTabs } from './DayTabs';
 import { RouteSummary } from './RouteSummary';
 
@@ -12,6 +13,7 @@ interface Props {
   onDayChange: (day: string) => void;
   dayOrder: string[];
   dayCounts: Record<string, number>;
+  weather: Record<string, DayWeather>;
   getFamily: (id: string) => Family | undefined;
   summary: Summary | null;
   onMove: (id: string, direction: 'up' | 'down') => void;
@@ -26,6 +28,7 @@ export function DayPlanner({
   onDayChange,
   dayOrder,
   dayCounts,
+  weather,
   getFamily,
   summary,
   onMove,
@@ -53,6 +56,7 @@ export function DayPlanner({
         activeDay={activeDay}
         onChange={onDayChange}
         counts={dayCounts}
+        weather={weather}
       />
 
       <div className="flex items-center justify-between">

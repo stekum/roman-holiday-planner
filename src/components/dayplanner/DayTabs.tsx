@@ -1,13 +1,15 @@
 import { formatDayLabel } from '../../lib/dates';
+import type { DayWeather } from '../../lib/weather';
 
 interface Props {
   days: string[];
   activeDay: string;
   onChange: (day: string) => void;
   counts: Record<string, number>;
+  weather: Record<string, DayWeather>;
 }
 
-export function DayTabs({ days, activeDay, onChange, counts }: Props) {
+export function DayTabs({ days, activeDay, onChange, counts, weather }: Props) {
   if (days.length === 0) return null;
 
   return (
@@ -16,6 +18,7 @@ export function DayTabs({ days, activeDay, onChange, counts }: Props) {
         {days.map((day, idx) => {
           const active = day === activeDay;
           const count = counts[day] ?? 0;
+          const w = weather[day];
           return (
             <button
               key={day}
@@ -31,6 +34,16 @@ export function DayTabs({ days, activeDay, onChange, counts }: Props) {
                 Tag {idx + 1}
               </span>
               <span className="text-sm">{formatDayLabel(day)}</span>
+              {w && (
+                <span
+                  className={`mt-0.5 text-[11px] ${
+                    active ? 'opacity-90' : 'opacity-70'
+                  }`}
+                  title={w.label}
+                >
+                  {w.icon} {w.tempMax}°
+                </span>
+              )}
               {count > 0 && (
                 <span
                   className={`mt-0.5 rounded-full px-2 py-0.5 text-[10px] ${
