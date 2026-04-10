@@ -2,11 +2,13 @@ import { useRef, useState } from 'react';
 import { ArrowDown, ArrowUp, Loader2, Sparkles, Trash2, X } from 'lucide-react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import type { POI } from '../../data/pois';
-import type { Family } from '../../settings/types';
+import type { Family, Settings } from '../../settings/types';
 import type { RouteSummary as Summary } from '../map/RoutePolyline';
 import type { DayWeather } from '../../lib/weather';
+import { isGeminiConfigured } from '../../lib/gemini';
 import { DayTabs } from './DayTabs';
 import { RouteSummary } from './RouteSummary';
+import { AiDayPlannerModal } from './AiDayPlannerModal';
 
 interface Props {
   pois: POI[];
@@ -23,6 +25,10 @@ interface Props {
   onClear: () => void;
   /** Called with the optimized order of POI ids. */
   onReorder: (newOrder: string[]) => void;
+  /** Full settings for AI planner context. */
+  settings: Settings;
+  /** Callback when AI planner generates POIs + order. */
+  onAiAccept: (pois: POI[], order: string[]) => void;
 }
 
 export function DayPlanner({
@@ -39,10 +45,13 @@ export function DayPlanner({
   onRemove,
   onClear,
   onReorder,
+  settings,
+  onAiAccept,
 }: Props) {
   const routesLib = useMapsLibrary('routes');
   const [optimizing, setOptimizing] = useState(false);
   const [optimizeResult, setOptimizeResult] = useState<string | null>(null);
+  const [aiModalOpen, setAiModalOpen] = useState(false);
 
   // Clear optimize banner when switching days
   const prevDay = useRef(activeDay);
@@ -165,7 +174,17 @@ export function DayPlanner({
             Reihenfolge mit den Pfeilen ändern. Route wird zu Fuß geplant.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          {isGeminiConfigured && (
+            <button
+              type="button"
+              onClick={() => setAiModalOpen(true)}
+              className="flex items-center gap-1 rounded-full bg-terracotta px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-terracotta-dark"
+            >
+              <Sparkles className="h-4 w-4" />
+              AI Tagesplan
+            </button>
+          )}
           {canOptimize && (
             <button
               type="button"
@@ -278,6 +297,16 @@ export function DayPlanner({
           })}
         </ol>
       )}
+
+      <AiDayPlannerModal
+        open={aiModalOpen}
+        onClose={() => setAiModalOpen(false)}
+        dayLabel={`Tag ${days.indexOf(activeDay) + 1} — ${activeDay}`}
+        dayIso={activeDay}
+        settings={settings}
+        existingPoiNames={pois.filter((p) => p.coords).map((p) => p.title)}
+        onAccept={onAiAccept}
+      />
     </div>
   );
 }
