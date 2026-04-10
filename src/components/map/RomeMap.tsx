@@ -145,9 +145,11 @@ export function RomeMap({
       className={`h-full w-full ${pickMode ? 'cursor-crosshair' : ''}`}
       clickableIcons={true}
       onClick={(e) => {
-        if (!onMapClick) return;
+        // Any click on the map background dismisses the InfoWindow
+        setInternalSelectedId(null);
+
         const latLng = e.detail.latLng;
-        if (!latLng) return;
+        if (!latLng || !onMapClick) return;
         const placeId = (e.detail as { placeId?: string }).placeId;
         // In pickMode: always forward. In discover mode: only forward clicks
         // on actual Google POIs (they have a placeId) — blank clicks should
