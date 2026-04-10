@@ -221,6 +221,13 @@ function AppInner() {
               onReorder={(newOrder) => {
                 if (activeDay) void setDayOrder(activeDay, newOrder);
               }}
+              settings={settings}
+              onAiAccept={(newPois, order) => {
+                // Add all AI-generated POIs to Firestore
+                for (const poi of newPois) void addPoi(poi);
+                // Set the day order
+                if (activeDay) void setDayOrder(activeDay, order);
+              }}
             />
           )}
           {tab === 'settings' && (
