@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { AlertTriangle, Upload } from 'lucide-react';
-import type { Family, Settings } from '../../settings/types';
+import type { Family, Homebase, Settings } from '../../settings/types';
 import type { POI } from '../../data/pois';
 import type { TripPlan } from '../../hooks/useTripPlan';
 import { DEFAULT_SETTINGS } from '../../settings/defaults';
 import { TripDatesEditor } from './TripDatesEditor';
 import { FamilyEditor } from './FamilyEditor';
+import { HomebaseEditor } from './HomebaseEditor';
 
 interface Props {
   settings: Settings;
@@ -13,6 +14,7 @@ interface Props {
   onAddFamily: (family: Omit<Family, 'id'>) => void;
   onUpdateFamily: (id: string, patch: Partial<Omit<Family, 'id'>>) => void;
   onRemoveFamily: (id: string) => void;
+  onSetHomebase: (hb: Homebase | undefined) => void;
   /** Optional — if present, shows a „Lokale Daten hochladen"-Button. */
   onMigrateFromLocal?: (data: {
     pois: POI[];
@@ -71,6 +73,7 @@ export function SettingsView({
   onAddFamily,
   onUpdateFamily,
   onRemoveFamily,
+  onSetHomebase,
   onMigrateFromLocal,
 }: Props) {
   const [migrationState, setMigrationState] = useState<
@@ -107,6 +110,10 @@ export function SettingsView({
         tripStart={settings.tripStart}
         tripEnd={settings.tripEnd}
         onChange={onTripDates}
+      />
+      <HomebaseEditor
+        homebase={settings.homebase}
+        onChange={onSetHomebase}
       />
       <FamilyEditor
         families={settings.families}

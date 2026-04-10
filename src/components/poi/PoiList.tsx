@@ -1,5 +1,5 @@
 import type { POI } from '../../data/pois';
-import type { Family } from '../../settings/types';
+import type { Family, Homebase } from '../../settings/types';
 import { InboxBanner } from '../inbox/InboxBanner';
 import { PoiCard } from './PoiCard';
 
@@ -15,6 +15,8 @@ interface Props {
   onRemove: (id: string) => void;
   onEdit: (id: string) => void;
   onHighlight: (id: string) => void;
+  onSetAsHomebase: (id: string) => void;
+  homebase?: Homebase;
   onLocate: (id: string) => void;
 }
 
@@ -29,6 +31,8 @@ export function PoiList({
   onRemove,
   onEdit,
   onHighlight,
+  onSetAsHomebase,
+  homebase,
   onLocate,
 }: Props) {
   const sorted = [...pois].sort((a, b) => b.createdAt - a.createdAt);
@@ -59,6 +63,8 @@ export function PoiList({
               onRemove={onRemove}
               onEdit={onEdit}
               onHighlight={onHighlight}
+              onSetAsHomebase={onSetAsHomebase}
+              homebase={homebase}
               onLocate={onLocate}
             />
           </div>

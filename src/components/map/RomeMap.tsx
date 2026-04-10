@@ -7,7 +7,7 @@ import {
   useMap,
 } from '@vis.gl/react-google-maps';
 import { CATEGORY_EMOJI, ROME_CENTER, type POI } from '../../data/pois';
-import type { Family } from '../../settings/types';
+import type { Family, Homebase } from '../../settings/types';
 import { RoutePolyline, type RouteSummary } from './RoutePolyline';
 
 const CATEGORY_GRADIENT: Record<POI['category'], string> = {
@@ -26,6 +26,7 @@ interface Props {
   /** Ordered POI ids for the currently active day (plan mode). */
   planOrder?: string[];
   families: Family[];
+  homebase?: Homebase;
   /** External selection — app-controlled. Pans map and shows InfoWindow. */
   highlightedPoiId?: string | null;
   /** When true the map cursor is a crosshair and clicks fire onMapClick instead of deselecting. */
@@ -65,6 +66,7 @@ export function RomeMap({
   mode,
   planOrder = [],
   families,
+  homebase,
   highlightedPoiId,
   pickMode = false,
   onMarkerClick,
@@ -152,6 +154,17 @@ export function RomeMap({
           </AdvancedMarker>
         );
       })}
+
+      {homebase?.coords && (
+        <AdvancedMarker
+          position={homebase.coords}
+          zIndex={999}
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ink text-white shadow-lg ring-2 ring-white">
+            <span className="text-lg">🏠</span>
+          </div>
+        </AdvancedMarker>
+      )}
 
       {selected && (
         <InfoWindow
@@ -263,7 +276,7 @@ export function RomeMap({
       )}
 
       {mode === 'plan' && planPois.length >= 2 && (
-        <RoutePolyline pois={planPois} onSummary={onRouteSummary} />
+        <RoutePolyline pois={planPois} homebase={homebase?.coords} onSummary={onRouteSummary} />
       )}
     </GMap>
   );

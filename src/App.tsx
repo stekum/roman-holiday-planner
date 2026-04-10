@@ -56,6 +56,7 @@ function AppInner() {
     updateFamily,
     removeFamily,
     getFamily,
+    setHomebase,
     plan,
     getDay,
     togglePoi,
@@ -103,9 +104,21 @@ function AppInner() {
   }
 
   const handleRemove = (id: string) => {
-    // fire-and-forget; removePoi already cleans the plan entries server-side
     void removePoi(id);
     void removePoiFromAll(id);
+  };
+
+  const handleSetAsHomebase = (id: string) => {
+    const poi = pois.find((p) => p.id === id);
+    if (!poi?.coords) return;
+    if (!confirm(`„${poi.title}" als Homebase setzen?`)) return;
+    void setHomebase({
+      name: poi.title,
+      address: poi.address ?? poi.description ?? '',
+      coords: poi.coords,
+      placeId: poi.placeId,
+      image: poi.image || undefined,
+    });
   };
 
   const connectionBanner =
@@ -137,6 +150,7 @@ function AppInner() {
                 mode={tab === 'trip' ? 'plan' : 'discover'}
                 planOrder={activeDayOrder}
                 families={settings.families}
+                homebase={settings.homebase}
                 highlightedPoiId={highlightedPoiId}
                 pickMode={addMode === 'map'}
                 onMapClick={(pick) => {
@@ -173,6 +187,8 @@ function AppInner() {
               onHighlight={(id) =>
                 setHighlightedPoiId((prev) => (prev === id ? null : id))
               }
+              onSetAsHomebase={handleSetAsHomebase}
+              homebase={settings.homebase}
               onLocate={(id) => setLocatingPoiId(id)}
             />
           )}
@@ -198,6 +214,7 @@ function AppInner() {
               onAddFamily={addFamily}
               onUpdateFamily={updateFamily}
               onRemoveFamily={removeFamily}
+              onSetHomebase={setHomebase}
               onMigrateFromLocal={workspace.migrateFromLocal}
             />
           )}

@@ -11,7 +11,7 @@ import {
 import { ensureAuth, getFirebase } from './firebase';
 import { type POI, SEED_POIS } from '../data/pois';
 import { DEFAULT_SETTINGS } from '../settings/defaults';
-import type { Family, Settings } from '../settings/types';
+import type { Family, Homebase, Settings } from '../settings/types';
 import type { TripPlan } from '../hooks/useTripPlan';
 
 export type ConnectionStatus = 'connecting' | 'ready' | 'error';
@@ -44,6 +44,7 @@ export interface WorkspaceAPI {
   updateFamily: (id: string, patch: Partial<Omit<Family, 'id'>>) => Promise<void>;
   removeFamily: (id: string) => Promise<void>;
   getFamily: (id: string) => Family | undefined;
+  setHomebase: (hb: Homebase | undefined) => Promise<void>;
 
   // Trip plan
   plan: TripPlan;
@@ -288,6 +289,23 @@ export function useWorkspace(): WorkspaceAPI {
     [doc_.settings.families],
   );
 
+  const setHomebase = useCallback(
+    async (hb: Homebase | undefined) => {
+      if (hb) {
+        await updateDoc(workspaceDocRef(), {
+          'settings.homebase': stripUndefined(hb as unknown as Record<string, unknown>),
+        });
+      } else {
+        // Firestore doesn't have a "delete field" in updateDoc with dot notation,
+        // so we rewrite the full settings without homebase.
+        const next = { ...doc_.settings };
+        delete next.homebase;
+        await updateDoc(workspaceDocRef(), { settings: next });
+      }
+    },
+    [doc_.settings, workspaceDocRef],
+  );
+
   // --- Trip plan operations ---
   const getDay = useCallback(
     (dayIso: string) => doc_.tripPlan[dayIso] ?? [],
@@ -388,6 +406,7 @@ export function useWorkspace(): WorkspaceAPI {
     updateFamily,
     removeFamily,
     getFamily,
+    setHomebase,
     plan: doc_.tripPlan,
     getDay,
     togglePoi,

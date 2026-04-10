@@ -4,6 +4,7 @@ import {
   Check,
   ExternalLink,
   Heart,
+  Home,
   MapPin,
   MapPinOff,
   Pencil,
@@ -13,8 +14,9 @@ import {
 } from 'lucide-react';
 import type { POI } from '../../data/pois';
 import { CATEGORY_EMOJI } from '../../data/pois';
-import type { Family } from '../../settings/types';
+import type { Family, Homebase } from '../../settings/types';
 import { formatDayLabel } from '../../lib/dates';
+import { haversineKm, formatDistance } from '../../lib/geo';
 
 interface Props {
   poi: POI;
@@ -29,6 +31,8 @@ interface Props {
   onRemove: (id: string) => void;
   onEdit: (id: string) => void;
   onHighlight: (id: string) => void;
+  onSetAsHomebase?: (id: string) => void;
+  homebase?: Homebase;
   onLocate?: (id: string) => void;
 }
 
@@ -53,11 +57,17 @@ export function PoiCard({
   onRemove,
   onEdit,
   onHighlight,
+  onSetAsHomebase,
+  homebase,
   onLocate,
 }: Props) {
   const [imgFailed, setImgFailed] = useState(false);
   const familyName = family?.name ?? 'Unbekannt';
   const familyColor = family?.color ?? '#94999d';
+  const distFromHome =
+    homebase?.coords && poi.coords
+      ? haversineKm(homebase.coords, poi.coords)
+      : null;
   const hasImage = !!poi.image && !imgFailed;
 
   return (
@@ -123,6 +133,17 @@ export function PoiCard({
             {poi.title}
           </h3>
           <div className="flex flex-shrink-0 gap-1">
+            {onSetAsHomebase && poi.coords && (
+              <button
+                type="button"
+                onClick={() => onSetAsHomebase(poi.id)}
+                className="rounded-full p-1.5 text-ink/30 hover:bg-ink/10 hover:text-ink"
+                aria-label="Als Homebase setzen"
+                title="Als Homebase setzen"
+              >
+                <Home className="h-4 w-4" />
+              </button>
+            )}
             <button
               type="button"
               onClick={() => onEdit(poi.id)}
@@ -162,8 +183,14 @@ export function PoiCard({
           </div>
         )}
 
-        {(poi.address || poi.rating !== undefined) && (
+        {(poi.address || poi.rating !== undefined || distFromHome !== null) && (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink/60">
+            {distFromHome !== null && (
+              <span className="flex items-center gap-1 font-semibold text-ink/70">
+                <Home className="h-3 w-3 flex-shrink-0" />
+                {formatDistance(distFromHome)}
+              </span>
+            )}
             {poi.address && (
               <span className="flex items-center gap-1">
                 <MapPin className="h-3 w-3 flex-shrink-0" />
