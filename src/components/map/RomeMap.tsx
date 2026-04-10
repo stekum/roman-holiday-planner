@@ -109,7 +109,7 @@ export function RomeMap({
   return (
     <GMap
       mapId="rhp-main"
-      defaultCenter={ROME_CENTER}
+      defaultCenter={homebase?.coords ?? ROME_CENTER}
       defaultZoom={14}
       gestureHandling="greedy"
       disableDefaultUI={false}
@@ -128,7 +128,13 @@ export function RomeMap({
         onMapClick({ coords: { lat: latLng.lat, lng: latLng.lng }, placeId });
       }}
     >
-      <MapFocus target={selected ? selected.coords : null} />
+      <MapFocus
+        target={
+          selectedId === '__homebase__' && homebase?.coords
+            ? homebase.coords
+            : selected?.coords ?? null
+        }
+      />
 
       {visiblePois.map((poi, idx) => {
         const family = familyMap.get(poi.familyId);
@@ -159,6 +165,7 @@ export function RomeMap({
         <AdvancedMarker
           position={homebase.coords}
           zIndex={999}
+          onClick={() => setInternalSelectedId('__homebase__')}
         >
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ink text-white shadow-lg ring-2 ring-white">
             <span className="text-lg">🏠</span>
@@ -166,7 +173,54 @@ export function RomeMap({
         </AdvancedMarker>
       )}
 
-      {selected && (
+      {selectedId === '__homebase__' && homebase?.coords && (
+        <InfoWindow
+          position={homebase.coords}
+          onCloseClick={() => setInternalSelectedId(null)}
+          pixelOffset={[0, -44]}
+          headerDisabled
+        >
+          <div
+            className="-m-[1px] w-[240px] overflow-hidden rounded-xl font-sans text-ink"
+            style={{ fontFamily: 'var(--font-sans)' }}
+          >
+            <div
+              className="relative flex h-28 w-full items-center justify-center overflow-hidden"
+              style={
+                homebase.image
+                  ? undefined
+                  : { background: 'linear-gradient(135deg, #3B2E2A 0%, #6B7A3F 100%)' }
+              }
+            >
+              {homebase.image ? (
+                <img
+                  src={homebase.image}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="text-5xl">🏠</span>
+              )}
+              <span className="absolute left-2 top-2 rounded-full bg-ink px-2 py-0.5 text-[10px] font-semibold text-white shadow">
+                🏠 Homebase
+              </span>
+            </div>
+            <div className="space-y-1 p-3">
+              <h3
+                className="text-base leading-tight text-ink"
+                style={{ fontFamily: 'var(--font-display)' }}
+              >
+                {homebase.name}
+              </h3>
+              {homebase.address && (
+                <p className="text-xs text-ink/60">{homebase.address}</p>
+              )}
+            </div>
+          </div>
+        </InfoWindow>
+      )}
+
+      {selected && selectedId !== '__homebase__' && (
         <InfoWindow
           position={selected.coords}
           onCloseClick={() => setInternalSelectedId(null)}

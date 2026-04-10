@@ -4,7 +4,7 @@ import { Header, type Tab } from './components/Header';
 import { PasswordGate } from './components/PasswordGate';
 import { MissingKeyNotice } from './components/MissingKeyNotice';
 import { RomeMap } from './components/map/RomeMap';
-import { PoiList } from './components/poi/PoiList';
+import { PoiList, type ViewMode } from './components/poi/PoiList';
 import { DayPlanner } from './components/dayplanner/DayPlanner';
 import { SettingsView } from './components/settings/SettingsView';
 import { AddPoiMenu, type AddMode } from './components/add/AddPoiMenu';
@@ -69,6 +69,9 @@ function AppInner() {
   const [summary, setSummary] = useState<RouteSummary | null>(null);
   const [highlightedPoiId, setHighlightedPoiId] = useState<string | null>(null);
   const [addMode, setAddMode] = useState<AddMode>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    () => (typeof window !== 'undefined' && window.innerWidth < 640) ? 'compact' : 'grid',
+  );
   const [pickedCoords, setPickedCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [pickedPlaceId, setPickedPlaceId] = useState<string | null>(null);
   const [locatingPoiId, setLocatingPoiId] = useState<string | null>(null);
@@ -143,7 +146,7 @@ function AppInner() {
       {connectionBanner}
       <main className="flex flex-1 flex-col overflow-hidden">
         {tab !== 'settings' && (
-          <div className="relative h-[45vh] w-full flex-shrink-0 bg-cream-dark">
+          <div className={`relative w-full flex-shrink-0 bg-cream-dark ${viewMode === 'compact' ? 'h-[60vh]' : 'h-[45vh]'}`}>
             {hasKey ? (
               <RomeMap
                 pois={pois}
@@ -190,6 +193,8 @@ function AppInner() {
               onSetAsHomebase={handleSetAsHomebase}
               homebase={settings.homebase}
               onLocate={(id) => setLocatingPoiId(id)}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
             />
           )}
           {tab === 'trip' && (

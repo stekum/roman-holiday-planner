@@ -18,14 +18,13 @@ import type { Family, Homebase } from '../../settings/types';
 import { formatDayLabel } from '../../lib/dates';
 import { haversineKm, formatDistance } from '../../lib/geo';
 
-interface Props {
+export interface PoiCardProps {
   poi: POI;
   family?: Family;
   selected: boolean;
-  /** Tage (ISO-Strings), denen der POI im Plan zugeordnet ist. */
   assignedDays: string[];
-  /** Alle Tage der Reise — für die Berechnung von „Tag 3/7". */
   allDays: string[];
+  compact?: boolean;
   onLike: (id: string) => void;
   onToggleSelect: (id: string) => void;
   onRemove: (id: string) => void;
@@ -46,7 +45,116 @@ const CATEGORY_GRADIENT: Record<POI['category'], string> = {
   Sonstiges: 'linear-gradient(135deg, #6B7A3F 0%, #4F5B2D 100%)',
 };
 
-export function PoiCard({
+export function PoiCard(props: PoiCardProps) {
+  return props.compact ? <CompactCard {...props} /> : <FullCard {...props} />;
+}
+
+/* ─── Compact Card (horizontal, ~72px) ─── */
+
+function CompactCard({
+  poi,
+  family,
+  selected,
+  onLike,
+  onToggleSelect,
+  onHighlight,
+  homebase,
+}: PoiCardProps) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const familyColor = family?.color ?? '#94999d';
+  const hasImage = !!poi.image && !imgFailed;
+  const distFromHome =
+    homebase?.coords && poi.coords
+      ? haversineKm(homebase.coords, poi.coords)
+      : null;
+
+  return (
+    <article className="flex items-center gap-3 rounded-2xl bg-white p-2 shadow-sm shadow-ink/5 transition hover:shadow-md">
+      <button
+        type="button"
+        onClick={() => onHighlight(poi.id)}
+        className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl"
+        style={hasImage ? undefined : { background: CATEGORY_GRADIENT[poi.category] }}
+        aria-label={`${poi.title} auf Karte anzeigen`}
+      >
+        {hasImage ? (
+          <img
+            src={poi.image}
+            alt=""
+            className="h-full w-full object-cover"
+            loading="lazy"
+            onError={() => setImgFailed(true)}
+          />
+        ) : (
+          <span className="flex h-full w-full items-center justify-center text-2xl">
+            {CATEGORY_EMOJI[poi.category]}
+          </span>
+        )}
+        {poi.needsLocation && (
+          <span className="absolute inset-0 flex items-center justify-center bg-terracotta/60 text-white">
+            <MapPinOff className="h-4 w-4" />
+          </span>
+        )}
+      </button>
+
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-1.5">
+          <span
+            className="inline-block h-2 w-2 flex-shrink-0 rounded-full"
+            style={{ backgroundColor: familyColor }}
+          />
+          <span
+            className="truncate text-sm font-semibold text-ink"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            {poi.title}
+          </span>
+        </div>
+        <div className="flex items-center gap-2 text-[11px] text-ink/50">
+          <span>{CATEGORY_EMOJI[poi.category]} {poi.category}</span>
+          {distFromHome !== null && (
+            <span className="flex items-center gap-0.5 font-semibold text-ink/70">
+              <Home className="h-2.5 w-2.5" />
+              {formatDistance(distFromHome)}
+            </span>
+          )}
+          {poi.rating !== undefined && (
+            <span className="flex items-center gap-0.5 text-ocker">
+              <Star className="h-2.5 w-2.5 fill-current" />
+              {poi.rating.toFixed(1)}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-shrink-0 items-center gap-1">
+        <button
+          type="button"
+          onClick={() => onLike(poi.id)}
+          className="flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold text-terracotta hover:bg-terracotta/10"
+        >
+          <Heart className="h-3.5 w-3.5 fill-current" />
+          {poi.likes}
+        </button>
+        <button
+          type="button"
+          onClick={() => onToggleSelect(poi.id)}
+          disabled={poi.needsLocation}
+          className={`rounded-full p-1.5 text-xs transition disabled:opacity-30 ${
+            selected ? 'bg-olive text-white' : 'text-olive hover:bg-olive/10'
+          }`}
+          aria-label={selected ? 'Im Plan' : 'Zum Tag'}
+        >
+          {selected ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+        </button>
+      </div>
+    </article>
+  );
+}
+
+/* ─── Full Card (vertical, equal-height via flex) ─── */
+
+function FullCard({
   poi,
   family,
   selected,
@@ -60,7 +168,7 @@ export function PoiCard({
   onSetAsHomebase,
   homebase,
   onLocate,
-}: Props) {
+}: PoiCardProps) {
   const [imgFailed, setImgFailed] = useState(false);
   const familyName = family?.name ?? 'Unbekannt';
   const familyColor = family?.color ?? '#94999d';
@@ -71,7 +179,7 @@ export function PoiCard({
   const hasImage = !!poi.image && !imgFailed;
 
   return (
-    <article className="overflow-hidden rounded-3xl bg-white shadow-md shadow-ink/5 transition hover:shadow-lg">
+    <article className="flex h-full flex-col overflow-hidden rounded-3xl bg-white shadow-md shadow-ink/5 transition hover:shadow-lg">
       <button
         type="button"
         onClick={() => onHighlight(poi.id)}
@@ -124,7 +232,7 @@ export function PoiCard({
         )}
       </button>
 
-      <div className="space-y-2 p-4">
+      <div className="flex flex-1 flex-col space-y-2 p-4">
         <div className="flex items-start justify-between gap-2">
           <h3
             className="text-xl leading-tight text-ink"
@@ -209,12 +317,12 @@ export function PoiCard({
           </div>
         )}
 
-        {poi.description && (
-          <p className="line-clamp-2 text-sm text-ink/60">{poi.description}</p>
-        )}
+        <p className="flex-1 line-clamp-2 text-sm text-ink/60">
+          {poi.description || '\u00A0'}
+        </p>
 
         {(poi.instagramUrl || poi.mapsUrl) && (
-          <div className="flex flex-wrap gap-2 pt-1">
+          <div className="flex flex-wrap gap-2">
             {poi.instagramUrl && (
               <a
                 href={poi.instagramUrl}
@@ -242,7 +350,7 @@ export function PoiCard({
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-1">
+        <div className="mt-auto flex items-center justify-between pt-1">
           <button
             type="button"
             onClick={() => onLike(poi.id)}
