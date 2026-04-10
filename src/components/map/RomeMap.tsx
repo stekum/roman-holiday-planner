@@ -186,7 +186,7 @@ export function RomeMap({
         const family = familyMap.get(poi.familyId);
         const bg = family?.color ?? '#94999d';
         const border = darken(bg);
-        const label = mode === 'plan' ? String(idx + 1) : undefined;
+        const label = mode === 'plan' && planPois.length > 0 ? String(idx + 1) : undefined;
         return (
           <AdvancedMarker
             key={poi.id}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ArrowDown, ArrowUp, Loader2, Sparkles, Trash2, X } from 'lucide-react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import type { POI } from '../../data/pois';
@@ -43,6 +43,13 @@ export function DayPlanner({
   const routesLib = useMapsLibrary('routes');
   const [optimizing, setOptimizing] = useState(false);
   const [optimizeResult, setOptimizeResult] = useState<string | null>(null);
+
+  // Clear optimize banner when switching days
+  const prevDay = useRef(activeDay);
+  if (prevDay.current !== activeDay) {
+    prevDay.current = activeDay;
+    if (optimizeResult) setOptimizeResult(null);
+  }
 
   const selected = dayOrder
     .map((id) => pois.find((p) => p.id === id))
