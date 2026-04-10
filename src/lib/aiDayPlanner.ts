@@ -112,8 +112,14 @@ export async function generateDayPlan(
 
   const rawText = result.response.text();
 
+  // Gemini sometimes wraps JSON in markdown fences even with responseMimeType set
+  const cleanJson = rawText
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```\s*$/, '')
+    .trim();
+
   try {
-    const parsed = JSON.parse(rawText) as {
+    const parsed = JSON.parse(cleanJson) as {
       overview?: string;
       stops?: AiStop[];
     };
@@ -130,11 +136,33 @@ export async function generateDayPlan(
       overview: parsed.overview ?? '',
       rawText,
     };
-  } catch {
-    // If JSON parsing fails, return the raw text as overview with no stops
+  } catch (e) {
+    // JSON parsing failed — try to extract stops from text as best-effort
+    console.error('[AI DayPlanner] JSON parse failed:', e, '\nRaw:', rawText.slice(0, 300));
+
+    // Last resort: try to find a JSON object anywhere in the text
+    const jsonMatch = rawText.match(/\{[\s\S]*"stops"[\s\S]*\}/);
+    if (jsonMatch) {
+      try {
+        const rescued = JSON.parse(jsonMatch[0]) as { overview?: string; stops?: AiStop[] };
+        return {
+          stops: (rescued.stops ?? []).map((s, i) => ({
+            order: s.order ?? i + 1,
+            name: s.name ?? 'Unbekannt',
+            description: s.description ?? '',
+            category: s.category ?? 'Sonstiges',
+            estimatedTime: s.estimatedTime,
+            reason: s.reason,
+          })),
+          overview: rescued.overview ?? '',
+          rawText,
+        };
+      } catch { /* give up */ }
+    }
+
     return {
       stops: [],
-      overview: rawText.slice(0, 500),
+      overview: 'AI-Antwort konnte nicht geparst werden. Bitte nochmal versuchen.',
       rawText,
     };
   }
