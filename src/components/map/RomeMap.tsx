@@ -351,6 +351,20 @@ export function RomeMap({
                       )}
                     </p>
                   )}
+                  {selected.openingHours && selected.openingHours.length > 0 && (() => {
+                    const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+                    const today = dayNames[new Date().getDay()];
+                    const todayLine = selected.openingHours.find((l: string) => l.startsWith(today));
+                    if (!todayLine) return null;
+                    const hours = todayLine.split(': ').slice(1).join(': ');
+                    const closed = /closed|geschlossen/i.test(hours);
+                    return (
+                      <p className={`text-[10px] font-semibold ${closed ? 'text-terracotta' : 'text-olive'}`}>
+                        <span className={`mr-1 inline-block h-1.5 w-1.5 rounded-full ${closed ? 'bg-terracotta' : 'bg-olive'}`} />
+                        {closed ? 'Heute geschlossen' : `Heute: ${hours}`}
+                      </p>
+                    );
+                  })()}
                   {selected.description && (
                     <p className="line-clamp-2 text-xs text-ink/60">
                       {selected.description}

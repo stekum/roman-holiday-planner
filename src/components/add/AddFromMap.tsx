@@ -23,6 +23,7 @@ interface EnrichedPlace {
   photoUrl?: string;
   mapsUrl?: string;
   placeId?: string;
+  openingHours?: string[];
 }
 
 export function AddFromMap({
@@ -70,6 +71,7 @@ export function AddFromMap({
           'url',
           'place_id',
           'types',
+          'opening_hours',
         ],
       },
       (place, status) => {
@@ -84,6 +86,7 @@ export function AddFromMap({
           photoUrl,
           mapsUrl: place.url,
           placeId: place.place_id,
+          openingHours: place.opening_hours?.weekday_text,
         });
         if (place.name) setTitle(place.name);
       },
@@ -133,6 +136,7 @@ export function AddFromMap({
       rating: enriched.rating,
       userRatingCount: enriched.userRatingCount,
       mapsUrl: enriched.mapsUrl,
+      openingHours: enriched.openingHours,
       placeId: enriched.placeId ?? pickedPlaceId ?? undefined,
       createdAt: Date.now(),
     });

@@ -11,6 +11,7 @@ export interface PlaceResult {
   rating?: number;
   userRatingCount?: number;
   mapsUrl?: string;
+  openingHours?: string[];
 }
 
 interface Props {
@@ -105,11 +106,12 @@ export function PlacesAutocomplete({ onSelect }: Props) {
     placesServiceRef.current.getDetails(
       {
         placeId: result.placeId,
-        fields: ['url'],
+        fields: ['url', 'opening_hours'],
       },
       (place, status) => {
-        const mapsUrl =
-          status === google.maps.places.PlacesServiceStatus.OK ? place?.url : undefined;
+        const ok = status === google.maps.places.PlacesServiceStatus.OK;
+        const mapsUrl = ok ? place?.url : undefined;
+        const openingHours = ok ? place?.opening_hours?.weekday_text : undefined;
         onSelect({
           name: result.name,
           address: result.address,
@@ -119,6 +121,7 @@ export function PlacesAutocomplete({ onSelect }: Props) {
           rating: result.rating,
           userRatingCount: result.userRatingCount,
           mapsUrl,
+          openingHours,
         });
         setQuery('');
         setResults([]);

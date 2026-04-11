@@ -17,6 +17,7 @@ import { CATEGORY_EMOJI } from '../../data/pois';
 import type { Family, Homebase } from '../../settings/types';
 import { formatDayLabel } from '../../lib/dates';
 import { haversineKm, formatDistance } from '../../lib/geo';
+import { getOpenStatus } from '../../lib/openingHours';
 
 export interface PoiCardProps {
   poi: POI;
@@ -314,6 +315,23 @@ function FullCard({
                 )}
               </span>
             )}
+            {(() => {
+              const status = getOpenStatus(poi.openingHours);
+              if (!status.label) return null;
+              return (
+                <span
+                  className={`flex items-center gap-1 font-semibold ${
+                    status.isOpen === false ? 'text-terracotta' : 'text-olive'
+                  }`}
+                  title={poi.openingHours?.join('\n')}
+                >
+                  <span className={`inline-block h-1.5 w-1.5 rounded-full ${
+                    status.isOpen === false ? 'bg-terracotta' : 'bg-olive'
+                  }`} />
+                  {status.label}
+                </span>
+              );
+            })()}
           </div>
         )}
 

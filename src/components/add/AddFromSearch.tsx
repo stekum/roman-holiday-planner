@@ -39,6 +39,7 @@ export function AddFromSearch({ families, onCancel, onSave }: Props) {
       rating: place.rating,
       userRatingCount: place.userRatingCount,
       mapsUrl: place.mapsUrl,
+      openingHours: place.openingHours,
       createdAt: Date.now(),
     });
   };

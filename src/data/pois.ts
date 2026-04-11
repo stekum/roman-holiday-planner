@@ -25,6 +25,8 @@ export interface POI {
   rating?: number;
   userRatingCount?: number;
   mapsUrl?: string;
+  /** Öffnungszeiten von Google Places, z.B. ["Mo: 09:00–18:00", ...]. */
+  openingHours?: string[];
   /** true wenn der POI noch manuell verortet werden muss (Inbox). */
   needsLocation?: boolean;
   createdAt: number;
