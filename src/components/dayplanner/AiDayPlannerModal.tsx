@@ -106,30 +106,42 @@ export function AiDayPlannerModal({
       const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
       const activeStops = result.stops.filter((_, i) => !excludedStops.has(i));
+      console.log(`[AI Planner] Resolving ${activeStops.length} stops via Places...`);
+
+      // Derive city context from homebase address
+      const cityHint = settings.homebase?.address
+        ? settings.homebase.address.split(',').slice(-2).join(',').trim()
+        : '';
 
       for (const stop of activeStops) {
         // Sequential with delay to avoid rate-limiting
-        if (pois.length > 0) await delay(300);
-
-        // Derive city context from homebase address or fall back to empty
-        const cityHint = settings.homebase?.address
-          ? settings.homebase.address.split(',').slice(-2).join(',').trim()
-          : '';
+        if (pois.length > 0) await delay(400);
 
         // Try multiple search queries in order of specificity
         const queries = [
-          cityHint ? `${stop.name} ${cityHint}` : null,
-          `${stop.name}`,
-        ].filter(Boolean) as string[];
+          cityHint ? `${stop.name}, ${cityHint}` : `${stop.name}`,
+          stop.name,
+        ];
+        // Deduplicate
+        const uniqueQueries = [...new Set(queries)];
 
         let match: google.maps.places.PlaceResult | null = null;
 
-        for (const query of queries) {
+        for (const query of uniqueQueries) {
           const places = await new Promise<google.maps.places.PlaceResult[]>(
             (resolve) => {
               service.textSearch(
-                { query },
+                {
+                  query,
+                  ...(settings.homebase?.coords
+                    ? {
+                        location: settings.homebase.coords,
+                        radius: 30000, // 30km around homebase
+                      }
+                    : {}),
+                },
                 (results, status) => {
+                  console.log(`[AI Planner] textSearch "${query}" → ${status} (${results?.length ?? 0} results)`);
                   if (status === placesLib.PlacesServiceStatus.OK && results) {
                     resolve(results);
                   } else {
@@ -197,6 +209,8 @@ export function AiDayPlannerModal({
             }
           }
         }
+
+        console.log(`[AI Planner] Stop "${stop.name}" → match: ${match?.name ?? 'NONE'}, coords: ${match?.geometry?.location ? 'YES' : 'NO'}, photo: ${photoUrl ? 'YES' : 'NO'}`);
 
         const category =
           CATEGORY_MAP[stop.category?.toLowerCase() ?? ''] ?? 'Sonstiges';
