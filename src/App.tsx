@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import { Header, type Tab } from './components/Header';
 import { PasswordGate } from './components/PasswordGate';
@@ -18,7 +18,7 @@ import type { POI } from './data/pois';
 import { eachDayInRange } from './lib/dates';
 import type { RouteSummary } from './components/map/RoutePolyline';
 import { Loader2, WifiOff } from 'lucide-react';
-import { persistAndUpdatePhoto } from './lib/photoStorage';
+// import { persistAndUpdatePhoto } from './lib/photoStorage'; // TODO: re-enable after CORS fix (#91)
 
 function FirebaseMissingNotice() {
   return (
@@ -115,34 +115,16 @@ function AppInner() {
     }
   }
 
-  // One-time migration: persist any Google Places photo URLs to Firebase Storage
-  const migrationRan = useRef(false);
-  useEffect(() => {
-    if (migrationRan.current || status !== 'ready' || pois.length === 0) return;
-    migrationRan.current = true;
-    const googlePhotoPois = pois.filter(
-      (p) =>
-        p.image?.trim() &&
-        !p.image.includes('firebasestorage.googleapis.com') &&
-        !p.image.includes('firebasestorage.app') &&
-        !p.image.includes('picsum.photos') &&
-        (p.image.includes('googleapis.com') || p.image.includes('googleusercontent.com')),
-    );
-    if (googlePhotoPois.length > 0) {
-      console.log(`[PhotoMigration] Persisting ${googlePhotoPois.length} Google photo URLs...`);
-      for (const poi of googlePhotoPois) {
-        void persistAndUpdatePhoto(poi.image, poi.id, updatePoi);
-      }
-    }
-  }, [status, pois, updatePoi]);
+  // TODO: Photo persistence temporarily disabled — Google Places photo URLs
+  // block both fetch() (CORS) and <img crossOrigin> + canvas (tainted canvas).
+  // Need to switch to Places Photo REST API with photo_reference for proper
+  // server-side download. See Issue #91.
+  // The photos still DISPLAY correctly in <img src=""> tags (no CORS for display),
+  // they just can't be downloaded client-side for Firebase Storage upload.
 
-  /** Adds a POI and persists its photo to Firebase Storage in the background. */
-  const handleAddPoi = async (poi: POI) => {
-    await addPoi(poi);
-    // Persist photo in background — don't block the UI
-    if (poi.image?.trim()) {
-      void persistAndUpdatePhoto(poi.image, poi.id, updatePoi);
-    }
+  /** Adds a POI. Photo persistence temporarily disabled (CORS issue, see #91). */
+  const handleAddPoi = (poi: POI) => {
+    void addPoi(poi);
   };
 
   const handleRemove = (id: string) => {
