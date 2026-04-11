@@ -63,7 +63,7 @@ function CompactCard({
 }: PoiCardProps) {
   const [imgFailed, setImgFailed] = useState(false);
   const familyColor = family?.color ?? '#94999d';
-  const hasImage = !!poi.image && !imgFailed;
+  const hasImage = !!poi.image?.trim() && !imgFailed;
   const distFromHome =
     homebase?.coords && poi.coords
       ? haversineKm(homebase.coords, poi.coords)
@@ -75,7 +75,7 @@ function CompactCard({
         type="button"
         onClick={() => onHighlight(poi.id)}
         className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl"
-        style={hasImage ? undefined : { background: CATEGORY_GRADIENT[poi.category] }}
+        style={{ background: CATEGORY_GRADIENT[poi.category] }}
         aria-label={`${poi.title} auf Karte anzeigen`}
       >
         {hasImage ? (
@@ -185,11 +185,7 @@ function FullCard({
         type="button"
         onClick={() => onHighlight(poi.id)}
         className="relative flex h-40 w-full items-center justify-center overflow-hidden"
-        style={
-          hasImage
-            ? undefined
-            : { background: CATEGORY_GRADIENT[poi.category] }
-        }
+        style={{ background: CATEGORY_GRADIENT[poi.category] }}
         aria-label={`${poi.title} auf Karte anzeigen`}
       >
         {hasImage ? (
