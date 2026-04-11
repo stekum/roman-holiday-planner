@@ -102,24 +102,99 @@ export function AiDayPlannerModal({
       const service = new placesLib.PlacesService(document.createElement('div'));
       const pois: POI[] = [];
 
+      const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
       for (const stop of result.stops) {
-        // Try to find the place via textSearch
-        const places = await new Promise<google.maps.places.PlaceResult[]>(
-          (resolve) => {
-            service.textSearch(
-              { query: `${stop.name} Rom Italien` },
-              (results, status) => {
-                if (status === placesLib.PlacesServiceStatus.OK && results) {
-                  resolve(results);
-                } else {
-                  resolve([]);
-                }
+        // Sequential with delay to avoid rate-limiting
+        if (pois.length > 0) await delay(300);
+
+        // Derive city context from homebase address or fall back to empty
+        const cityHint = settings.homebase?.address
+          ? settings.homebase.address.split(',').slice(-2).join(',').trim()
+          : '';
+
+        // Try multiple search queries in order of specificity
+        const queries = [
+          cityHint ? `${stop.name} ${cityHint}` : null,
+          `${stop.name}`,
+        ].filter(Boolean) as string[];
+
+        let match: google.maps.places.PlaceResult | null = null;
+
+        for (const query of queries) {
+          const places = await new Promise<google.maps.places.PlaceResult[]>(
+            (resolve) => {
+              service.textSearch(
+                { query },
+                (results, status) => {
+                  if (status === placesLib.PlacesServiceStatus.OK && results) {
+                    resolve(results);
+                  } else {
+                    resolve([]);
+                  }
+                },
+              );
+            },
+          );
+
+          if (places.length > 0 && places[0].geometry?.location) {
+            match = places[0];
+            break;
+          }
+          // Small delay before retry with different query
+          await delay(150);
+        }
+
+        // If we found a match but no photo, try getDetails for the photo
+        let photoUrl = '';
+        if (match?.place_id) {
+          if (match.photos?.[0]) {
+            try {
+              photoUrl = match.photos[0].getUrl({ maxWidth: 800, maxHeight: 600 });
+            } catch {
+              // getUrl can fail silently
+            }
+          }
+          // If still no photo, try getDetails
+          if (!photoUrl) {
+            await delay(150);
+            const details = await new Promise<google.maps.places.PlaceResult | null>(
+              (resolve) => {
+                service.getDetails(
+                  {
+                    placeId: match!.place_id!,
+                    fields: ['photos', 'formatted_address', 'rating', 'user_ratings_total', 'url'],
+                  },
+                  (place, status) => {
+                    if (status === placesLib.PlacesServiceStatus.OK && place) {
+                      resolve(place);
+                    } else {
+                      resolve(null);
+                    }
+                  },
+                );
               },
             );
-          },
-        );
+            if (details?.photos?.[0]) {
+              try {
+                photoUrl = details.photos[0].getUrl({ maxWidth: 800, maxHeight: 600 });
+              } catch {
+                // ignore
+              }
+            }
+            // Enrich with details data if available
+            if (details) {
+              match = {
+                ...match,
+                formatted_address: details.formatted_address ?? match?.formatted_address,
+                rating: details.rating ?? match?.rating,
+                user_ratings_total: details.user_ratings_total ?? match?.user_ratings_total,
+                url: details.url ?? (match as google.maps.places.PlaceResult & { url?: string })?.url,
+              } as google.maps.places.PlaceResult;
+            }
+          }
+        }
 
-        const match = places[0];
         const category =
           CATEGORY_MAP[stop.category?.toLowerCase() ?? ''] ?? 'Sonstiges';
 
@@ -139,12 +214,13 @@ export function AiDayPlannerModal({
                 lng: match.geometry.location.lng(),
               }
             : undefined,
-          image: match?.photos?.[0]?.getUrl({ maxWidth: 800, maxHeight: 600 }) ?? '',
+          image: photoUrl,
           likes: 0,
           address: match?.formatted_address,
           rating: match?.rating,
           userRatingCount: match?.user_ratings_total,
           placeId: match?.place_id,
+          mapsUrl: (match as google.maps.places.PlaceResult & { url?: string })?.url,
           needsLocation: !match?.geometry?.location,
           createdAt: Date.now() + stop.order,
         };
