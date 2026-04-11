@@ -16,7 +16,7 @@ interface Props {
   dayIso: string;
   settings: Settings;
   existingPoiNames: string[];
-  onAccept: (pois: POI[], order: string[]) => void;
+  onAccept: (pois: POI[], order: string[], overview: string) => void;
 }
 
 const QUICK_TAGS = [
@@ -52,6 +52,7 @@ export function AiDayPlannerModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AiDayPlanResult | null>(null);
+  const [excludedStops, setExcludedStops] = useState<Set<number>>(new Set());
   const [resolving, setResolving] = useState(false);
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
 
@@ -104,7 +105,9 @@ export function AiDayPlannerModal({
 
       const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-      for (const stop of result.stops) {
+      const activeStops = result.stops.filter((_, i) => !excludedStops.has(i));
+
+      for (const stop of activeStops) {
         // Sequential with delay to avoid rate-limiting
         if (pois.length > 0) await delay(300);
 
@@ -229,7 +232,7 @@ export function AiDayPlannerModal({
       }
 
       const order = pois.map((p) => p.id);
-      onAccept(pois, order);
+      onAccept(pois, order, result.overview);
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Fehler beim Verorten der Stops.');
@@ -337,29 +340,47 @@ export function AiDayPlannerModal({
               </p>
             )}
             <ol className="space-y-3">
-              {result.stops.map((stop) => (
-                <li
-                  key={stop.order}
-                  className="flex items-start gap-3 rounded-2xl bg-cream p-3"
-                >
-                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-olive text-sm font-bold text-white">
-                    {stop.order}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-ink">{stop.name}</p>
-                    {stop.estimatedTime && (
-                      <p className="text-xs text-olive-dark">⏰ {stop.estimatedTime}</p>
-                    )}
-                    <p className="mt-0.5 text-xs text-ink/60">{stop.description}</p>
-                    {stop.reason && (
-                      <p className="mt-0.5 text-xs text-ink/50">💡 {stop.reason}</p>
-                    )}
-                  </div>
-                  <span className="flex-shrink-0 rounded-full bg-ocker/20 px-2 py-0.5 text-[10px] font-semibold text-ocker">
-                    {stop.category}
-                  </span>
-                </li>
-              ))}
+              {result.stops.map((stop, idx) => {
+                const excluded = excludedStops.has(idx);
+                if (excluded) return null;
+                // Renumber based on remaining stops
+                const activeIdx = result.stops
+                  .slice(0, idx)
+                  .filter((_, i) => !excludedStops.has(i)).length + 1;
+                return (
+                  <li
+                    key={stop.order}
+                    className="flex items-start gap-3 rounded-2xl bg-cream p-3"
+                  >
+                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-olive text-sm font-bold text-white">
+                      {activeIdx}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-ink">{stop.name}</p>
+                      {stop.estimatedTime && (
+                        <p className="text-xs text-olive-dark">⏰ {stop.estimatedTime}</p>
+                      )}
+                      <p className="mt-0.5 text-xs text-ink/60">{stop.description}</p>
+                      {stop.reason && (
+                        <p className="mt-0.5 text-xs text-ink/50">💡 {stop.reason}</p>
+                      )}
+                    </div>
+                    <div className="flex flex-shrink-0 flex-col items-center gap-1">
+                      <span className="rounded-full bg-ocker/20 px-2 py-0.5 text-[10px] font-semibold text-ocker">
+                        {stop.category}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setExcludedStops((prev) => new Set([...prev, idx]))}
+                        className="rounded-full p-1 text-ink/30 hover:bg-terracotta/10 hover:text-terracotta"
+                        aria-label="Stop entfernen"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
             </ol>
 
             {error && (
@@ -371,7 +392,7 @@ export function AiDayPlannerModal({
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => { setResult(null); setError(null); }}
+                onClick={() => { setResult(null); setError(null); setExcludedStops(new Set()); }}
                 className="flex-1 rounded-2xl bg-cream px-4 py-3 font-semibold text-ink/70 hover:bg-cream-dark"
               >
                 Nochmal
@@ -379,7 +400,7 @@ export function AiDayPlannerModal({
               <button
                 type="button"
                 onClick={handleAccept}
-                disabled={resolving || result.stops.length === 0}
+                disabled={resolving || result.stops.length - excludedStops.size === 0}
                 className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-terracotta px-4 py-3 font-semibold text-white transition hover:bg-terracotta-dark disabled:opacity-50"
               >
                 {resolving ? (
@@ -390,7 +411,7 @@ export function AiDayPlannerModal({
                 ) : (
                   <>
                     <Check className="h-4 w-4" />
-                    Übernehmen ({result.stops.length} Stops)
+                    Übernehmen ({result.stops.length - excludedStops.size} Stops)
                   </>
                 )}
               </button>

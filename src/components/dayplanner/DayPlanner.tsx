@@ -27,8 +27,10 @@ interface Props {
   onReorder: (newOrder: string[]) => void;
   /** Full settings for AI planner context. */
   settings: Settings;
-  /** Callback when AI planner generates POIs + order. */
-  onAiAccept: (pois: POI[], order: string[]) => void;
+  /** AI-generated day description (overview text). */
+  dayDescription: string;
+  /** Callback when AI planner generates POIs + order + overview. */
+  onAiAccept: (pois: POI[], order: string[], overview: string) => void;
 }
 
 export function DayPlanner({
@@ -46,6 +48,7 @@ export function DayPlanner({
   onClear,
   onReorder,
   settings,
+  dayDescription,
   onAiAccept,
 }: Props) {
   const routesLib = useMapsLibrary('routes');
@@ -226,6 +229,15 @@ export function DayPlanner({
       )}
 
       <RouteSummary summary={summary} stops={selected.length} />
+
+      {dayDescription && (
+        <div className="rounded-2xl bg-olive/10 px-4 py-3 text-sm text-olive-dark">
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-olive/60">
+            AI Tagesplan
+          </p>
+          {dayDescription}
+        </div>
+      )}
 
       {selected.length === 0 ? (
         <div className="rounded-3xl bg-white p-8 text-center text-ink/50 shadow-sm">

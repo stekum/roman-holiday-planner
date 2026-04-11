@@ -19,6 +19,7 @@ export type ConnectionStatus = 'connecting' | 'ready' | 'error';
 interface WorkspaceDoc {
   settings: Settings;
   tripPlan: TripPlan;
+  dayDescriptions: Record<string, string>; // ISO date → AI-generated overview text
 }
 
 export interface WorkspaceAPI {
@@ -56,6 +57,8 @@ export interface WorkspaceAPI {
     direction: 'up' | 'down',
   ) => Promise<void>;
   setDayOrder: (dayIso: string, order: string[]) => Promise<void>;
+  setDayDescription: (dayIso: string, description: string) => Promise<void>;
+  getDayDescription: (dayIso: string) => string;
   clearDay: (dayIso: string) => Promise<void>;
   removePoiFromAll: (poiId: string) => Promise<void>;
 
@@ -91,6 +94,7 @@ export function useWorkspace(): WorkspaceAPI {
   const [doc_, setDoc_] = useState<WorkspaceDoc>({
     settings: DEFAULT_SETTINGS,
     tripPlan: {},
+    dayDescriptions: {},
   });
 
   // --- Subscribe on mount ---
@@ -124,6 +128,7 @@ export function useWorkspace(): WorkspaceAPI {
             setDoc_({
               settings: data.settings ?? DEFAULT_SETTINGS,
               tripPlan: data.tripPlan ?? {},
+              dayDescriptions: data.dayDescriptions ?? {},
             });
             setStatus('ready');
           },
@@ -355,6 +360,20 @@ export function useWorkspace(): WorkspaceAPI {
     [workspaceDocRef],
   );
 
+  const setDayDescription = useCallback(
+    async (dayIso: string, description: string) => {
+      await updateDoc(workspaceDocRef(), {
+        [`dayDescriptions.${dayIso}`]: description,
+      });
+    },
+    [workspaceDocRef],
+  );
+
+  const getDayDescription = useCallback(
+    (dayIso: string) => doc_.dayDescriptions[dayIso] ?? '',
+    [doc_.dayDescriptions],
+  );
+
   const clearDay = useCallback(
     async (dayIso: string) => {
       await updateDoc(workspaceDocRef(), {
@@ -422,6 +441,8 @@ export function useWorkspace(): WorkspaceAPI {
     togglePoi,
     movePoi,
     setDayOrder,
+    setDayDescription,
+    getDayDescription,
     clearDay,
     removePoiFromAll,
     migrateFromLocal,

@@ -64,6 +64,8 @@ function AppInner() {
     togglePoi,
     movePoi,
     setDayOrder,
+    setDayDescription,
+    getDayDescription,
     clearDay,
     removePoiFromAll,
   } = workspace;
@@ -222,11 +224,13 @@ function AppInner() {
                 if (activeDay) void setDayOrder(activeDay, newOrder);
               }}
               settings={settings}
-              onAiAccept={(newPois, order) => {
-                // Add all AI-generated POIs to Firestore
+              dayDescription={activeDay ? getDayDescription(activeDay) : ''}
+              onAiAccept={(newPois, order, overview) => {
                 for (const poi of newPois) void addPoi(poi);
-                // Set the day order
-                if (activeDay) void setDayOrder(activeDay, order);
+                if (activeDay) {
+                  void setDayOrder(activeDay, order);
+                  if (overview) void setDayDescription(activeDay, overview);
+                }
               }}
             />
           )}
