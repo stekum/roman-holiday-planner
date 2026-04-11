@@ -191,6 +191,7 @@ function AppInner() {
               selectedIds={activeDayOrder}
               allDays={days}
               assignedDaysByPoi={assignedDaysByPoi}
+              families={settings.families}
               getFamily={getFamily}
               onLike={likePoi}
               onToggleSelect={(id) => activeDay && togglePoi(activeDay, id)}
