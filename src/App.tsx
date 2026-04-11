@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import { Header, type Tab } from './components/Header';
 import { PasswordGate } from './components/PasswordGate';
@@ -14,9 +14,11 @@ import { useWorkspace } from './firebase/useWorkspace';
 import { useWeather } from './hooks/useWeather';
 import { useMyLocation } from './hooks/useMyLocation';
 import { isFirebaseConfigured } from './firebase/firebase';
+import type { POI } from './data/pois';
 import { eachDayInRange } from './lib/dates';
 import type { RouteSummary } from './components/map/RoutePolyline';
 import { Loader2, WifiOff } from 'lucide-react';
+import { persistAndUpdatePhoto } from './lib/photoStorage';
 
 function FirebaseMissingNotice() {
   return (
@@ -112,6 +114,36 @@ function AppInner() {
       assignedDaysByPoi[id].push(d);
     }
   }
+
+  // One-time migration: persist any Google Places photo URLs to Firebase Storage
+  const migrationRan = useRef(false);
+  useEffect(() => {
+    if (migrationRan.current || status !== 'ready' || pois.length === 0) return;
+    migrationRan.current = true;
+    const googlePhotoPois = pois.filter(
+      (p) =>
+        p.image?.trim() &&
+        !p.image.includes('firebasestorage.googleapis.com') &&
+        !p.image.includes('firebasestorage.app') &&
+        !p.image.includes('picsum.photos') &&
+        (p.image.includes('googleapis.com') || p.image.includes('googleusercontent.com')),
+    );
+    if (googlePhotoPois.length > 0) {
+      console.log(`[PhotoMigration] Persisting ${googlePhotoPois.length} Google photo URLs...`);
+      for (const poi of googlePhotoPois) {
+        void persistAndUpdatePhoto(poi.image, poi.id, updatePoi);
+      }
+    }
+  }, [status, pois, updatePoi]);
+
+  /** Adds a POI and persists its photo to Firebase Storage in the background. */
+  const handleAddPoi = async (poi: POI) => {
+    await addPoi(poi);
+    // Persist photo in background — don't block the UI
+    if (poi.image?.trim()) {
+      void persistAndUpdatePhoto(poi.image, poi.id, updatePoi);
+    }
+  };
 
   const handleRemove = (id: string) => {
     void removePoi(id);
@@ -227,7 +259,7 @@ function AppInner() {
               settings={settings}
               dayDescription={activeDay ? getDayDescription(activeDay) : ''}
               onAiAccept={(newPois, order, overview) => {
-                for (const poi of newPois) void addPoi(poi);
+                for (const poi of newPois) void handleAddPoi(poi);
                 if (activeDay) {
                   void setDayOrder(activeDay, order);
                   if (overview) void setDayDescription(activeDay, overview);
@@ -265,7 +297,7 @@ function AppInner() {
             setPickedCoords(null);
             setPickedPlaceId(null);
           }}
-          onAdd={addPoi}
+          onAdd={handleAddPoi}
         />
       )}
       {locatingPoi && (
