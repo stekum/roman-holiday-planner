@@ -6,7 +6,11 @@ import {
   type Auth,
   type User,
 } from 'firebase/auth';
-import { getFirestore, type Firestore } from 'firebase/firestore';
+import {
+  getFirestore,
+  enableMultiTabIndexedDbPersistence,
+  type Firestore,
+} from 'firebase/firestore';
 
 interface FirebaseBundle {
   app: FirebaseApp;
@@ -39,10 +43,20 @@ export function getFirebase(): FirebaseBundle {
     messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID as string,
     appId: env.VITE_FIREBASE_APP_ID as string,
   });
+  const db = getFirestore(app);
+
+  // Enable offline persistence — Firestore caches data locally so the
+  // app works without internet and syncs when back online.
+  enableMultiTabIndexedDbPersistence(db).catch((err) => {
+    console.warn('[Firebase] Offline persistence failed:', err.code);
+    // err.code === 'failed-precondition' → multiple tabs open
+    // err.code === 'unimplemented' → browser doesn't support IndexedDB
+  });
+
   bundle = {
     app,
     auth: getAuth(app),
-    db: getFirestore(app),
+    db,
     workspaceId: (env.VITE_FIREBASE_WORKSPACE_ID as string) || 'default',
   };
   return bundle;
