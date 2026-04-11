@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { ArrowDown, ArrowUp, Loader2, Sparkles, Trash2, X } from 'lucide-react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import type { POI } from '../../data/pois';
+import { CATEGORY_EMOJI } from '../../data/pois';
 import type { Family, Settings } from '../../settings/types';
 import type { RouteSummary as Summary } from '../map/RoutePolyline';
 import type { DayWeather } from '../../lib/weather';
@@ -259,11 +260,17 @@ export function DayPlanner({
                 >
                   {idx + 1}
                 </div>
-                <img
-                  src={poi.image}
-                  alt=""
-                  className="h-14 w-14 flex-shrink-0 rounded-2xl object-cover"
-                />
+                {poi.image?.trim() ? (
+                  <img
+                    src={poi.image}
+                    alt=""
+                    className="h-14 w-14 flex-shrink-0 rounded-2xl object-cover bg-cream"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden'); }}
+                  />
+                ) : null}
+                <div className={`flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-cream text-2xl ${poi.image?.trim() ? 'hidden' : ''}`}>
+                  {CATEGORY_EMOJI[poi.category]}
+                </div>
                 <div className="min-w-0 flex-1">
                   <p
                     className="truncate text-lg text-ink"
