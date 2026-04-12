@@ -6,7 +6,7 @@
 
 ---
 
-## Woche 1 — v1.1 Bugfix + Quick Wins (14.–18. Apr)
+## Woche 1 — v1.1 Bugfix + Security (14.–18. Apr)
 
 | Issue | Titel | Size | Prio |
 |---|---|---|---|
@@ -14,13 +14,27 @@
 | #106 | Homebase-Foto fehlt | S | low |
 | #59 | AI Review-Zusammenfassungen auf POI-Cards | S | high |
 | #77 | Seed-POIs entfernen (leerer Trip = leere Liste) | S | — |
+| #110 | **npm audit fix — Dependency-Vulnerabilities** | S | **high** |
+| #111 | **Firestore Rules — Workspace-Isolation** | M | **high** |
 
-**Fokus:** Restliche v1.0-Bugs schließen, schnelle AI- und Multi-Trip-Vorbereitungen.  
+**Fokus:** Security-Screening + restliche Bugs.  
 **Release:** `v1.1.0`
 
 ---
 
-## Woche 2 — v1.5 AI Features (21.–25. Apr)
+## Woche 1.5 — v1.2 Google Auth (21.–22. Apr)
+
+| Issue | Titel | Size | Prio |
+|---|---|---|---|
+| #112 | **Google Sign-In (Firebase Auth)** | M | **high** |
+| #113 | **User-Profil + Workspace-Zuordnung** | M | — |
+
+**Fokus:** Anonyme Auth durch Google Sign-In ersetzen, User-Modell einfuehren.  
+**Release:** `v1.2.0`
+
+---
+
+## Woche 2 — v1.5 AI Features (23.–25. Apr)
 
 | Issue | Titel | Size | Prio |
 |---|---|---|---|
@@ -98,6 +112,7 @@
 | #43 | AI: Was wir verpasst haben | v1.5 |
 | #47 | Expense Tracker | v2.0 |
 | #49 | Familien-Split | v2.0 |
+| #114 | Weitere Social Providers (Microsoft, GitHub, Apple) | v2.0 |
 | #44 | Notfall-Dashboard | v2.0 |
 | #39 | Reise-Statistik | v2.0 |
 | #40 | GPS-Tracking | v2.0 |
