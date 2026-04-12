@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist",
+    "deploy": "gh-pages -d dist --add",
     "build:beta": "tsc -b && VITE_BASE=/roman-holiday-planner/beta/ vite build",
     "deploy:beta": "npm run build:beta && gh-pages -d dist --dest beta --add"
   },
