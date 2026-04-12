@@ -81,7 +81,17 @@ gh api graphql -f query='
 4. Projekt-Status auf "In Progress" setzen (via GraphQL, s.o.)
 5. Implementieren, dann: `npm run build && npm run lint` müssen grün sein
 6. PR öffnen mit `Closes #N` im Body
-7. Nach Merge: Issue schließt automatisch → GitHub Actions setzt Status auf Done
+7. Nach Merge: Issue schließt automatisch, Status manuell auf Done setzen
+
+## Release-Workflow
+
+1. Fixes/Features via PRs auf `main` mergen
+2. `npm run deploy:beta` → mit Playwright auf Beta-URL testen
+3. Stefan testet auf Beta
+4. `gh release create v1.x.y --target main --generate-notes`
+5. `npm run deploy` → Production
+
+**Neue Issues:** Immer Release-Feld + Start/Ziel-Daten im Project Board setzen + `docs/ROADMAP.md` aktualisieren (siehe AGENTS.md → "Neue Issues auf die Roadmap setzen")
 
 ---
 

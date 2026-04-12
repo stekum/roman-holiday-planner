@@ -72,7 +72,11 @@ Eine **mobile-first kollaborative Trip-Planing-PWA** für eine gemeinsame Rom-Re
 │       └── settings/              SettingsView, FamilyEditor, HomebaseEditor, TripDatesEditor
 ├── functions/
 │   └── index.js                   Cloud Function: persistPoiPhoto (Node.js, Firebase v2)
-├── .github/                       (Workflows derzeit deaktiviert — Status wird manuell via gh CLI gesetzt)
+├── docs/
+│   ├── USER-GUIDE.md              Benutzerhandbuch (alle Features, Workflows, Known Issues)
+│   └── ROADMAP.md                 6-Wochen-Releaseplan (Source of Truth: GitHub Project Board)
+├── e2e/
+│   └── manual/                    Manuelle Testpläne pro Issue (nach jedem Fix/Feature erstellen)
 ├── firestore.rules                Firestore Security Rules (Produktion!)
 ├── storage.rules                  Storage Security Rules (Produktion!)
 ├── firebase.json
@@ -210,11 +214,25 @@ npm run deploy       # Build + Deploy nach / (Production — nur nach Beta-Valid
   - Todo: `f75ad846`
   - In Progress: `47fc9ee4`
   - Done: `98236657`
+- **Release-Field ID:** `PVTSSF_lAHOALePRc4BUPjLzhBirwI`
+  - v1.1: `569b9bc8` | v1.2: `3708b2e2` | v1.5: `ca68f362`
+  - v2.0: `d8772cc2` | v3.0-beta: `aab63fe0` | v3.0: `a7336ff1`
+- **Start-Field ID:** `PVTF_lAHOALePRc4BUPjLzhBil4I` (Date)
+- **Ziel-Field ID:** `PVTF_lAHOALePRc4BUPjLzhBil4M` (Date)
 - **Cluster-Field ID:** `PVTSSF_lAHOALePRc4BUPjLzhBfLaw`
-- **Labels:** `bug`, `enhancement`, `ai`, `ux`, `priority:high`, `priority:low`, `size:S`, `size:M`, `size:L`
-- **Milestones:** `v1.0 — Pre-Trip`, `v1.5 — AI`, `v2.0 — Polish`, `v3.0 — Multi-Trip`
+- **Labels:** `bug`, `bugfix`, `enhancement`, `ai`, `ux`, `infra`, `priority:high`, `priority:low`, `size:S`, `size:M`, `size:L`
+- **Milestones:** `v1.0 — Pre-Trip`, `v1.5 — AI`, `v2.0 — Polish`, `v3.0 — Multi-Trip`, `v4.0 — App Stores`
 
-Status wird manuell via `gh` CLI gesetzt (Workflows derzeit deaktiviert).
+Status wird manuell via `gh` CLI gesetzt (keine GitHub Actions Workflows aktiv).
+
+### Neue Issues auf die Roadmap setzen
+
+Bei jedem neuen Issue:
+1. Issue erstellen mit Labels + Milestone
+2. Ins Project Board einfuegen (`addProjectV2ItemById`)
+3. **Release-Feld** setzen (welches Release?)
+4. **Start/Ziel-Daten** setzen (welche Woche?)
+5. `docs/ROADMAP.md` aktualisieren
 
 ---
 
