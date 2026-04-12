@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import { Loader2, MapPin, Search, Star } from 'lucide-react';
+import { fetchAiSummary } from '../../lib/placesNewApi';
 
 export interface PlaceResult {
   name: string;
@@ -12,6 +13,7 @@ export interface PlaceResult {
   userRatingCount?: number;
   mapsUrl?: string;
   openingHours?: string[];
+  aiSummary?: string;
 }
 
 interface Props {
@@ -103,6 +105,8 @@ export function PlacesAutocomplete({ onSelect }: Props) {
   const handlePick = (result: SearchResult) => {
     if (!placesServiceRef.current) return;
     // Fetch `url` (Google Maps link) via details — textSearch doesn't include it.
+    // Also fetch AI summary from Places API (New) in parallel.
+    const aiSummaryPromise = fetchAiSummary(result.placeId);
     placesServiceRef.current.getDetails(
       {
         placeId: result.placeId,
@@ -112,19 +116,22 @@ export function PlacesAutocomplete({ onSelect }: Props) {
         const ok = status === google.maps.places.PlacesServiceStatus.OK;
         const mapsUrl = ok ? place?.url : undefined;
         const openingHours = ok ? place?.opening_hours?.weekday_text : undefined;
-        onSelect({
-          name: result.name,
-          address: result.address,
-          coords: result.coords,
-          placeId: result.placeId,
-          photoUrl: result.photoUrl,
-          rating: result.rating,
-          userRatingCount: result.userRatingCount,
-          mapsUrl,
-          openingHours,
+        void aiSummaryPromise.then((aiSummary) => {
+          onSelect({
+            name: result.name,
+            address: result.address,
+            coords: result.coords,
+            placeId: result.placeId,
+            photoUrl: result.photoUrl,
+            rating: result.rating,
+            userRatingCount: result.userRatingCount,
+            mapsUrl,
+            openingHours,
+            aiSummary: aiSummary ?? undefined,
+          });
+          setQuery('');
+          setResults([]);
         });
-        setQuery('');
-        setResults([]);
       },
     );
   };

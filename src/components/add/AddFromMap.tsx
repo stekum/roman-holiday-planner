@@ -3,6 +3,7 @@ import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import { MapPin, Star } from 'lucide-react';
 import type { POI } from '../../data/pois';
 import type { Family } from '../../settings/types';
+import { fetchAiSummary } from '../../lib/placesNewApi';
 import { AddPoiFields, type AddPoiFieldsValue } from './AddPoiFields';
 
 interface Props {
@@ -24,6 +25,7 @@ interface EnrichedPlace {
   mapsUrl?: string;
   placeId?: string;
   openingHours?: string[];
+  aiSummary?: string;
 }
 
 export function AddFromMap({
@@ -59,6 +61,7 @@ export function AddFromMap({
     if (!pickedPlaceId || !placesLib) return;
     setLoading(true);
     const service = new placesLib.PlacesService(document.createElement('div'));
+    const aiPromise = fetchAiSummary(pickedPlaceId);
     service.getDetails(
       {
         placeId: pickedPlaceId,
@@ -75,20 +78,26 @@ export function AddFromMap({
         ],
       },
       (place, status) => {
-        setLoading(false);
-        if (status !== placesLib.PlacesServiceStatus.OK || !place) return;
+        if (status !== placesLib.PlacesServiceStatus.OK || !place) {
+          setLoading(false);
+          return;
+        }
         const photoUrl = place.photos?.[0]?.getUrl({ maxWidth: 800, maxHeight: 600 });
-        setEnriched({
-          name: place.name,
-          address: place.formatted_address,
-          rating: place.rating,
-          userRatingCount: place.user_ratings_total,
-          photoUrl,
-          mapsUrl: place.url,
-          placeId: place.place_id,
-          openingHours: place.opening_hours?.weekday_text,
+        void aiPromise.then((aiSummary) => {
+          setLoading(false);
+          setEnriched({
+            name: place.name,
+            address: place.formatted_address,
+            rating: place.rating,
+            userRatingCount: place.user_ratings_total,
+            photoUrl,
+            mapsUrl: place.url,
+            placeId: place.place_id,
+            openingHours: place.opening_hours?.weekday_text,
+            aiSummary: aiSummary ?? undefined,
+          });
+          if (place.name) setTitle(place.name);
         });
-        if (place.name) setTitle(place.name);
       },
     );
   }, [pickedPlaceId, placesLib]);
@@ -138,6 +147,7 @@ export function AddFromMap({
       mapsUrl: enriched.mapsUrl,
       openingHours: enriched.openingHours,
       placeId: enriched.placeId ?? pickedPlaceId ?? undefined,
+      aiSummary: enriched.aiSummary,
       createdAt: Date.now(),
     });
   };

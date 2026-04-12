@@ -335,6 +335,13 @@ function FullCard({
           {poi.description || '\u00A0'}
         </p>
 
+        {poi.aiSummary && (
+          <div className="rounded-xl bg-purple-50 px-3 py-2 text-xs text-ink/70">
+            <span className="mr-1 font-semibold text-purple-600">Was Gäste sagen</span>
+            <span className="line-clamp-3">{poi.aiSummary}</span>
+          </div>
+        )}
+
         {(poi.instagramUrl || poi.mapsUrl) && (
           <div className="flex flex-wrap gap-2">
             {poi.instagramUrl && (

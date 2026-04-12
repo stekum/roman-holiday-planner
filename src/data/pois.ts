@@ -29,6 +29,8 @@ export interface POI {
   openingHours?: string[];
   /** true wenn der POI noch manuell verortet werden muss (Inbox). */
   needsLocation?: boolean;
+  /** KI-generierte Review-Zusammenfassung (Places API generativeSummary). */
+  aiSummary?: string;
   createdAt: number;
 }
 

@@ -417,6 +417,11 @@ export function RomeMap({
                       {selected.description}
                     </p>
                   )}
+                  {selected.aiSummary && (
+                    <p className="line-clamp-2 text-[10px] italic text-purple-600/70">
+                      ✨ {selected.aiSummary}
+                    </p>
+                  )}
                   {(selected.mapsUrl || selected.instagramUrl) && (
                     <div className="flex gap-1 pt-1">
                       {selected.mapsUrl && (
