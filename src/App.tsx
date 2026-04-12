@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import { Header, type Tab } from './components/Header';
 import { PasswordGate } from './components/PasswordGate';
@@ -115,16 +115,39 @@ function AppInner() {
     }
   }
 
-  // TODO: Photo persistence temporarily disabled — Google Places photo URLs
-  // block both fetch() (CORS) and <img crossOrigin> + canvas (tainted canvas).
-  // Need to switch to Places Photo REST API with photo_reference for proper
-  // server-side download. See Issue #91.
-  // The photos still DISPLAY correctly in <img src=""> tags (no CORS for display),
-  // they just can't be downloaded client-side for Firebase Storage upload.
+  // One-time migration: re-save POIs with Google photo URLs to trigger
+  // the Cloud Function `persistPoiPhoto` which downloads them server-side.
+  const migrationRan = useRef(false);
+  useEffect(() => {
+    if (migrationRan.current || status !== 'ready' || pois.length === 0) return;
+    migrationRan.current = true;
+    const googlePhotoPois = pois.filter(
+      (p) =>
+        p.image?.trim() &&
+        !p.image.includes('firebasestorage.googleapis.com') &&
+        !p.image.includes('storage.googleapis.com') &&
+        !p.image.includes('firebasestorage.app') &&
+        (p.image.includes('googleapis.com') || p.image.includes('googleusercontent.com')),
+    );
+    if (googlePhotoPois.length > 0) {
+      console.log(`[PhotoMigration] Triggering Cloud Function for ${googlePhotoPois.length} POIs...`);
+      for (const poi of googlePhotoPois) {
+        // Re-save with a timestamp field to trigger the Cloud Function
+        // Touch the image field to trigger the Cloud Function's onDocumentWritten
+        void updatePoi(poi.id, { image: poi.image });
+      }
+    }
+  }, [status, pois, updatePoi]);
 
-  /** Adds a POI. Photo persistence temporarily disabled (CORS issue, see #91). */
+  // Photo persistence is handled server-side by the Cloud Function
+  // `persistPoiPhoto` which triggers on every Firestore POI write.
+  // No client-side download needed — the function runs on Google's
+  // servers where there are no CORS restrictions.
+
   const handleAddPoi = (poi: POI) => {
     void addPoi(poi);
+    // Cloud Function `persistPoiPhoto` will automatically detect the
+    // Google photo URL and persist it to Firebase Storage.
   };
 
   const handleRemove = (id: string) => {
