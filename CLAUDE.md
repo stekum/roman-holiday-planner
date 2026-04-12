@@ -73,23 +73,38 @@ gh api graphql -f query='
 
 ---
 
-## Workflow beim Start einer Issue
+## Dev Workflow — zwei Modi
+
+### Light (size:S, Bugfix, kleine Änderungen)
+
+1. Branch erstellen: `git checkout -b fix/issue-N-beschreibung`
+2. Projekt-Status auf "In Progress" setzen
+3. Implementieren → `npm run build && npm run lint`
+4. PR öffnen mit `Closes #N`
+5. Direkt auf Production deployen (`npm run deploy`)
+6. Issue schließen + Status auf Done
+
+### Full (size:M/L, Features, user-facing Änderungen)
 
 1. Prüfen ob Branch existiert: `git branch -r | grep issue-N`
-2. Falls ja → nicht nochmal starten, ggf. existierenden PR reviewen
-3. Branch erstellen: `git checkout -b feat/issue-N-beschreibung`
-4. Projekt-Status auf "In Progress" setzen (via GraphQL, s.o.)
-5. Implementieren, dann: `npm run build && npm run lint` müssen grün sein
-6. PR öffnen mit `Closes #N` im Body
-7. Nach Merge: Issue schließt automatisch, Status manuell auf Done setzen
+2. Branch erstellen: `git checkout -b feat/issue-N-beschreibung`
+3. Projekt-Status auf "In Progress" setzen
+4. Implementieren → `npm run build && npm run lint`
+5. **Playwright-Test** auf localhost (via Playwright MCP)
+6. **Manuelles Testscript** in `e2e/manual/` erstellen
+7. PR öffnen mit `Closes #N`
+8. `npm run deploy:beta` → Stefan testet auf Beta
+9. Nach Validierung: PR mergen + `npm run deploy` (Production)
+10. **USER-GUIDE.md** aktualisieren (wenn user-facing)
+11. Issue schließen + Status auf Done
 
-## Release-Workflow
+### Release erstellen (nur bei komplettem Meilenstein)
 
-1. Fixes/Features via PRs auf `main` mergen
-2. `npm run deploy:beta` → mit Playwright auf Beta-URL testen
-3. Stefan testet auf Beta
-4. `gh release create v1.x.y --target main --generate-notes`
-5. `npm run deploy` → Production
+Releases werden **nicht** nach einzelnen Issues erstellt, sondern erst wenn **alle Issues eines Release** (v1.1, v1.2, etc.) abgeschlossen sind:
+
+```bash
+gh release create v1.x.y --target main --generate-notes --title "v1.x.y — Beschreibung"
+```
 
 **Neue Issues:** Immer Release-Feld + Start/Ziel-Daten im Project Board setzen + `docs/ROADMAP.md` aktualisieren (siehe AGENTS.md → "Neue Issues auf die Roadmap setzen")
 

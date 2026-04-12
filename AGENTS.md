@@ -145,20 +145,37 @@ npm run deploy       # Build + Deploy nach / (Production — nur nach Beta-Valid
 | **Beta** | `https://stekum.github.io/roman-holiday-planner/beta/` | `npm run deploy:beta` | Testen nach jedem Fix |
 | **Production** | `https://stekum.github.io/roman-holiday-planner/` | `npm run deploy` | Stabile Version für alle Nutzer |
 
-### Ablauf nach jedem Fix / Feature
+### Dev Workflow — zwei Modi
 
-1. Code fertig → `npm run build && npm run lint` müssen grün sein
-2. `npm run deploy:beta` — Beta-Deployment
-3. Selbst mit Playwright auf Beta-URL validieren (headless)
-4. Stefan mitteilen: _"Fix ist auf Beta deployed, bitte testen"_
-5. Stefan validiert auf Beta
-6. Wenn ok → `npm run deploy` (promoted zu Production)
+**Light (size:S, Bugfix):**
+1. Branch + Implementieren + Build/Lint
+2. PR öffnen → direkt auf Production deployen
+3. Issue schließen + Done
+
+**Full (size:M/L, Feature):**
+1. Branch + Implementieren + Build/Lint
+2. Playwright-Test auf localhost (via Playwright MCP)
+3. Manuelles Testscript in `e2e/manual/` erstellen
+4. PR öffnen + `npm run deploy:beta`
+5. Stefan testet auf Beta
+6. PR mergen + `npm run deploy` (Production)
+7. USER-GUIDE.md aktualisieren (wenn user-facing)
+8. Issue schließen + Done
+
+### Releases
+
+Releases werden **nicht** nach einzelnen Issues erstellt. Ein Release wird erst erstellt wenn **alle Issues einer Version** (z.B. v1.1) abgeschlossen sind:
+
+```bash
+gh release create v1.x.y --target main --generate-notes
+```
 
 ### Wichtig
 
 - `deploy:beta` nutzt `--add` → ersetzt nur den `beta/`-Ordner, Production bleibt unangetastet
 - `deploy` ersetzt den **gesamten** gh-pages Branch → nur ausführen wenn Beta validiert ist
-- Nie `deploy` ohne vorherige Beta-Validierung
+- Light-Workflow: direktes Production-Deploy ohne Beta ist ok bei size:S
+- Playwright-Tests laufen über Playwright MCP (nicht Desktop Commander)
 
 ---
 
