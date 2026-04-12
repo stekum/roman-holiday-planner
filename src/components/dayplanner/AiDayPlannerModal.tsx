@@ -55,6 +55,7 @@ export function AiDayPlannerModal({
   const [excludedStops, setExcludedStops] = useState<Set<number>>(new Set());
   const [resolving, setResolving] = useState(false);
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
+  const [selectedFamilyId, setSelectedFamilyId] = useState(settings.families[0]?.id ?? '');
 
   if (!open) return null;
 
@@ -219,7 +220,7 @@ export function AiDayPlannerModal({
           id: `ai-${Date.now().toString(36)}-${stop.order}`,
           title: match?.name ?? stop.name,
           category,
-          familyId: settings.families[0]?.id ?? 'default-a',
+          familyId: selectedFamilyId || settings.families[0]?.id || 'default-a',
           description: [
             stop.description,
             stop.estimatedTime ? `⏰ ${stop.estimatedTime}` : '',
@@ -322,6 +323,36 @@ export function AiDayPlannerModal({
                 </button>
               ))}
             </div>
+
+            {settings.families.length > 1 && (
+              <div>
+                <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-ink/60">
+                  Zuordnung
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {settings.families.map((fam) => (
+                    <button
+                      key={fam.id}
+                      type="button"
+                      onClick={() => setSelectedFamilyId(fam.id)}
+                      className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                        selectedFamilyId === fam.id
+                          ? 'text-white shadow-md'
+                          : 'bg-cream text-ink/60 hover:bg-cream-dark'
+                      }`}
+                      style={selectedFamilyId === fam.id ? { backgroundColor: fam.color } : undefined}
+                    >
+                      <span
+                        className="inline-block h-2 w-2 rounded-full"
+                        style={{ backgroundColor: selectedFamilyId === fam.id ? '#fff' : fam.color }}
+                      />
+                      {fam.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {error && (
               <div className="rounded-2xl bg-terracotta/10 p-3 text-sm text-terracotta">
                 {error}
