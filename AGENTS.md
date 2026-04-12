@@ -214,7 +214,53 @@ npm run deploy       # Build + Deploy nach / (Production — nur nach Beta-Valid
 - **Labels:** `bug`, `enhancement`, `ai`, `ux`, `priority:high`, `priority:low`, `size:S`, `size:M`, `size:L`
 - **Milestones:** `v1.0 — Pre-Trip`, `v1.5 — AI`, `v2.0 — Polish`, `v3.0 — Multi-Trip`
 
-Neue Issues werden automatisch via GitHub Actions ins Projekt eingefügt. Geschlossene Issues werden automatisch auf Done gesetzt.
+Status wird manuell via `gh` CLI gesetzt (Workflows derzeit deaktiviert).
+
+---
+
+## Release Management
+
+### Versionierung (Semantic Versioning)
+
+```
+v1.2.0   ← Minor: neues Feature
+v1.2.1   ← Patch: Bug-Fix
+v2.0.0   ← Major: Breaking Changes (unwahrscheinlich bei diesem Projekt)
+```
+
+Mehrere Releases pro Tag sind normal — jedes Patch bekommt eine eigene Version.
+
+### Release-Ablauf
+
+1. **Fix/Feature** landet via PR auf `main`
+2. **Beta-Deploy:** `npm run deploy:beta`
+3. **Validierung:** Playwright + manueller Test auf Beta-URL
+4. **Release erstellen:**
+   ```bash
+   # Aktuelle Version ermitteln
+   gh release list --limit 1
+   
+   # Neues Release mit auto-generiertem Changelog aus PR-Titeln
+   gh release create v1.x.y --target main --generate-notes --title "v1.x.y — Kurzbeschreibung"
+   ```
+5. **Production-Deploy:** `npm run deploy`
+
+### Was ein GitHub Release enthält
+
+- **Git-Tag** auf dem exakten Commit
+- **Auto-Changelog** aus allen PRs seit dem letzten Release
+- **Übersicht:** `https://github.com/stekum/roman-holiday-planner/releases`
+
+### Rollback
+
+Falls ein Production-Deploy Probleme macht:
+```bash
+# Alten Release-Tag auschecken
+git checkout v1.2.0
+npm run build
+npm run deploy
+git checkout main
+```
 
 ---
 
