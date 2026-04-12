@@ -27,6 +27,16 @@ interface Props {
   onLocate: (id: string) => void;
   viewMode: ViewMode;
   onViewModeChange: (m: ViewMode) => void;
+  // Filter state — controlled by parent so the map stays in sync
+  filterCategory: Category | null;
+  filterFamily: string | null;
+  filterInbox: boolean;
+  showFilters: boolean;
+  onFilterCategoryChange: (cat: Category | null) => void;
+  onFilterFamilyChange: (fam: string | null) => void;
+  onFilterInboxChange: (v: boolean) => void;
+  onShowFiltersChange: (v: boolean) => void;
+  onClearFilters: () => void;
 }
 
 const SORT_OPTIONS: { key: SortKey; label: string }[] = [
@@ -53,12 +63,17 @@ export function PoiList({
   onLocate,
   viewMode,
   onViewModeChange,
+  filterCategory,
+  filterFamily,
+  filterInbox,
+  showFilters,
+  onFilterCategoryChange,
+  onFilterFamilyChange,
+  onFilterInboxChange,
+  onShowFiltersChange,
+  onClearFilters,
 }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('date');
-  const [filterCategory, setFilterCategory] = useState<Category | null>(null);
-  const [filterFamily, setFilterFamily] = useState<string | null>(null);
-  const [filterInbox, setFilterInbox] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
 
   const activeFilterCount =
     (filterCategory ? 1 : 0) + (filterFamily ? 1 : 0) + (filterInbox ? 1 : 0);
@@ -95,14 +110,8 @@ export function PoiList({
   const inboxCount = pois.filter((p) => p.needsLocation).length;
 
   const scrollToInbox = () => {
-    setFilterInbox(true);
-    setShowFilters(true);
-  };
-
-  const clearFilters = () => {
-    setFilterCategory(null);
-    setFilterFamily(null);
-    setFilterInbox(false);
+    onFilterInboxChange(true);
+    onShowFiltersChange(true);
   };
 
   const sharedProps = (poi: POI): PoiCardProps => ({
@@ -132,7 +141,7 @@ export function PoiList({
 
         <button
           type="button"
-          onClick={() => setShowFilters(!showFilters)}
+          onClick={() => onShowFiltersChange(!showFilters)}
           className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold transition ${
             activeFilterCount > 0
               ? 'bg-terracotta text-white'
@@ -196,7 +205,7 @@ export function PoiList({
             {activeFilterCount > 0 && (
               <button
                 type="button"
-                onClick={clearFilters}
+                onClick={onClearFilters}
                 className="flex items-center gap-1 text-xs text-terracotta hover:underline"
               >
                 <X className="h-3 w-3" />
@@ -213,7 +222,7 @@ export function PoiList({
                 <button
                   key={cat}
                   type="button"
-                  onClick={() => setFilterCategory(active ? null : cat)}
+                  onClick={() => onFilterCategoryChange(active ? null : cat)}
                   className={`rounded-full px-2.5 py-1 text-xs font-semibold transition ${
                     active
                       ? 'bg-ocker text-white shadow-md'
@@ -240,7 +249,7 @@ export function PoiList({
                     <button
                       key={fam.id}
                       type="button"
-                      onClick={() => setFilterFamily(active ? null : fam.id)}
+                      onClick={() => onFilterFamilyChange(active ? null : fam.id)}
                       className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold transition ${
                         active
                           ? 'text-white shadow-md'
@@ -263,7 +272,7 @@ export function PoiList({
           {inboxCount > 0 && (
             <button
               type="button"
-              onClick={() => setFilterInbox(!filterInbox)}
+              onClick={() => onFilterInboxChange(!filterInbox)}
               className={`rounded-full px-2.5 py-1 text-xs font-semibold transition ${
                 filterInbox
                   ? 'bg-terracotta text-white shadow-md'
@@ -305,7 +314,7 @@ export function PoiList({
       {sorted.length === 0 && pois.length > 0 && (
         <div className="rounded-3xl bg-white p-8 text-center text-ink/50 shadow-sm">
           Keine Orte für diesen Filter.{' '}
-          <button type="button" onClick={clearFilters} className="text-terracotta underline">
+          <button type="button" onClick={onClearFilters} className="text-terracotta underline">
             Filter zurücksetzen
           </button>
         </div>
