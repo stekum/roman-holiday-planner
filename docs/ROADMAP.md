@@ -58,6 +58,7 @@
 | #48 | Budget pro Tag mit Restbudget-Anzeige | S | — |
 | #46 | Packing List (kategorisiert, pro Person) | M | — |
 | #73 | Stadt-Konfiguration (CityConfig statt ROME_CENTER) | M | — |
+| #117 | **Hosting-Migration (weg von GitHub Pages)** | M | — |
 
 **Fokus:** Reise-Features für den praktischen Einsatz + Multi-Trip Infra beginnen.  
 **Release:** `v2.0.0`
