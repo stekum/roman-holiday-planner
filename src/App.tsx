@@ -14,7 +14,7 @@ import { useWorkspace } from './firebase/useWorkspace';
 import { useWeather } from './hooks/useWeather';
 import { useMyLocation } from './hooks/useMyLocation';
 import { isFirebaseConfigured } from './firebase/firebase';
-import type { POI } from './data/pois';
+import type { Category, POI } from './data/pois';
 import { eachDayInRange } from './lib/dates';
 import type { RouteSummary } from './components/map/RoutePolyline';
 import { Loader2, WifiOff } from 'lucide-react';
@@ -83,6 +83,18 @@ function AppInner() {
   );
   const [pickedCoords, setPickedCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [pickedPlaceId, setPickedPlaceId] = useState<string | null>(null);
+  const [filterCategory, setFilterCategory] = useState<Category | null>(null);
+  const [filterFamily, setFilterFamily] = useState<string | null>(null);
+  const [filterInbox, setFilterInbox] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+
+  const filteredPois = useMemo(() => {
+    let list = pois;
+    if (filterCategory) list = list.filter((p) => p.category === filterCategory);
+    if (filterFamily) list = list.filter((p) => p.familyId === filterFamily);
+    if (filterInbox) list = list.filter((p) => p.needsLocation);
+    return list;
+  }, [pois, filterCategory, filterFamily, filterInbox]);
   const [locatingPoiId, setLocatingPoiId] = useState<string | null>(null);
   const locatingPoi = locatingPoiId
     ? pois.find((p) => p.id === locatingPoiId) ?? null
@@ -193,7 +205,7 @@ function AppInner() {
           <div className={`relative w-full flex-shrink-0 bg-cream-dark ${viewMode === 'compact' ? 'h-[60vh]' : 'h-[45vh]'}`}>
             {hasKey ? (
               <RomeMap
-                pois={pois}
+                pois={tab === 'discover' ? filteredPois : pois}
                 mode={tab === 'trip' ? 'plan' : 'discover'}
                 planOrder={activeDayOrder}
                 families={settings.families}
@@ -242,6 +254,19 @@ function AppInner() {
               onLocate={(id) => setLocatingPoiId(id)}
               viewMode={viewMode}
               onViewModeChange={setViewMode}
+              filterCategory={filterCategory}
+              filterFamily={filterFamily}
+              filterInbox={filterInbox}
+              showFilters={showFilters}
+              onFilterCategoryChange={setFilterCategory}
+              onFilterFamilyChange={setFilterFamily}
+              onFilterInboxChange={setFilterInbox}
+              onShowFiltersChange={setShowFilters}
+              onClearFilters={() => {
+                setFilterCategory(null);
+                setFilterFamily(null);
+                setFilterInbox(false);
+              }}
             />
           )}
           {tab === 'trip' && (
@@ -264,9 +289,27 @@ function AppInner() {
               settings={settings}
               dayDescription={activeDay ? getDayDescription(activeDay) : ''}
               onAiAccept={(newPois, order, overview) => {
-                for (const poi of newPois) void handleAddPoi(poi);
+                const hb = settings.homebase;
+                const skippedIds = new Set<string>();
+                for (const poi of newPois) {
+                  // Skip POIs that match the homebase — the AI sometimes includes
+                  // the accommodation as a stop despite prompt instructions (#105)
+                  if (hb) {
+                    const samePlace = hb.placeId && poi.placeId && hb.placeId === poi.placeId;
+                    const sameCoords = hb.coords && poi.coords &&
+                      Math.abs(hb.coords.lat - poi.coords.lat) < 0.0002 &&
+                      Math.abs(hb.coords.lng - poi.coords.lng) < 0.0002;
+                    const sameName = hb.name.toLowerCase().trim() === poi.title.toLowerCase().trim();
+                    if (samePlace || sameCoords || sameName) {
+                      skippedIds.add(poi.id);
+                      continue;
+                    }
+                  }
+                  void handleAddPoi(poi);
+                }
                 if (activeDay) {
-                  void setDayOrder(activeDay, order);
+                  const filteredOrder = order.filter((id) => !skippedIds.has(id));
+                  void setDayOrder(activeDay, filteredOrder);
                   if (overview) void setDayDescription(activeDay, overview);
                 }
               }}

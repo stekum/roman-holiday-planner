@@ -61,6 +61,7 @@ function buildSystemPrompt(context: {
     ``,
     `REGELN:`,
     `- Erstelle einen Plan mit 4-7 Stops.`,
+    `- Die Unterkunft/Homebase darf NIEMALS als Stop in der stops-Liste erscheinen. Sie ist nur der implizite Start- und Endpunkt des Tages.`,
     `- Berücksichtige realistische Gehzeiten zwischen den Stops.`,
     `- Plane Pausen ein (Kaffee, Gelato, Mittagessen) — nicht nur Sehenswürdigkeiten.`,
     `- Wenn Kinder dabei sind: kindgerechte Aktivitäten einbauen, nicht zu viel laufen.`,
