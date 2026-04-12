@@ -16,6 +16,8 @@
 | #77 | Seed-POIs entfernen (leerer Trip = leere Liste) | S | — |
 | #110 | **npm audit fix — Dependency-Vulnerabilities** | S | **high** |
 | #111 | **Firestore Rules — Workspace-Isolation** | M | **high** |
+| #115 | **Claude Code Deny Rules + Sandbox** | S | **high** |
+| #116 | **Semgrep Pre-Commit Hook** | S | **high** |
 
 **Fokus:** Security-Screening + restliche Bugs.  
 **Release:** `v1.1.0`
