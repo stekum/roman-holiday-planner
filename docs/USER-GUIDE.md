@@ -62,12 +62,16 @@ Die App hat drei Hauptbereiche (Tabs in der oberen Leiste):
 
 | Methode | Beschreibung |
 |---|---|
-| **Suchen** | Google Places Textsuche — findet echte Orte mit Foto, Adresse, Bewertung |
-| **Auf Karte** | Crosshair-Modus — auf der Karte tippen oder Google POI antippen |
-| **Manuell** | Freitext-Eingabe (Name, Kategorie, Beschreibung) — landet in der Inbox |
-| **Instagram** | Instagram-URL einfügen → extrahiert Name + Foto aus og:metadata |
+| **Suchen** | Google Places Textsuche (debounced 350ms, bis 8 Ergebnisse) — findet echte Orte mit Foto, Adresse, Bewertung, Öffnungszeiten |
+| **Auf Karte** | Crosshair-Modus — Karte tippen oder Google POI antippen → Place-Details werden automatisch geladen |
+| **Manuell** | Freitext-Eingabe (Name, Kategorie, Beschreibung) — landet in der Inbox (ohne Koordinaten) |
+| **Instagram** | Instagram-URL einfügen → extrahiert Name + Foto aus og:metadata (via CORS-Proxy: corsproxy.io → allorigins.win → codetabs.com) |
 
-**Inbox-System:** Manuell oder per Instagram hinzugefügte POIs haben keine Koordinaten. Sie erscheinen mit 📍-Badge und können über den „Verorten"-Button auf der Karte platziert werden.
+Alle Methoden bieten: **Familie-Auswahl** (farbige Pill-Buttons) + **Kategorie-Auswahl** (7 Kategorien mit Emoji) + **Notiz** (Freitext).
+
+**Inbox-System:** Manuell oder per Instagram hinzugefügte POIs haben keine Koordinaten. Sie erscheinen mit 📍-Badge „Ort fehlt" und können über den „Verorten"-Button auf der Karte platziert werden (Google Places Suche → Koordinaten + Details werden übernommen).
+
+**Inbox-Banner:** Erscheint über der Liste wenn POIs ohne Koordinaten existieren: _„N Ort(e) warten auf Verortung"_.
 
 ### POI bearbeiten
 
@@ -91,21 +95,25 @@ Die App hat drei Hauptbereiche (Tabs in der oberen Leiste):
 
 ### Route optimieren
 
-- **„Route optimieren"**-Button: nutzt Google Directions API um die optimale Reihenfolge zu berechnen
+- **„Route optimieren"**-Button: nutzt Google Directions API mit `optimizeWaypoints: true`
 - Berücksichtigt Homebase als Start- und Endpunkt
+- Benötigt mindestens 3 Stops (alle mit Koordinaten)
+- Feedback: _„Route optimiert — N km kürzer! 🎉"_ oder _„Reihenfolge ist bereits optimal! 👌"_
 
 ### KI-Tagesplan (✨ AI Tagesplan)
 
 - **Prompt-Eingabe:** Natürliche Sprache, z.B. _„Entspannter Tag in Trastevere mit gutem Essen"_
+- **Quick-Tags** (Multi-Select): 🏛️ Kultur, 🍕 Pizza, 🍨 Gelato, 🍝 Trattoria, 🍹 Aperitivo, 👨‍👩‍👧‍👦 Kinderfreundlich, 🌅 Aussicht, 🚶 Wenig laufen
 - **Familie auswählen:** Für welche Familie plant die KI (beeinflusst Familien-Zuordnung der neuen POIs)
 - **Gemini 2.5 Flash** generiert 4–7 Stops mit:
   - Name (echter Ort in Rom)
   - Kategorie
   - Beschreibung + Begründung
-  - Ungefähre Uhrzeit
-- **Vorschau:** Stops werden als Liste gezeigt, können geprüft werden
-- **„Zur Tour hinzufügen":** Akzeptierte Stops werden als neue POIs gespeichert und dem Tag zugeordnet
-- **Schutz:** Homebase wird nie als Stop eingefügt (weder im Prompt noch im Code)
+  - Ungefähre Uhrzeit (⏰)
+- **Vorschau:** Stops werden als nummerierte Liste gezeigt, einzelne Stops können per ✕ entfernt werden
+- **„Übernehmen (N Stops)":** Akzeptierte Stops werden via Google Places verortet (sequentiell mit 400ms Delay), als neue POIs gespeichert und dem Tag zugeordnet
+- **Schutz:** Homebase wird nie als Stop eingefügt (Prompt-Regel + defensiver Filter im Code)
+- Stops die nicht via Google Places gefunden werden landen in der Inbox
 
 ### Tagesbeschreibung
 
@@ -123,9 +131,10 @@ Die App hat drei Hauptbereiche (Tabs in der oberen Leiste):
 ### Familien
 
 - **Familien hinzufügen/bearbeiten:** Name + Farbe
+- **Farbpalette:** 8 „Dolce Vita Herbst"-Farben (Terracotta, Olive, Ocker, Burgunder, Petrol, Lavendel, Senf, Schiefer)
 - Farbe bestimmt die Pin-Farbe auf der Karte
 - **Kinder-Info:** Optionales Freitextfeld (z.B. „2 Kinder, 4 und 7 Jahre") — wird dem KI-Planer mitgegeben
-- Familie löschen (nur wenn keine POIs zugeordnet)
+- Familie löschen (nur wenn keine POIs zugeordnet, mindestens 1 Familie muss bleiben)
 
 ### Homebase (Unterkunft)
 
@@ -142,13 +151,19 @@ Die App hat drei Hauptbereiche (Tabs in der oberen Leiste):
 ### Echtzeit-Synchronisation
 
 - Alle Daten (POIs, Settings, Tagesplan) werden über **Firebase Firestore** synchronisiert
-- Beide Familien sehen Änderungen sofort
+- Beide Familien sehen Änderungen sofort (`onSnapshot`-Listener)
 - Optimistische UI-Updates (keine Wartezeit auf Server-Bestätigung)
+- **Offline-fähig:** Firestore IndexedDB-Persistierung (Multi-Tab)
+- Anonyme Authentifizierung (kein Login nötig)
+- Shared Workspace über `VITE_FIREBASE_WORKSPACE_ID`
 
 ### Wetter
 
-- Wettervorhersage pro Reisetag in den Tag-Tabs
-- Basiert auf den Homebase-Koordinaten
+- **Quelle:** Open-Meteo API (kostenlos, kein API-Key nötig)
+- 16-Tage-Vorhersage basierend auf Homebase-Koordinaten
+- Anzeige in den Tag-Tabs: Wetter-Emoji + Maximaltemperatur (z.B. ☀️ 24°)
+- Vollständige WMO-Code-Tabelle (Sonnig bis Gewitter mit Hagel) mit deutschen Labels
+- In-Memory-Cache mit 1-Stunde TTL
 
 ### Fotos
 
@@ -158,9 +173,25 @@ Die App hat drei Hauptbereiche (Tabs in der oberen Leiste):
 
 ### PWA (Progressive Web App)
 
-- **Installierbar:** „Zum Startbildschirm hinzufügen" im Browser
-- **Service Worker:** Cacht statische Assets für schnelleres Laden
-- **App-Manifest:** Icon, Splash Screen, Standalone-Modus
+- **Installierbar:** „Zum Startbildschirm hinzufügen" auf iOS und Android
+- **Service Worker:** Auto-Update, Workbox-basiert
+  - Google Maps APIs: NetworkFirst, 1h Cache, max 50 Einträge
+  - Firestore: NetworkFirst, 5min Cache, max 20 Einträge
+  - Statische Assets: Precached (JS, CSS, HTML, Fonts)
+- **App-Manifest:** Standalone-Modus, Portrait-Orientierung, Custom Icons (192px, 512px maskable, SVG)
+
+### Öffnungszeiten
+
+- Von Google Places übernommen (Wochentagsformat)
+- POI-Karte + InfoWindow zeigen heutigen Status: grüner Punkt „Jetzt geöffnet" / roter Punkt „Heute geschlossen"
+- Erkennt „24 hours", „closed", „geschlossen"
+
+### Eigener Standort
+
+- Geolocation API mit `watchPosition` (hohe Genauigkeit)
+- Blauer pulsierender Punkt auf der Karte
+- Wird für keine Berechnung genutzt — nur visuelle Orientierung
+- Permission-Verweigerung wird still ignoriert
 
 ### Passwort-Schutz
 
