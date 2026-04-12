@@ -14,7 +14,7 @@ import { useWorkspace } from './firebase/useWorkspace';
 import { useWeather } from './hooks/useWeather';
 import { useMyLocation } from './hooks/useMyLocation';
 import { isFirebaseConfigured } from './firebase/firebase';
-import type { POI } from './data/pois';
+import type { POI, Category } from './data/pois';
 import { eachDayInRange } from './lib/dates';
 import type { RouteSummary } from './components/map/RoutePolyline';
 import { Loader2, WifiOff } from 'lucide-react';
@@ -81,6 +81,18 @@ function AppInner() {
   const [viewMode, setViewMode] = useState<ViewMode>(
     () => (typeof window !== 'undefined' && window.innerWidth < 640) ? 'compact' : 'grid',
   );
+  const [filterCategory, setFilterCategory] = useState<Category | null>(null);
+  const [filterFamily, setFilterFamily] = useState<string | null>(null);
+  const [filterInbox, setFilterInbox] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+
+  const filteredPois = useMemo(() => {
+    let list = pois;
+    if (filterCategory) list = list.filter((p) => p.category === filterCategory);
+    if (filterFamily) list = list.filter((p) => p.familyId === filterFamily);
+    if (filterInbox) list = list.filter((p) => p.needsLocation);
+    return list;
+  }, [pois, filterCategory, filterFamily, filterInbox]);
   const [pickedCoords, setPickedCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [pickedPlaceId, setPickedPlaceId] = useState<string | null>(null);
   const [locatingPoiId, setLocatingPoiId] = useState<string | null>(null);
@@ -193,7 +205,7 @@ function AppInner() {
           <div className={`relative w-full flex-shrink-0 bg-cream-dark ${viewMode === 'compact' ? 'h-[60vh]' : 'h-[45vh]'}`}>
             {hasKey ? (
               <RomeMap
-                pois={pois}
+                pois={tab === 'discover' ? filteredPois : pois}
                 mode={tab === 'trip' ? 'plan' : 'discover'}
                 planOrder={activeDayOrder}
                 families={settings.families}
@@ -242,6 +254,19 @@ function AppInner() {
               onLocate={(id) => setLocatingPoiId(id)}
               viewMode={viewMode}
               onViewModeChange={setViewMode}
+              filterCategory={filterCategory}
+              filterFamily={filterFamily}
+              filterInbox={filterInbox}
+              showFilters={showFilters}
+              onFilterCategoryChange={setFilterCategory}
+              onFilterFamilyChange={setFilterFamily}
+              onFilterInboxChange={setFilterInbox}
+              onShowFiltersChange={setShowFilters}
+              onClearFilters={() => {
+                setFilterCategory(null);
+                setFilterFamily(null);
+                setFilterInbox(false);
+              }}
             />
           )}
           {tab === 'trip' && (
