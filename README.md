@@ -6,7 +6,9 @@ Mobile-first PWA für die gemeinsame Planung einer Rom-Reise zweier Familien. Ko
 **Beta:** https://stekum.github.io/roman-holiday-planner/beta/
 
 ---
-<img src="https://github.com/user-attachments/assets/66e2cdd7-1456-422b-88ed-a8f3097d5ad3" alt="Screenshot der App" width="50%">
+
+<img width="1459" height="2171" alt="D0DC074F-6D83-4DC6-8157-861D6ADE4449" src="https://github.com/user-attachments/assets/38b3e881-2df7-4934-b7d9-c195b4a3f5fe" />
+
 
 ## Features
 
