@@ -6,32 +6,33 @@
 
 ---
 
-## Woche 1 — v1.1 Bugfix + Security (14.–18. Apr)
+## Woche 1 — v1.1 ✅ Released (18. Apr)
+
+| Issue | Titel | Size | Status |
+|---|---|---|---|
+| #105 | ~~Homebase-Duplikat im KI-Plan~~ | S | ✅ |
+| #107 | ~~Entdecken-Filter auf Karte~~ | S | ✅ |
+| #59 | ~~AI Review-Zusammenfassungen auf POI-Cards~~ | S | ✅ |
+| #118 | ~~Map-Zucken im Reise-Tab~~ | S | ✅ |
+
+**Release:** [`v1.1.0`](https://github.com/stekum/roman-holiday-planner/releases/tag/v1.1.0)
+
+---
+
+## Woche 2 — v1.2 Security + Auth + Bugfixes (21.–25. Apr)
 
 | Issue | Titel | Size | Prio |
 |---|---|---|---|
-| #105 | ~~Homebase-Duplikat im KI-Plan~~ | S | high |
 | #106 | Homebase-Foto fehlt | S | low |
-| #59 | AI Review-Zusammenfassungen auf POI-Cards | S | high |
 | #77 | Seed-POIs entfernen (leerer Trip = leere Liste) | S | — |
 | #110 | **npm audit fix — Dependency-Vulnerabilities** | S | **high** |
 | #111 | **Firestore Rules — Workspace-Isolation** | M | **high** |
 | #115 | **Claude Code Deny Rules + Sandbox** | S | **high** |
 | #116 | **Semgrep Pre-Commit Hook** | S | **high** |
-
-**Fokus:** Security-Screening + restliche Bugs.  
-**Release:** `v1.1.0`
-
----
-
-## Woche 1.5 — v1.2 Google Auth (21.–22. Apr)
-
-| Issue | Titel | Size | Prio |
-|---|---|---|---|
 | #112 | **Google Sign-In (Firebase Auth)** | M | **high** |
 | #113 | **User-Profil + Workspace-Zuordnung** | M | — |
 
-**Fokus:** Anonyme Auth durch Google Sign-In ersetzen, User-Modell einfuehren.  
+**Fokus:** Security-Hardening + Google Auth + restliche Bugs.  
 **Release:** `v1.2.0`
 
 ---
