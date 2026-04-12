@@ -93,6 +93,13 @@ function AppInner() {
     if (filterInbox) list = list.filter((p) => p.needsLocation);
     return list;
   }, [pois, filterCategory, filterFamily, filterInbox]);
+
+  // Set of POI IDs visible on the map (null = show all).
+  // Passed to RomeMap so markers stay mounted but hidden ones get display:none.
+  const visiblePoiIds = useMemo(() => {
+    if (!filterCategory && !filterFamily && !filterInbox) return null;
+    return new Set(filteredPois.map((p) => p.id));
+  }, [filteredPois, filterCategory, filterFamily, filterInbox]);
   const [pickedCoords, setPickedCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [pickedPlaceId, setPickedPlaceId] = useState<string | null>(null);
   const [locatingPoiId, setLocatingPoiId] = useState<string | null>(null);
@@ -205,7 +212,8 @@ function AppInner() {
           <div className={`relative w-full flex-shrink-0 bg-cream-dark ${viewMode === 'compact' ? 'h-[60vh]' : 'h-[45vh]'}`}>
             {hasKey ? (
               <RomeMap
-                pois={tab === 'discover' ? filteredPois : pois}
+                pois={pois}
+                visiblePoiIds={tab === 'discover' ? visiblePoiIds : null}
                 mode={tab === 'trip' ? 'plan' : 'discover'}
                 planOrder={activeDayOrder}
                 families={settings.families}

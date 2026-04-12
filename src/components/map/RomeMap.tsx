@@ -4,6 +4,7 @@ import {
   InfoWindow,
   Map as GMap,
   Pin,
+  useAdvancedMarkerRef,
   useMap,
 } from '@vis.gl/react-google-maps';
 import { CATEGORY_EMOJI, ROME_CENTER, type POI } from '../../data/pois';
@@ -22,6 +23,9 @@ const CATEGORY_GRADIENT: Record<POI['category'], string> = {
 
 interface Props {
   pois: POI[];
+  /** When set, only markers whose id is in this Set are shown; others get position=null.
+   *  null = show all markers. */
+  visiblePoiIds?: Set<string> | null;
   mode: 'discover' | 'plan';
   /** Ordered POI ids for the currently active day (plan mode). */
   planOrder?: string[];
@@ -93,8 +97,54 @@ function MapFitBounds({
   return null;
 }
 
+/** Single POI marker with imperative visibility via marker.map */
+function PoiMarker({
+  poi,
+  hidden,
+  bg,
+  border,
+  label,
+  onSelect,
+}: {
+  poi: POI & { coords: { lat: number; lng: number } };
+  hidden: boolean;
+  bg: string;
+  border: string;
+  label?: string;
+  onSelect: () => void;
+}) {
+  const [markerRef, marker] = useAdvancedMarkerRef();
+  const map = useMap();
+
+  // The ONLY reliable way to hide an AdvancedMarkerElement:
+  // set marker.map = null (removes from canvas) or marker.map = map (adds back).
+  // position=null, className="hidden", and React unmount cleanup are all broken
+  // in @vis.gl/react-google-maps 1.8.x.
+  useEffect(() => {
+    if (!marker) return;
+    marker.map = hidden ? null : (map ?? null);
+  }, [marker, hidden, map]);
+
+  return (
+    <AdvancedMarker
+      ref={markerRef}
+      position={poi.coords}
+      onClick={hidden ? undefined : onSelect}
+    >
+      <Pin
+        background={bg}
+        borderColor={border}
+        glyphColor="#FFFFFF"
+        glyph={label}
+        scale={1.1}
+      />
+    </AdvancedMarker>
+  );
+}
+
 export function RomeMap({
   pois,
+  visiblePoiIds = null,
   mode,
   planOrder = [],
   families,
@@ -183,27 +233,24 @@ export function RomeMap({
       )}
 
       {visiblePois.map((poi, idx) => {
+        const hidden = visiblePoiIds !== null && !visiblePoiIds.has(poi.id);
         const family = familyMap.get(poi.familyId);
         const bg = family?.color ?? '#94999d';
         const border = darken(bg);
         const label = mode === 'plan' && planPois.length > 0 ? String(idx + 1) : undefined;
         return (
-          <AdvancedMarker
+          <PoiMarker
             key={poi.id}
-            position={poi.coords}
-            onClick={() => {
+            poi={poi}
+            hidden={hidden}
+            bg={bg}
+            border={border}
+            label={label}
+            onSelect={() => {
               setInternalSelectedId(poi.id);
               onMarkerClick?.(poi);
             }}
-          >
-            <Pin
-              background={bg}
-              borderColor={border}
-              glyphColor="#FFFFFF"
-              glyph={label}
-              scale={1.1}
-            />
-          </AdvancedMarker>
+          />
         );
       })}
 

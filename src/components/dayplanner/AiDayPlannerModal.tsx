@@ -213,6 +213,18 @@ export function AiDayPlannerModal({
 
         console.log(`[AI Planner] Stop "${stop.name}" → match: ${match?.name ?? 'NONE'}, coords: ${match?.geometry?.location ? 'YES' : 'NO'}, photo: ${photoUrl ? 'YES' : 'NO'}`);
 
+        // Skip stops that resolve to the homebase (avoid duplicate POI entries)
+        if (match?.place_id && settings.homebase?.placeId && match.place_id === settings.homebase.placeId) {
+          console.log(`[AI Planner] Skipping "${stop.name}" — matches homebase placeId`);
+          continue;
+        }
+        const normalizedMatch = (match?.name ?? stop.name).toLowerCase().trim();
+        const normalizedHomebase = settings.homebase?.name?.toLowerCase().trim() ?? '';
+        if (normalizedHomebase && normalizedMatch === normalizedHomebase) {
+          console.log(`[AI Planner] Skipping "${stop.name}" — matches homebase name`);
+          continue;
+        }
+
         const category =
           CATEGORY_MAP[stop.category?.toLowerCase() ?? ''] ?? 'Sonstiges';
 

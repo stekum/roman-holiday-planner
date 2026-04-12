@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react';
+import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import { Home, Trash2 } from 'lucide-react';
 import type { Homebase } from '../../settings/types';
 import {
@@ -11,6 +13,31 @@ interface Props {
 }
 
 export function HomebaseEditor({ homebase, onChange }: Props) {
+  const placesLib = useMapsLibrary('places');
+  const fetchedPlaceIdRef = useRef<string | null>(null);
+
+  // Auto-fetch photo when homebase has a placeId but no image
+  useEffect(() => {
+    if (!placesLib || !homebase?.placeId || homebase.image) return;
+    if (fetchedPlaceIdRef.current === homebase.placeId) return;
+    fetchedPlaceIdRef.current = homebase.placeId;
+
+    const service = new placesLib.PlacesService(document.createElement('div'));
+    service.getDetails(
+      { placeId: homebase.placeId, fields: ['photos'] },
+      (place, status) => {
+        if (status === placesLib.PlacesServiceStatus.OK && place?.photos?.[0]) {
+          try {
+            const photoUrl = place.photos[0].getUrl({ maxWidth: 800, maxHeight: 600 });
+            if (photoUrl) onChange({ ...homebase, image: photoUrl });
+          } catch {
+            // ignore
+          }
+        }
+      },
+    );
+  }, [placesLib, homebase, onChange]);
+
   const handleSelect = (place: PlaceResult) => {
     onChange({
       name: place.name,
