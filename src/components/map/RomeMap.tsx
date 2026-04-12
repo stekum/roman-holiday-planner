@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   AdvancedMarker,
   InfoWindow,
@@ -78,13 +78,14 @@ function MapFitBounds({
   points: { lat: number; lng: number }[];
 }) {
   const map = useMap();
+  const lastKeyRef = useRef('');
   const key = points
     .map((p) => `${p.lat.toFixed(5)},${p.lng.toFixed(5)}`)
     .join('|');
 
   useEffect(() => {
-    if (!map || points.length === 0) return;
-    void key;
+    if (!map || points.length === 0 || key === lastKeyRef.current) return;
+    lastKeyRef.current = key;
     if (points.length === 1) {
       map.panTo(points[0]);
       map.setZoom(16);
