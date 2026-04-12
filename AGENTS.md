@@ -72,10 +72,7 @@ Eine **mobile-first kollaborative Trip-Planing-PWA** für eine gemeinsame Rom-Re
 │       └── settings/              SettingsView, FamilyEditor, HomebaseEditor, TripDatesEditor
 ├── functions/
 │   └── index.js                   Cloud Function: persistPoiPhoto (Node.js, Firebase v2)
-├── .github/
-│   └── workflows/
-│       ├── add-to-project.yml     Neue Issues/PRs → automatisch ins GitHub-Projekt
-│       └── close-project-item.yml Geschlossene Issues → Projekt-Status auf Done
+├── .github/                       (Workflows derzeit deaktiviert — Status wird manuell via gh CLI gesetzt)
 ├── firestore.rules                Firestore Security Rules (Produktion!)
 ├── storage.rules                  Storage Security Rules (Produktion!)
 ├── firebase.json
@@ -127,11 +124,37 @@ npm run dev          # Dev-Server: http://localhost:5173/roman-holiday-planner/
 npm run build        # TypeScript-Check + Vite Production Build → dist/
 npm run lint         # ESLint
 npm run preview      # Production Build lokal vorschauen
-
-# NUR Stefan:
-npm run deploy       # Build + GitHub Pages deployment
-npm run deploy:beta  # Build mit /beta/ Basispfad + deployment
+npm run deploy:beta  # Build + Deploy nach /beta/ (zum Testen)
+npm run deploy       # Build + Deploy nach / (Production — nur nach Beta-Validierung!)
 ```
+
+---
+
+## Deployment-Workflow (Beta → Production)
+
+**Stefan testet auf GitHub Pages, nicht auf localhost.** Lokales Testen (z.B. Playwright) ist ok, muss aber klar kommuniziert werden.
+
+### Zwei Stufen
+
+| Stufe | URL | Script | Zweck |
+|---|---|---|---|
+| **Beta** | `https://stekum.github.io/roman-holiday-planner/beta/` | `npm run deploy:beta` | Testen nach jedem Fix |
+| **Production** | `https://stekum.github.io/roman-holiday-planner/` | `npm run deploy` | Stabile Version für alle Nutzer |
+
+### Ablauf nach jedem Fix / Feature
+
+1. Code fertig → `npm run build && npm run lint` müssen grün sein
+2. `npm run deploy:beta` — Beta-Deployment
+3. Selbst mit Playwright auf Beta-URL validieren (headless)
+4. Stefan mitteilen: _"Fix ist auf Beta deployed, bitte testen"_
+5. Stefan validiert auf Beta
+6. Wenn ok → `npm run deploy` (promoted zu Production)
+
+### Wichtig
+
+- `deploy:beta` nutzt `--add` → ersetzt nur den `beta/`-Ordner, Production bleibt unangetastet
+- `deploy` ersetzt den **gesamten** gh-pages Branch → nur ausführen wenn Beta validiert ist
+- Nie `deploy` ohne vorherige Beta-Validierung
 
 ---
 
@@ -197,15 +220,58 @@ Neue Issues werden automatisch via GitHub Actions ins Projekt eingefügt. Geschl
 
 ## Testing
 
-Kein Automated Testing bisher. Playwright ist installiert (`@playwright/test`), aber noch nicht konfiguriert.
+### Mindestanforderung vor jedem PR
 
-**Mindestanforderung vor jedem PR:**
 ```bash
 npm run build   # TypeScript-Fehler + Build-Fehler
 npm run lint    # ESLint
 ```
 
-Playwright-Tests kommen in `e2e/` (noch nicht existent — beim ersten Test anlegen).
+### Playwright (automatisiert)
+
+Playwright ist installiert. Für schnelle Validierung nach Fixes:
+
+```bash
+# Beispiel: Headless-Test auf deployed Beta-URL
+node -e "
+const { chromium } = require('playwright');
+(async () => {
+  const browser = await chromium.launch({ headless: true });
+  const ctx = await browser.newContext({ viewport: { width: 800, height: 900 } });
+  await ctx.addInitScript(() => { sessionStorage.setItem('rhp:unlocked', '1'); });
+  const page = await ctx.newPage();
+  await page.goto('https://stekum.github.io/roman-holiday-planner/beta/', { waitUntil: 'domcontentloaded' });
+  // ... Test-Logik + Screenshot ...
+  await browser.close();
+})();
+"
+```
+
+**Wichtig:** PasswordGate muss per `sessionStorage.setItem('rhp:unlocked', '1')` via `addInitScript` umgangen werden.
+
+### Manuelle Testpläne
+
+Nach jedem Bug-Fix oder Feature wird ein manueller Testplan erstellt:
+
+- Ablage: `e2e/manual/<issue-N>-<beschreibung>.md`
+- Format: Vorbedingungen, Test-Cases mit Schritten + erwartetes Ergebnis
+- Im Testplan angeben ob auf **Beta** oder **Production** getestet werden soll
+
+---
+
+## Bekannte Workarounds
+
+### Google Maps AdvancedMarker — Visibility
+
+`@vis.gl/react-google-maps` v1.8.x hat einen Bug: Marker werden beim React-Unmount nicht zuverlässig von der Karte entfernt. Weder `position={null}`, `className="hidden"`, noch React-Unmount-Cleanup funktionieren.
+
+**Lösung:** `PoiMarker`-Komponente in `RomeMap.tsx` nutzt `useAdvancedMarkerRef()` + `useMap()` um direkt `marker.map = null` (verstecken) bzw. `marker.map = mapInstance` (zeigen) zu setzen. Das ist die einzige zuverlässige Methode.
+
+### Homebase-Duplikation im AI Tagesplan
+
+Gemini fügt manchmal die Unterkunft als Stop in den Tagesplan ein. Zwei Schutzschichten:
+1. System-Prompt-Regel in `aiDayPlanner.ts`: _"Homebase darf NIEMALS als Stop erscheinen"_
+2. Defensiver Filter in `App.tsx onAiAccept`: überspringt POIs die per placeId, Koordinaten oder Name zur Homebase passen
 
 ---
 
@@ -214,8 +280,8 @@ Playwright-Tests kommen in `e2e/` (noch nicht existent — beim ersten Test anle
 - `.env.local` oder andere Dateien mit API-Keys committen
 - API-Keys als Strings im Quellcode hardcoden
 - `console.log` mit API-Keys oder Firebase-Config
-- `.github/workflows/` Dateien ohne Diskussion mit Stefan ändern
+- GitHub Actions Workflows ohne Diskussion mit Stefan ändern
 - Direkt auf `main` pushen
 - `firestore.rules` oder `storage.rules` lockern ohne Verständnis der Implikationen (schützen Produktionsdaten!)
-- `npm run deploy` oder `npm run deploy:beta` ausführen (Stefans Verantwortung)
+- `npm run deploy` ohne vorherige Beta-Validierung ausführen
 - `functions/` Struktur ohne Absprache ändern (Cloud Function läuft in Produktion)
