@@ -49,6 +49,7 @@ Die App hat drei Hauptbereiche (Tabs in der oberen Leiste):
 - Titel, Entfernung zur Homebase, Adresse
 - Google-Bewertung (Sterne + Anzahl)
 - Beschreibung
+- **„Was Gäste sagen"** — KI-generierte Review-Zusammenfassung (lila Block, nur bei POIs die via Suche oder Karten-Klick hinzugefügt wurden, Quelle: Google Places API editorialSummary)
 - ❤️ Like-Button + Zähler
 - 🏠 Als Homebase setzen
 - ✏️ Bearbeiten
@@ -170,6 +171,15 @@ Alle Methoden bieten: **Familie-Auswahl** (farbige Pill-Buttons) + **Kategorie-A
 - **Google Places Fotos** werden automatisch geladen (bei Suche + Karten-Klick)
 - **Cloud Function** (`persistPoiPhoto`) kopiert Google-Fotos nach Firebase Storage (CORS-sichere URLs)
 - **Fallback:** Kategorie-Emoji als Gradient-Platzhalter wenn kein Foto vorhanden
+
+### AI Review-Zusammenfassungen
+
+- Beim Hinzufügen via **Suche** oder **Karten-Klick** wird parallel eine KI-generierte Zusammenfassung der Google Reviews geholt
+- **Quelle:** Google Places API (New) → `editorialSummary` (Fallback) oder `generativeSummary` (wenn verfügbar)
+- Anzeige auf der POI-Karte als lila **„Was Gäste sagen"**-Block
+- Auch im Map-InfoWindow sichtbar (kursiv)
+- **Voraussetzung:** „Places API (New)" muss in der Google Cloud Console aktiviert sein
+- **Graceful Fallback:** Wenn nicht aktiviert oder kein Summary verfügbar → Block wird nicht angezeigt, kein Fehler
 
 ### PWA (Progressive Web App)
 
