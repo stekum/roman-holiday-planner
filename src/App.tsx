@@ -75,6 +75,7 @@ function AppInner() {
   const weatherByDay = useWeather(settings.homebase?.coords);
   const { location: myLocation } = useMyLocation();
   const [tab, setTab] = useState<Tab>('discover');
+  const [streetViewCoords, setStreetViewCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [summary, setSummary] = useState<RouteSummary | null>(null);
   const [highlightedPoiId, setHighlightedPoiId] = useState<string | null>(null);
   const [addMode, setAddMode] = useState<AddMode>(null);
@@ -187,6 +188,15 @@ function AppInner() {
     });
   };
 
+  const handleStreetView = (id: string) => {
+    const poi = pois.find((p) => p.id === id);
+    if (!poi?.coords) return;
+    // Settings tab has no map — switch to Entdecken first so Street View
+    // has a container to render into.
+    if (tab === 'settings') setTab('discover');
+    setStreetViewCoords(poi.coords);
+  };
+
   const connectionBanner =
     status === 'connecting' ? (
       <div className="flex items-center gap-2 bg-olive/10 px-4 py-2 text-xs text-olive-dark">
@@ -220,6 +230,8 @@ function AppInner() {
                 homebase={settings.homebase}
                 myLocation={myLocation}
                 highlightedPoiId={highlightedPoiId}
+                streetViewPosition={streetViewCoords}
+                onStreetViewClose={() => setStreetViewCoords(null)}
                 pickMode={addMode === 'map'}
                 onMapClick={(pick) => {
                   // Set the picked location data first
@@ -260,6 +272,7 @@ function AppInner() {
               onSetAsHomebase={handleSetAsHomebase}
               homebase={settings.homebase}
               onLocate={(id) => setLocatingPoiId(id)}
+              onStreetView={handleStreetView}
               viewMode={viewMode}
               onViewModeChange={setViewMode}
               filterCategory={filterCategory}

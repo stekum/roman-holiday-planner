@@ -34,6 +34,10 @@ interface Props {
   myLocation?: { lat: number; lng: number; accuracy: number } | null;
   /** External selection — app-controlled. Pans map and shows InfoWindow. */
   highlightedPoiId?: string | null;
+  /** When set, shows Street View panorama at this location (shares map container). */
+  streetViewPosition?: { lat: number; lng: number } | null;
+  /** Called when the Street View panorama is dismissed. */
+  onStreetViewClose?: () => void;
   /** When true the map cursor is a crosshair and clicks fire onMapClick instead of deselecting. */
   pickMode?: boolean;
   onMarkerClick?: (poi: POI) => void;
@@ -65,6 +69,55 @@ function MapFocus({
     const currentZoom = map.getZoom() ?? 14;
     if (currentZoom < 15) map.setZoom(16);
   }, [map, target]);
+  return null;
+}
+
+/**
+ * Switches the map into Street View panorama mode when `position` is set.
+ * Uses the map's built-in StreetViewPanorama which shares the same DOM
+ * container — no new window, no leaving the app. Fires `onClose` when
+ * the user dismisses the panorama via the built-in X button.
+ */
+function StreetViewController({
+  position,
+  onClose,
+}: {
+  position: { lat: number; lng: number } | null;
+  onClose?: () => void;
+}) {
+  const map = useMap();
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  useEffect(() => {
+    if (!map) return;
+    const pano = map.getStreetView();
+
+    if (position) {
+      pano.setOptions({
+        position,
+        pov: { heading: 0, pitch: 0 },
+        zoom: 1,
+        addressControl: true,
+        fullscreenControl: false,
+        enableCloseButton: true,
+      });
+      pano.setVisible(true);
+    } else if (pano.getVisible()) {
+      pano.setVisible(false);
+    }
+
+    const listener = pano.addListener('visible_changed', () => {
+      if (!pano.getVisible() && position) {
+        onCloseRef.current?.();
+      }
+    });
+
+    return () => {
+      listener.remove();
+    };
+  }, [map, position]);
+
   return null;
 }
 
@@ -152,6 +205,8 @@ export function RomeMap({
   homebase,
   myLocation,
   highlightedPoiId,
+  streetViewPosition = null,
+  onStreetViewClose,
   pickMode = false,
   onMarkerClick,
   onMapClick,
@@ -222,6 +277,11 @@ export function RomeMap({
             ? homebase.coords
             : selected?.coords ?? null
         }
+      />
+
+      <StreetViewController
+        position={streetViewPosition}
+        onClose={onStreetViewClose}
       />
 
       {mode === 'plan' && planPois.length > 0 && (
