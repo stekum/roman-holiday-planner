@@ -147,20 +147,24 @@ npm run deploy       # Build + Deploy nach / (Production — nur nach Beta-Valid
 
 ### Dev Workflow — zwei Modi
 
+**Gemeinsame Regel:** Beta → Production. NIEMALS direkt nach Production (sonst out-of-sync).
+
 **Light (size:S, Bugfix):**
 1. Branch + Implementieren + Build/Lint
-2. PR öffnen → direkt auf Production deployen
-3. Issue schließen + Done
+2. PR merge
+3. `deploy:beta` → Stefan testet
+4. Nach Validierung: `deploy` (Production)
+5. Issue → Done (erst nach Stefan-Validierung)
 
 **Full (size:M/L, Feature):**
 1. Branch + Implementieren + Build/Lint
-2. Playwright-Test auf localhost (via Playwright MCP)
-3. Manuelles Testscript in `e2e/manual/` erstellen
-4. PR öffnen + `npm run deploy:beta`
-5. Stefan testet auf Beta
-6. PR mergen + `npm run deploy` (Production)
+2. Playwright-Test via MCP, Screenshots nach `.playwright-results/`
+3. Manuelles Testscript in `e2e/manual/`
+4. PR merge
+5. `deploy:beta` → Stefan testet auf Beta
+6. Nach Validierung: `deploy` (Production)
 7. USER-GUIDE.md aktualisieren (wenn user-facing)
-8. Issue schließen + Done
+8. Issue → Done
 
 ### Releases
 

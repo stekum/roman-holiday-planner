@@ -75,28 +75,34 @@ gh api graphql -f query='
 
 ## Dev Workflow — zwei Modi
 
+**Gemeinsame Regel (BEIDE Modi):** Jeder Fix geht erst nach Beta, dann nach Production. NIEMALS direkt nach Production — sonst sind Beta und Production out-of-sync.
+
 ### Light (size:S, Bugfix, kleine Änderungen)
 
-1. Branch erstellen: `git checkout -b fix/issue-N-beschreibung`
-2. Projekt-Status auf "In Progress" setzen
+1. Branch: `git checkout -b fix/issue-N-beschreibung`
+2. Projekt-Status → "In Progress"
 3. Implementieren → `npm run build && npm run lint`
-4. PR öffnen mit `Closes #N`
-5. Direkt auf Production deployen (`npm run deploy`)
-6. Issue schließen + Status auf Done
+4. PR öffnen mit `Closes #N`, merge (squash)
+5. `npm run deploy:beta` → Stefan testet
+6. Nach Validierung: `npm run deploy` → Production
+7. Projekt-Status → "Done"
 
 ### Full (size:M/L, Features, user-facing Änderungen)
 
-1. Prüfen ob Branch existiert: `git branch -r | grep issue-N`
-2. Branch erstellen: `git checkout -b feat/issue-N-beschreibung`
-3. Projekt-Status auf "In Progress" setzen
-4. Implementieren → `npm run build && npm run lint`
-5. **Playwright-Test** auf localhost (via Playwright MCP)
-6. **Manuelles Testscript** in `e2e/manual/` erstellen
-7. PR öffnen mit `Closes #N`
-8. `npm run deploy:beta` → Stefan testet auf Beta
-9. Nach Validierung: PR mergen + `npm run deploy` (Production)
-10. **USER-GUIDE.md** aktualisieren (wenn user-facing)
-11. Issue schließen + Status auf Done
+1. Branch: `git checkout -b feat/issue-N-beschreibung`
+2. Projekt-Status → "In Progress"
+3. Implementieren → `npm run build && npm run lint`
+4. **Playwright-Test** via MCP, Screenshots in `.playwright-results/`
+5. **Manuelles Testscript** in `e2e/manual/` erstellen
+6. PR öffnen mit `Closes #N`, merge (squash)
+7. `npm run deploy:beta` → Stefan testet auf Beta
+8. Nach Validierung: `npm run deploy` → Production
+9. **USER-GUIDE.md** aktualisieren (wenn user-facing)
+10. Projekt-Status → "Done"
+
+**Wichtig:**
+- Issues auf "Done" erst **nach Stefan-Validierung auf Beta**, nicht nach Deploy
+- Playwright-Screenshots gehen nach `.playwright-results/` (gitignored), nicht in `/tmp/`
 
 ### Release erstellen (nur bei komplettem Meilenstein)
 
