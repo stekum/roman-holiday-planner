@@ -42,6 +42,13 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // Take over pages as soon as the new SW is installed — no waiting
+        // for all tabs to close. Combined with registerType 'autoUpdate'
+        // this ensures updates propagate within one reload cycle.
+        skipWaiting: true,
+        clientsClaim: true,
+        // Cleanup outdated caches from older SW versions
+        cleanupOutdatedCaches: true,
         // Cache strategy: network-first for API calls, cache-first for static assets
         runtimeCaching: [
           {
