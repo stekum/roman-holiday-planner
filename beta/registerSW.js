@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/roman-holiday-planner/beta/sw.js', { scope: '/roman-holiday-planner/beta/' })})}

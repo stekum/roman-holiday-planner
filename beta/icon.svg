@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background: rounded square in cream -->
+  <rect width="512" height="512" rx="96" fill="#FBF7F0"/>
+
+  <!-- Outer circle: olive ring -->
+  <circle cx="256" cy="240" r="180" fill="none" stroke="#6B7A3F" stroke-width="16"/>
+
+  <!-- Inner compass rose / pin shape -->
+  <circle cx="256" cy="240" r="140" fill="#C96F4A" opacity="0.12"/>
+
+  <!-- Pin/marker shape -->
+  <path d="M256 100
+           C200 100 156 144 156 200
+           C156 268 256 360 256 360
+           C256 360 356 268 356 200
+           C356 144 312 100 256 100Z"
+        fill="#C96F4A"/>
+
+  <!-- Inner circle on pin -->
+  <circle cx="256" cy="200" r="50" fill="#FBF7F0"/>
+
+  <!-- Compass star inside -->
+  <polygon points="256,162 264,190 292,190 270,206 278,234 256,218 234,234 242,206 220,190 248,190"
+           fill="#6B7A3F"/>
+
+  <!-- Text: RHP -->
+  <text x="256" y="440"
+        font-family="Georgia, serif"
+        font-size="56"
+        font-weight="bold"
+        fill="#3B2E2A"
+        text-anchor="middle"
+        letter-spacing="8">RHP</text>
+
+  <!-- Small decorative dots -->
+  <circle cx="256" cy="80" r="6" fill="#D4A24C"/>
+  <circle cx="256" cy="400" r="4" fill="#D4A24C" opacity="0.5"/>
+</svg>
