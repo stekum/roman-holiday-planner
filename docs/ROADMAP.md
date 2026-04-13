@@ -23,16 +23,20 @@
 
 | Issue | Titel | Size | Prio |
 |---|---|---|---|
-| #106 | Homebase-Foto fehlt | S | low |
-| #77 | Seed-POIs entfernen (leerer Trip = leere Liste) | S | — |
 | #110 | **npm audit fix — Dependency-Vulnerabilities** | S | **high** |
 | #111 | **Firestore Rules — Workspace-Isolation** | M | **high** |
 | #115 | **Claude Code Deny Rules + Sandbox** | S | **high** |
 | #116 | **Semgrep Pre-Commit Hook** | S | **high** |
 | #112 | **Google Sign-In (Firebase Auth)** | M | **high** |
 | #113 | **User-Profil + Workspace-Zuordnung** | M | — |
+| #106 | Homebase-Foto fehlt | S | low |
+| #77 | Seed-POIs entfernen (leerer Trip = leere Liste) | S | — |
+| #5 | Voting / Wunschliste pro POI | M | — |
+| #11 | Walking Time zwischen Stops | S | — |
+| #27 | Quick-Navigate: Google Maps Deep-Link | S | — |
+| #29 | Tagesroute in Google Maps oeffnen | S | — |
 
-**Fokus:** Security-Hardening + Google Auth + restliche Bugs.  
+**Fokus:** Security-Hardening + Google Auth + restliche v1.0/v1.1 Items.  
 **Release:** `v1.2.0`
 
 ---
