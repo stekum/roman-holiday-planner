@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { APIProvider } from '@vis.gl/react-google-maps';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { APIProvider, useMapsLibrary } from '@vis.gl/react-google-maps';
 import { Header, type Tab } from './components/Header';
 import { PasswordGate } from './components/PasswordGate';
 import { MissingKeyNotice } from './components/MissingKeyNotice';
@@ -17,8 +17,48 @@ import { isFirebaseConfigured } from './firebase/firebase';
 import type { POI, Category } from './data/pois';
 import { eachDayInRange } from './lib/dates';
 import type { RouteSummary } from './components/map/RoutePolyline';
+import type { Homebase } from './settings/types';
 import { Loader2, WifiOff } from 'lucide-react';
 // import { persistAndUpdatePhoto } from './lib/photoStorage'; // TODO: re-enable after CORS fix (#91)
+
+/**
+ * Render-less component (must live inside APIProvider) that auto-fetches a
+ * photo for the homebase when it has a placeId but no image yet.
+ * Runs at app startup — not only when the Settings tab is open.
+ */
+function HomebasePhotoSync({
+  homebase,
+  onUpdate,
+}: {
+  homebase: Homebase | undefined;
+  onUpdate: (hb: Homebase) => void;
+}) {
+  const placesLib = useMapsLibrary('places');
+  const fetchedRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!placesLib || !homebase?.placeId || homebase.image) return;
+    if (fetchedRef.current === homebase.placeId) return;
+    fetchedRef.current = homebase.placeId;
+
+    const service = new placesLib.PlacesService(document.createElement('div'));
+    service.getDetails(
+      { placeId: homebase.placeId, fields: ['photos'] },
+      (place, status) => {
+        if (status === placesLib.PlacesServiceStatus.OK && place?.photos?.[0]) {
+          try {
+            const photoUrl = place.photos[0].getUrl({ maxWidth: 800, maxHeight: 600 });
+            if (photoUrl) onUpdate({ ...homebase, image: photoUrl });
+          } catch {
+            /* ignore */
+          }
+        }
+      },
+    );
+  }, [placesLib, homebase, onUpdate]);
+
+  return null;
+}
 
 function FirebaseMissingNotice() {
   return (
@@ -213,10 +253,21 @@ function AppInner() {
       </div>
     ) : null;
 
+  const handleHomebaseUpdate = useCallback(
+    (hb: Homebase) => { void setHomebase(hb); },
+    [setHomebase],
+  );
+
   const content = (
     <div className="flex h-full flex-col">
       <Header tab={tab} onTabChange={setTab} />
       {connectionBanner}
+      {hasKey && (
+        <HomebasePhotoSync
+          homebase={settings.homebase}
+          onUpdate={handleHomebaseUpdate}
+        />
+      )}
       <main className="flex flex-1 flex-col overflow-hidden">
         {tab !== 'settings' && (
           <div className={`relative w-full flex-shrink-0 bg-cream-dark ${viewMode === 'compact' ? 'h-[60vh]' : 'h-[45vh]'}`}>

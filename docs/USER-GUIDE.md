@@ -54,6 +54,9 @@ Die App hat drei Hauptbereiche (Tabs in der oberen Leiste):
 - 🏠 Als Homebase setzen
 - ✏️ Bearbeiten
 - 🗑️ Löschen
+- **„Navigieren"** — öffnet Google Maps Navigation (zu Fuß) direkt zum POI
+- **„Street View"** — öffnet Google Street View direkt in der App-Karte (kein neuer Tab); schließen via ✕ im Panorama
+- **„Google Maps"** — öffnet den Ort in Google Maps (externer Link)
 - **„+ Zum Tag"** — POI einem Reisetag zuordnen
 - Tag-Badge zeigt zugeordnete Tage (z.B. „Tag 3 · Mo, 14. Apr")
 
