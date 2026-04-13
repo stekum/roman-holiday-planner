@@ -45,6 +45,8 @@
 | #42 | AI NL-Suche mit Kontext (Homebase, Kinder, Besuche) | M | — |
 | #75 | Generische Kategorien pro Trip | S | — |
 | #76 | AI-Prompt Dynamisierung (Stadt/Land aus Trip-Config) | S | — |
+| #121 | **Street View Button auf POI-Card** | S | — |
+| #123 | **Google Analytics Usage Tracking** | S | — |
 
 **Fokus:** AI-Features abrunden + Kategorie-System auf Multi-Trip vorbereiten.  
 **Release:** `v1.5.0`
@@ -60,6 +62,7 @@
 | #46 | Packing List (kategorisiert, pro Person) | M | — |
 | #73 | Stadt-Konfiguration (CityConfig statt ROME_CENTER) | M | — |
 | #117 | **Hosting-Migration (weg von GitHub Pages)** | M | — |
+| #122 | **Multi-Language Support (DE + EN)** | L | — |
 
 **Fokus:** Reise-Features für den praktischen Einsatz + Multi-Trip Infra beginnen.  
 **Release:** `v2.0.0`
