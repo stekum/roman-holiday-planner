@@ -296,6 +296,7 @@ function AppInner() {
                 }}
                 onDismiss={() => setHighlightedPoiId(null)}
                 onRouteSummary={setSummary}
+                onStreetViewRequest={(coords) => setStreetViewCoords(coords)}
               />
             ) : (
               <div className="flex h-full items-center justify-center p-4">

@@ -7,6 +7,7 @@ import {
   useAdvancedMarkerRef,
   useMap,
 } from '@vis.gl/react-google-maps';
+import { Eye, Navigation } from 'lucide-react';
 import { CATEGORY_EMOJI, ROME_CENTER, type POI } from '../../data/pois';
 import type { Family, Homebase } from '../../settings/types';
 import { RoutePolyline, type RouteSummary } from './RoutePolyline';
@@ -38,6 +39,8 @@ interface Props {
   streetViewPosition?: { lat: number; lng: number } | null;
   /** Called when the Street View panorama is dismissed. */
   onStreetViewClose?: () => void;
+  /** Called when the user requests Street View from an InfoWindow. */
+  onStreetViewRequest?: (coords: { lat: number; lng: number }) => void;
   /** When true the map cursor is a crosshair and clicks fire onMapClick instead of deselecting. */
   pickMode?: boolean;
   onMarkerClick?: (poi: POI) => void;
@@ -207,6 +210,7 @@ export function RomeMap({
   highlightedPoiId,
   streetViewPosition = null,
   onStreetViewClose,
+  onStreetViewRequest,
   pickMode = false,
   onMarkerClick,
   onMapClick,
@@ -381,6 +385,27 @@ export function RomeMap({
               {homebase.address && (
                 <p className="text-xs text-ink/60">{homebase.address}</p>
               )}
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                <a
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${homebase.coords.lat},${homebase.coords.lng}&travelmode=walking`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1 rounded-full bg-olive/10 px-2.5 py-1 text-[11px] font-semibold text-olive hover:bg-olive/20"
+                >
+                  <Navigation className="h-3 w-3" />
+                  Navigieren
+                </a>
+                {onStreetViewRequest && (
+                  <button
+                    type="button"
+                    onClick={() => onStreetViewRequest(homebase.coords)}
+                    className="flex items-center gap-1 rounded-full bg-ink/5 px-2.5 py-1 text-[11px] font-semibold text-ink hover:bg-ink/10"
+                  >
+                    <Eye className="h-3 w-3" />
+                    Street View
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </InfoWindow>
