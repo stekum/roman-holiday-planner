@@ -7,6 +7,7 @@ import {
   Home,
   MapPin,
   MapPinOff,
+  Navigation,
   Pencil,
   Plus,
   Star,
@@ -342,18 +343,17 @@ function FullCard({
           </div>
         )}
 
-        {(poi.instagramUrl || poi.mapsUrl) && (
+        {(poi.instagramUrl || poi.mapsUrl || poi.coords) && (
           <div className="flex flex-wrap gap-2">
-            {poi.instagramUrl && (
+            {poi.coords && (
               <a
-                href={poi.instagramUrl}
+                href={`https://www.google.com/maps/dir/?api=1&destination=${poi.coords.lat},${poi.coords.lng}&travelmode=walking`}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1 rounded-full bg-ink/5 px-3 py-1 text-xs font-semibold text-ink hover:bg-ink/10"
+                className="flex items-center gap-1 rounded-full bg-olive/10 px-3 py-1 text-xs font-semibold text-olive hover:bg-olive/20"
               >
-                <Camera className="h-3 w-3" />
-                Instagram
-                <ExternalLink className="h-3 w-3 opacity-60" />
+                <Navigation className="h-3 w-3" />
+                Navigieren
               </a>
             )}
             {poi.mapsUrl && (
@@ -365,6 +365,18 @@ function FullCard({
               >
                 <MapPin className="h-3 w-3" />
                 Google Maps
+                <ExternalLink className="h-3 w-3 opacity-60" />
+              </a>
+            )}
+            {poi.instagramUrl && (
+              <a
+                href={poi.instagramUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1 rounded-full bg-ink/5 px-3 py-1 text-xs font-semibold text-ink hover:bg-ink/10"
+              >
+                <Camera className="h-3 w-3" />
+                Instagram
                 <ExternalLink className="h-3 w-3 opacity-60" />
               </a>
             )}

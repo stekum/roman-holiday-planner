@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { ArrowDown, ArrowUp, Loader2, Sparkles, Trash2, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, Footprints, Loader2, Sparkles, Trash2, X } from 'lucide-react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import type { POI } from '../../data/pois';
 import { CATEGORY_EMOJI } from '../../data/pois';
@@ -229,7 +229,12 @@ export function DayPlanner({
         </div>
       )}
 
-      <RouteSummary summary={summary} stops={selected.length} />
+      <RouteSummary
+        summary={summary}
+        stops={selected.length}
+        waypoints={selected.flatMap((p) => p.coords ? [p.coords] : [])}
+        homebase={settings.homebase?.coords}
+      />
 
       {dayDescription && (
         <div className="rounded-2xl bg-olive/10 px-4 py-3 text-sm text-olive-dark">
@@ -246,14 +251,25 @@ export function DayPlanner({
           hinzu.
         </div>
       ) : (
-        <ol className="space-y-3">
+        <ol className="space-y-1">
           {selected.map((poi, idx) => {
             const family = getFamily(poi.familyId);
+            const leg = summary?.legs?.[idx - 1];
             return (
-              <li
-                key={poi.id}
-                className="flex items-center gap-3 rounded-3xl bg-white p-3 shadow-sm shadow-ink/5"
-              >
+              <li key={poi.id}>
+                {idx > 0 && leg && (
+                  <div className="flex items-center justify-center gap-1.5 py-1 text-[11px] text-ink/40">
+                    <Footprints className="h-3 w-3" />
+                    <span>
+                      {Math.round(leg.durationSeconds / 60)} min
+                      {' · '}
+                      {leg.distanceMeters < 1000
+                        ? `${Math.round(leg.distanceMeters)} m`
+                        : `${(leg.distanceMeters / 1000).toFixed(1)} km`}
+                    </span>
+                  </div>
+                )}
+                <div className="flex items-center gap-3 rounded-3xl bg-white p-3 shadow-sm shadow-ink/5">
                 <div
                   className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-lg font-bold text-white"
                   style={{ backgroundColor: family?.color ?? '#C96F4A' }}
@@ -311,6 +327,7 @@ export function DayPlanner({
                 >
                   <X className="h-4 w-4" />
                 </button>
+                </div>
               </li>
             );
           })}
