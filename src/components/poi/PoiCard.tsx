@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   Camera,
   Check,
-  Eye,
   ExternalLink,
   Heart,
   Home,
@@ -355,17 +354,6 @@ function FullCard({
               >
                 <Navigation className="h-3 w-3" />
                 Navigieren
-              </a>
-            )}
-            {poi.coords && (
-              <a
-                href={`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${poi.coords.lat},${poi.coords.lng}`}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-1 rounded-full bg-ink/5 px-3 py-1 text-xs font-semibold text-ink hover:bg-ink/10"
-              >
-                <Eye className="h-3 w-3" />
-                Street View
               </a>
             )}
             {poi.mapsUrl && (

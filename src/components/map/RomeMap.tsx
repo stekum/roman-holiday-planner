@@ -423,18 +423,8 @@ export function RomeMap({
                       ✨ {selected.aiSummary}
                     </p>
                   )}
-                  {(selected.mapsUrl || selected.instagramUrl || selected.coords) && (
-                    <div className="flex flex-wrap gap-1 pt-1">
-                      {selected.coords && (
-                        <a
-                          href={`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${selected.coords.lat},${selected.coords.lng}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="rounded-full bg-ink/5 px-2 py-0.5 text-[10px] font-semibold text-ink hover:bg-ink/10"
-                        >
-                          Street View ↗
-                        </a>
-                      )}
+                  {(selected.mapsUrl || selected.instagramUrl) && (
+                    <div className="flex gap-1 pt-1">
                       {selected.mapsUrl && (
                         <a
                           href={selected.mapsUrl}
