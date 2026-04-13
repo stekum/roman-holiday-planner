@@ -2,9 +2,16 @@ import { Polyline, useMapsLibrary } from '@vis.gl/react-google-maps';
 import { useEffect, useRef, useState } from 'react';
 import type { POI } from '../../data/pois';
 
+export interface RouteLeg {
+  distanceMeters: number;
+  durationSeconds: number;
+}
+
 export interface RouteSummary {
   distanceMeters: number;
   durationSeconds: number;
+  /** Per-leg data: legs[0] = stop 1→2, legs[1] = stop 2→3, etc. */
+  legs: RouteLeg[];
 }
 
 type POIWithCoords = POI & { coords: { lat: number; lng: number } };
@@ -169,16 +176,21 @@ export function RoutePolyline({ pois, homebase, onSummary }: Props) {
         notifySummary(null);
         return;
       }
-      const totals = mainRoute.legs.reduce(
+      const legs: RouteLeg[] = mainRoute.legs.map((leg) => ({
+        distanceMeters: leg.distance?.value ?? 0,
+        durationSeconds: leg.duration?.value ?? 0,
+      }));
+      const totals = legs.reduce(
         (acc, leg) => ({
-          distance: acc.distance + (leg.distance?.value ?? 0),
-          duration: acc.duration + (leg.duration?.value ?? 0),
+          distance: acc.distance + leg.distanceMeters,
+          duration: acc.duration + leg.durationSeconds,
         }),
         { distance: 0, duration: 0 },
       );
       notifySummary({
         distanceMeters: totals.distance,
         durationSeconds: totals.duration,
+        legs,
       });
     });
 
