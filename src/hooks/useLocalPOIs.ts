@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { SEED_POIS, type POI } from '../data/pois';
+import type { POI } from '../data/pois';
 
 const STORAGE_KEY = 'rhp:pois';
 
@@ -10,9 +10,9 @@ type LegacyPOI = Omit<POI, 'familyId' | 'createdAt'> & {
 };
 
 function migrate(raw: unknown): POI[] {
-  if (!Array.isArray(raw)) return SEED_POIS;
+  if (!Array.isArray(raw)) return [];
   const list = raw as LegacyPOI[];
-  if (list.length === 0) return SEED_POIS;
+  if (list.length === 0) return [];
   return list.map((p, idx) => ({
     id: p.id,
     title: p.title,
@@ -34,10 +34,10 @@ function migrate(raw: unknown): POI[] {
 function loadInitial(): POI[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return SEED_POIS;
+    if (!stored) return [];
     return migrate(JSON.parse(stored));
   } catch {
-    return SEED_POIS;
+    return [];
   }
 }
 
@@ -88,7 +88,7 @@ export function useLocalPOIs() {
   }, []);
 
   const resetPois = useCallback(() => {
-    setPois(SEED_POIS);
+    setPois([]);
   }, []);
 
   return {
