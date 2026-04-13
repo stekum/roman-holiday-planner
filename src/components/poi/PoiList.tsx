@@ -25,6 +25,7 @@ interface Props {
   onSetAsHomebase: (id: string) => void;
   homebase?: Homebase;
   onLocate: (id: string) => void;
+  onStreetView?: (id: string) => void;
   viewMode: ViewMode;
   onViewModeChange: (m: ViewMode) => void;
   // Filter state — controlled by parent so the map stays in sync
@@ -61,6 +62,7 @@ export function PoiList({
   onSetAsHomebase,
   homebase,
   onLocate,
+  onStreetView,
   viewMode,
   onViewModeChange,
   filterCategory,
@@ -129,6 +131,7 @@ export function PoiList({
     onSetAsHomebase,
     homebase,
     onLocate,
+    onStreetView,
   });
 
   return (

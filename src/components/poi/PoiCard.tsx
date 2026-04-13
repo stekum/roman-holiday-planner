@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   Camera,
   Check,
+  Eye,
   ExternalLink,
   Heart,
   Home,
@@ -35,6 +36,8 @@ export interface PoiCardProps {
   onSetAsHomebase?: (id: string) => void;
   homebase?: Homebase;
   onLocate?: (id: string) => void;
+  /** Opens Street View panorama in the shared map container for this POI. */
+  onStreetView?: (id: string) => void;
 }
 
 const CATEGORY_GRADIENT: Record<POI['category'], string> = {
@@ -170,6 +173,7 @@ function FullCard({
   onSetAsHomebase,
   homebase,
   onLocate,
+  onStreetView,
 }: PoiCardProps) {
   const [imgFailed, setImgFailed] = useState(false);
   const familyName = family?.name ?? 'Unbekannt';
@@ -355,6 +359,16 @@ function FullCard({
                 <Navigation className="h-3 w-3" />
                 Navigieren
               </a>
+            )}
+            {poi.coords && onStreetView && (
+              <button
+                type="button"
+                onClick={() => onStreetView(poi.id)}
+                className="flex items-center gap-1 rounded-full bg-ink/5 px-3 py-1 text-xs font-semibold text-ink hover:bg-ink/10"
+              >
+                <Eye className="h-3 w-3" />
+                Street View
+              </button>
             )}
             {poi.mapsUrl && (
               <a

@@ -4,6 +4,9 @@
       "WebFetch(domain:www.webfuse.com)",
       "Bash(git commit -m ':*)",
       "Bash(git tag:*)"
+    ],
+    "additionalDirectories": [
+      "/Users/stefankummert/Documents/_Roman-Holidays"
     ]
   }
 }
