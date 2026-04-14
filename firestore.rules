@@ -38,7 +38,7 @@ service cloud.firestore {
       return isAdmin() || isApproved();
     }
 
-    // User-Profile — bereits strict
+    // User-Profile
     match /users/{uid} {
       allow read: if request.auth != null
                   && (request.auth.uid == uid || isAdmin());
@@ -49,7 +49,17 @@ service cloud.firestore {
                       || (isAdmin() && request.resource.data.status == 'approved')
                       || (isPreApproved() && request.resource.data.status == 'approved')
                     );
-      allow update, delete: if isAdmin();
+      // User darf sein eigenes Doc patchen (email/displayName/photoURL
+      // Self-Heal bei unvollständigen Profilen), aber NICHT den Status
+      // oder createdAt ändern. Admin darf alles.
+      allow update: if isAdmin()
+                    || (
+                      request.auth != null
+                      && request.auth.uid == uid
+                      && request.resource.data.status == resource.data.status
+                      && request.resource.data.createdAt == resource.data.createdAt
+                    );
+      allow delete: if isAdmin();
     }
 
     // Workspace-Hauptdokument + POI-Subkollektion
