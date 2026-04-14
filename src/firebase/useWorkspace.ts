@@ -9,7 +9,7 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 import { getFirebase } from './firebase';
-import { type POI, SEED_POIS } from '../data/pois';
+import { type POI, SEED_POIS, type Vote } from '../data/pois';
 import { DEFAULT_SETTINGS } from '../settings/defaults';
 import type { Family, Homebase, Settings } from '../settings/types';
 import type { TripPlan } from '../hooks/useTripPlan';
@@ -36,6 +36,7 @@ export interface WorkspaceAPI {
     placeId?: string,
   ) => Promise<void>;
   likePoi: (id: string) => Promise<void>;
+  votePoi: (id: string, familyId: string, vote: Vote) => Promise<void>;
   removePoi: (id: string) => Promise<void>;
 
   // Settings
@@ -227,6 +228,19 @@ export function useWorkspace(): WorkspaceAPI {
       await updateDoc(poiDocRef(id), { likes: (current.likes ?? 0) + 1 });
     },
     [pois, poiDocRef],
+  );
+
+  const votePoi = useCallback(
+    async (id: string, familyId: string, vote: Vote) => {
+      if (!familyId) return;
+      // Firestore dot-notation update — writes only the single field.
+      // 'neutral' is still a valid value so users can "unvote" back to
+      // the default without losing that they interacted.
+      await updateDoc(poiDocRef(id), {
+        [`votes.${familyId}`]: vote,
+      });
+    },
+    [poiDocRef],
   );
 
   const removePoi = useCallback(
@@ -428,6 +442,7 @@ export function useWorkspace(): WorkspaceAPI {
     updatePoi,
     setLocation,
     likePoi,
+    votePoi,
     removePoi,
     settings: doc_.settings,
     setTripDates,

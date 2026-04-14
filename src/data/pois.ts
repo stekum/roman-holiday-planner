@@ -31,7 +31,30 @@ export interface POI {
   needsLocation?: boolean;
   /** KI-generierte Review-Zusammenfassung (Places API generativeSummary). */
   aiSummary?: string;
+  /** Per-Familie-Vote. Key = familyId, Value = Richtung. */
+  votes?: Record<string, Vote>;
   createdAt: number;
+}
+
+export type Vote = 'up' | 'down' | 'neutral';
+
+export interface VoteCounts {
+  up: number;
+  down: number;
+  neutral: number;
+  score: number; // up - down, für Sortierung
+}
+
+export function countVotes(votes: POI['votes']): VoteCounts {
+  const counts: VoteCounts = { up: 0, down: 0, neutral: 0, score: 0 };
+  if (!votes) return counts;
+  for (const v of Object.values(votes)) {
+    if (v === 'up') counts.up += 1;
+    else if (v === 'down') counts.down += 1;
+    else if (v === 'neutral') counts.neutral += 1;
+  }
+  counts.score = counts.up - counts.down;
+  return counts;
 }
 
 export const CATEGORIES: Category[] = [
