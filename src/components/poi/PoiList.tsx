@@ -1,14 +1,19 @@
 import { useMemo, useState } from 'react';
 import { Filter, Grid3x3, List, X } from 'lucide-react';
-import type { POI } from '../../data/pois';
-import { CATEGORIES, CATEGORY_EMOJI, type Category } from '../../data/pois';
+import type { POI, Vote } from '../../data/pois';
+import {
+  CATEGORIES,
+  CATEGORY_EMOJI,
+  countVotes,
+  type Category,
+} from '../../data/pois';
 import type { Family, Homebase } from '../../settings/types';
 import { haversineKm } from '../../lib/geo';
 import { InboxBanner } from '../inbox/InboxBanner';
 import { PoiCard, type PoiCardProps } from './PoiCard';
 
 export type ViewMode = 'grid' | 'compact';
-type SortKey = 'date' | 'likes' | 'distance' | 'name';
+type SortKey = 'date' | 'likes' | 'votes' | 'distance' | 'name';
 
 interface Props {
   pois: POI[];
@@ -16,8 +21,10 @@ interface Props {
   allDays: string[];
   assignedDaysByPoi: Record<string, string[]>;
   families: Family[];
+  myFamilyId: string;
   getFamily: (id: string) => Family | undefined;
   onLike: (id: string) => void;
+  onVote: (id: string, vote: Vote) => void;
   onToggleSelect: (id: string) => void;
   onRemove: (id: string) => void;
   onEdit: (id: string) => void;
@@ -43,6 +50,7 @@ interface Props {
 const SORT_OPTIONS: { key: SortKey; label: string }[] = [
   { key: 'date', label: 'Neueste zuerst' },
   { key: 'likes', label: 'Beliebteste' },
+  { key: 'votes', label: 'Beste Votes' },
   { key: 'distance', label: 'Nächste (Homebase)' },
   { key: 'name', label: 'A–Z' },
 ];
@@ -53,8 +61,10 @@ export function PoiList({
   allDays,
   assignedDaysByPoi,
   families,
+  myFamilyId,
   getFamily,
   onLike,
+  onVote,
   onToggleSelect,
   onRemove,
   onEdit,
@@ -97,6 +107,13 @@ export function PoiList({
         return list.sort((a, b) => b.likes - a.likes);
       case 'name':
         return list.sort((a, b) => a.title.localeCompare(b.title, 'de'));
+      case 'votes':
+        return list.sort((a, b) => {
+          const scoreA = countVotes(a.votes).score;
+          const scoreB = countVotes(b.votes).score;
+          if (scoreB !== scoreA) return scoreB - scoreA;
+          return b.createdAt - a.createdAt;
+        });
       case 'distance':
         if (!homebase?.coords) return list.sort((a, b) => b.createdAt - a.createdAt);
         return list.sort((a, b) => {
@@ -107,7 +124,7 @@ export function PoiList({
       default:
         return list;
     }
-  }, [filtered, sortKey, homebase?.coords]);
+  }, [filtered, sortKey, homebase]);
 
   const inboxCount = pois.filter((p) => p.needsLocation).length;
 
@@ -119,11 +136,14 @@ export function PoiList({
   const sharedProps = (poi: POI): PoiCardProps => ({
     poi,
     family: getFamily(poi.familyId),
+    families,
+    myFamilyId,
     selected: selectedIds.includes(poi.id),
     assignedDays: assignedDaysByPoi[poi.id] ?? [],
     allDays,
     compact: viewMode === 'compact',
     onLike,
+    onVote,
     onToggleSelect,
     onRemove,
     onEdit,

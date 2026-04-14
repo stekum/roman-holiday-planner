@@ -7,6 +7,7 @@ import { DEFAULT_SETTINGS } from '../../settings/defaults';
 import { TripDatesEditor } from './TripDatesEditor';
 import { FamilyEditor } from './FamilyEditor';
 import { HomebaseEditor } from './HomebaseEditor';
+import { MyFamilyEditor } from './MyFamilyEditor';
 import { ApprovalQueue } from './ApprovalQueue';
 
 interface Props {
@@ -24,6 +25,9 @@ interface Props {
   }) => Promise<void>;
   /** Admin-only: show the approval queue section. */
   isAdmin: boolean;
+  /** Current device's "I belong to" family — for voting. */
+  myFamilyId: string;
+  onMyFamilyChange: (id: string) => void;
 }
 
 function readLocalData(): {
@@ -79,6 +83,8 @@ export function SettingsView({
   onSetHomebase,
   onMigrateFromLocal,
   isAdmin,
+  myFamilyId,
+  onMyFamilyChange,
 }: Props) {
   const [migrationState, setMigrationState] = useState<
     'idle' | 'uploading' | 'done' | 'error'
@@ -125,6 +131,11 @@ export function SettingsView({
         onAdd={onAddFamily}
         onUpdate={onUpdateFamily}
         onRemove={onRemoveFamily}
+      />
+      <MyFamilyEditor
+        families={settings.families}
+        myFamilyId={myFamilyId}
+        onChange={onMyFamilyChange}
       />
 
       {onMigrateFromLocal && localPoiCount > 0 && (

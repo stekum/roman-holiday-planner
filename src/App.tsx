@@ -12,6 +12,7 @@ import { LocatePoiModal } from './components/inbox/LocatePoiModal';
 import { EditPoiModal } from './components/poi/EditPoiModal';
 import { useWorkspace } from './firebase/useWorkspace';
 import { useWeather } from './hooks/useWeather';
+import { useMyFamily } from './hooks/useMyFamily';
 import { useMyLocation } from './hooks/useMyLocation';
 import { isFirebaseConfigured } from './firebase/firebase';
 import type { POI, Category } from './data/pois';
@@ -100,6 +101,7 @@ function AppInner({ user }: AppInnerProps) {
     updatePoi,
     setLocation,
     likePoi,
+    votePoi,
     removePoi,
     settings,
     setTripDates,
@@ -121,6 +123,7 @@ function AppInner({ user }: AppInnerProps) {
 
   const weatherByDay = useWeather(settings.homebase?.coords);
   const { location: myLocation } = useMyLocation();
+  const { myFamilyId, setMyFamilyId } = useMyFamily(settings.families);
   const [tab, setTab] = useState<Tab>('discover');
   const [streetViewCoords, setStreetViewCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [summary, setSummary] = useState<RouteSummary | null>(null);
@@ -320,8 +323,10 @@ function AppInner({ user }: AppInnerProps) {
               allDays={days}
               assignedDaysByPoi={assignedDaysByPoi}
               families={settings.families}
+              myFamilyId={myFamilyId}
               getFamily={getFamily}
               onLike={likePoi}
+              onVote={(id, vote) => void votePoi(id, myFamilyId, vote)}
               onToggleSelect={(id) => activeDay && togglePoi(activeDay, id)}
               onRemove={handleRemove}
               onEdit={(id) => setEditingPoiId(id)}
@@ -387,6 +392,8 @@ function AppInner({ user }: AppInnerProps) {
               onSetHomebase={setHomebase}
               onMigrateFromLocal={workspace.migrateFromLocal}
               isAdmin={isAdmin}
+              myFamilyId={myFamilyId}
+              onMyFamilyChange={setMyFamilyId}
             />
           )}
         </div>

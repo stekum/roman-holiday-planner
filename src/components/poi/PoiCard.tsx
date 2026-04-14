@@ -8,14 +8,17 @@ import {
   Home,
   MapPin,
   MapPinOff,
+  Meh,
   Navigation,
   Pencil,
   Plus,
   Star,
+  ThumbsDown,
+  ThumbsUp,
   Trash2,
 } from 'lucide-react';
-import type { POI } from '../../data/pois';
-import { CATEGORY_EMOJI } from '../../data/pois';
+import type { POI, Vote } from '../../data/pois';
+import { CATEGORY_EMOJI, countVotes } from '../../data/pois';
 import type { Family, Homebase } from '../../settings/types';
 import { formatDayLabel } from '../../lib/dates';
 import { haversineKm, formatDistance } from '../../lib/geo';
@@ -24,11 +27,15 @@ import { getOpenStatus } from '../../lib/openingHours';
 export interface PoiCardProps {
   poi: POI;
   family?: Family;
+  families: Family[];
   selected: boolean;
   assignedDays: string[];
   allDays: string[];
   compact?: boolean;
+  /** Current device's "I belong to" family — drives the vote buttons. */
+  myFamilyId: string;
   onLike: (id: string) => void;
+  onVote: (id: string, vote: Vote) => void;
   onToggleSelect: (id: string) => void;
   onRemove: (id: string) => void;
   onEdit: (id: string) => void;
@@ -38,6 +45,92 @@ export interface PoiCardProps {
   onLocate?: (id: string) => void;
   /** Opens Street View panorama in the shared map container for this POI. */
   onStreetView?: (id: string) => void;
+}
+
+function VoteRow({
+  poi,
+  families,
+  myFamilyId,
+  onVote,
+  size = 'full',
+}: {
+  poi: POI;
+  families: Family[];
+  myFamilyId: string;
+  onVote: (id: string, vote: Vote) => void;
+  size?: 'full' | 'compact';
+}) {
+  const counts = countVotes(poi.votes);
+  const myVote = poi.votes?.[myFamilyId] ?? 'neutral';
+  const compact = size === 'compact';
+  const btn = (vote: Vote, Icon: typeof ThumbsUp, activeColor: string) => {
+    const active = myVote === vote;
+    return (
+      <button
+        key={vote}
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          // Toggle: re-clicking the active vote resets to neutral.
+          onVote(poi.id, active ? 'neutral' : vote);
+        }}
+        disabled={!myFamilyId}
+        className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold transition disabled:opacity-30 ${
+          active ? activeColor : 'bg-ink/5 text-ink/50 hover:bg-ink/10'
+        }`}
+        aria-label={vote}
+      >
+        <Icon className={compact ? 'h-3 w-3' : 'h-3.5 w-3.5'} />
+      </button>
+    );
+  };
+
+  // Render a small colored dot per family that has voted (up/down),
+  // grouped by direction — gives a quick "who feels how" read-out.
+  const votedFamilies = (direction: 'up' | 'down') =>
+    families.filter((f) => poi.votes?.[f.id] === direction);
+  const upFamilies = votedFamilies('up');
+  const downFamilies = votedFamilies('down');
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <div className="flex items-center gap-1">
+        {btn('up', ThumbsUp, 'bg-olive text-white')}
+        {btn('neutral', Meh, 'bg-ocker text-white')}
+        {btn('down', ThumbsDown, 'bg-terracotta text-white')}
+      </div>
+      {(counts.up > 0 || counts.down > 0) && (
+        <div className="flex items-center gap-1 text-[11px] text-ink/50">
+          {counts.up > 0 && (
+            <span className="flex items-center gap-0.5 text-olive">
+              {counts.up}×
+              {upFamilies.map((f) => (
+                <span
+                  key={f.id}
+                  className="inline-block h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: f.color }}
+                  title={f.name}
+                />
+              ))}
+            </span>
+          )}
+          {counts.down > 0 && (
+            <span className="flex items-center gap-0.5 text-terracotta">
+              {counts.down}×
+              {downFamilies.map((f) => (
+                <span
+                  key={f.id}
+                  className="inline-block h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: f.color }}
+                  title={f.name}
+                />
+              ))}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
 
 const CATEGORY_GRADIENT: Record<POI['category'], string> = {
@@ -59,8 +152,11 @@ export function PoiCard(props: PoiCardProps) {
 function CompactCard({
   poi,
   family,
+  families,
+  myFamilyId,
   selected,
   onLike,
+  onVote,
   onToggleSelect,
   onHighlight,
   homebase,
@@ -130,6 +226,15 @@ function CompactCard({
             </span>
           )}
         </div>
+        <div className="mt-1">
+          <VoteRow
+            poi={poi}
+            families={families}
+            myFamilyId={myFamilyId}
+            onVote={onVote}
+            size="compact"
+          />
+        </div>
       </div>
 
       <div className="flex flex-shrink-0 items-center gap-1">
@@ -162,10 +267,13 @@ function CompactCard({
 function FullCard({
   poi,
   family,
+  families,
+  myFamilyId,
   selected,
   assignedDays,
   allDays,
   onLike,
+  onVote,
   onToggleSelect,
   onRemove,
   onEdit,
@@ -397,7 +505,16 @@ function FullCard({
           </div>
         )}
 
-        <div className="mt-auto flex items-center justify-between pt-1">
+        <div className="mt-auto pt-1">
+          <VoteRow
+            poi={poi}
+            families={families}
+            myFamilyId={myFamilyId}
+            onVote={onVote}
+          />
+        </div>
+
+        <div className="flex items-center justify-between pt-1">
           <button
             type="button"
             onClick={() => onLike(poi.id)}
