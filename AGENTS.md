@@ -120,6 +120,43 @@ VITE_FIREBASE_WORKSPACE_ID=      # Shared Namespace (z.B. "roma2026"), default: 
 
 ---
 
+## Security
+
+### Claude Code Deny Rules (#115)
+
+`.claude/settings.json` enthält Deny-Permissions damit Claude Code keine Secrets liest und keine destruktiven Git-Operationen ohne Bestätigung ausführt:
+
+- **Read-Deny:** `.env.local`, `.env.*.local`, `.env.production`, `functions/.env*`, `*-credentials.json`, `*.pem`, `*.key`, Service-Account-JSONs
+- **Bash-Deny:** `git commit --no-verify`, `git push --force`, `git push --force-with-lease`
+
+Wenn Claude Code versucht eine dieser Operationen auszuführen, wird die Aktion blockiert und muss manuell freigegeben werden. Neue Secrets/Credentials-Dateinamen ggf. ergänzen.
+
+### Semgrep Pre-Commit Hook (#116)
+
+Via [husky](https://typicode.github.io/husky/) eingerichtet — `npm install` aktiviert die Git-Hooks automatisch (`prepare`-Script).
+
+**Der Hook (`.husky/pre-commit`)** läuft `semgrep --config auto --severity ERROR` über `src/`, die Firestore/Storage Rules und die Cloud Functions. Nur **High/Critical**-Findings blockieren den Commit — niedrigere Severity wird ignoriert um die Friction niedrig zu halten.
+
+**Semgrep einmalig installieren:**
+
+```bash
+brew install semgrep
+# Alternative:
+# pipx install semgrep
+```
+
+**Graceful fallback:** Wenn Semgrep nicht installiert ist, skipped der Hook mit einer Install-Hint-Message (exit 0). Niemand wird durch first-time setup geblockt, aber jeder bekommt die Info dass er installieren soll.
+
+**Manuell ausführen:**
+
+```bash
+semgrep --config auto --severity ERROR src/
+```
+
+**Hook bypassen** (sollte nur ausnahmsweise nötig sein): `git commit --no-verify` — aber das ist in `.claude/settings.json` als deny-rule hinterlegt, Claude Code wird das nicht selbst machen.
+
+---
+
 ## Dev Commands
 
 ```bash

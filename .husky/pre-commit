@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+# Roman Holiday Planner — pre-commit security scan (#116)
+#
+# Runs Semgrep against the source tree with severity=ERROR so only
+# High/Critical findings block the commit. Semgrep is optional — if it
+# is not installed the hook prints an install hint and exits 0, so
+# first-time contributors can commit before setting up their tooling.
+
+if ! command -v semgrep >/dev/null 2>&1; then
+  cat <<'EOF' >&2
+[pre-commit] Semgrep is not installed — skipping security scan.
+           Install once with:  brew install semgrep
+           (Python alternative: pipx install semgrep)
+           See AGENTS.md → Security → Semgrep for details.
+EOF
+  exit 0
+fi
+
+# --config auto      → fetch the standard p/default ruleset
+# --severity ERROR   → only block on High/Critical findings
+# --error            → exit non-zero on any matching finding
+# --quiet            → suppress progress noise, keep commit output clean
+semgrep \
+  --config auto \
+  --severity ERROR \
+  --error \
+  --quiet \
+  src/ firestore.rules storage.rules functions/index.js

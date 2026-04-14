@@ -11,7 +11,8 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist --add",
     "build:beta": "tsc -b && VITE_BASE=/roman-holiday-planner/beta/ vite build",
-    "deploy:beta": "npm run build:beta && gh-pages -d dist --dest beta --add"
+    "deploy:beta": "npm run build:beta && gh-pages -d dist --dest beta --add",
+    "prepare": "husky"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.2",
@@ -35,6 +36,7 @@
     "firebase-tools": "^15.14.0",
     "gh-pages": "^6.3.0",
     "globals": "^17.4.0",
+    "husky": "^9.1.7",
     "playwright": "^1.59.1",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.0",
