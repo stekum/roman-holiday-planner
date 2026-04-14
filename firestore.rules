@@ -2,18 +2,11 @@ rules_version = '2';
 
 // Roman Holiday Planner — Firestore Security Rules
 //
-// ⚠️ MIGRATION PHASE (nach #112)
-// Diese Rules sind intentional noch semi-permissive: Workspace-Zugriff ist
-// erlaubt für JEDEN authentifizierten User (inkl. anonyme Sessions), damit
-// bestehende Prod-Clients beim Rollout des neuen Auth-Codes nicht sofort
-// ausgesperrt werden.
-//
-// Nach der Migration (alle Family-Member haben sich neu mit Google eingeloggt
-// und wurden via ApprovalQueue approved) werden die Workspace-Rules auf
-// `hasAccess()` umgestellt (siehe TODO unten).
-//
-// User-Doc-Rules sind bereits strict — neue User können sich anlegen, nur
-// Admin kann approven/löschen.
+// Modell (nach #112):
+// - Auth via Google Sign-In (anonyme Auth wird nach Prod-Rollout abgeschaltet)
+// - Neue User entstehen als `users/{uid}` mit status='pending'
+// - Admin (stefan.kummert@gmail.com) wird beim Bootstrap als 'approved' angelegt
+// - Workspace-Zugriff nur mit status='approved' (oder Admin)
 //
 // Admin-Email ist hardcoded. Mirrored in src/firebase/adminConfig.ts.
 
@@ -48,13 +41,12 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
-    // Workspace-Hauptdokument
-    // TODO(#112 migration): auf `hasAccess()` umstellen nach Prod-Rollout
+    // Workspace-Hauptdokument + POI-Subkollektion
     match /workspaces/{workspaceId} {
-      allow read, write: if request.auth != null;
+      allow read, write: if hasAccess();
 
       match /pois/{poiId} {
-        allow read, write: if request.auth != null;
+        allow read, write: if hasAccess();
       }
     }
 
