@@ -19,45 +19,49 @@
 
 ---
 
-## Woche 2 — v1.2 Security + Auth + Bugfixes (21.–25. Apr)
+## Woche 2 — v1.2 Security + Auth + Bugfixes
 
-| Issue | Titel | Size | Prio |
+| Issue | Titel | Size | Status |
 |---|---|---|---|
-| #110 | **npm audit fix — Dependency-Vulnerabilities** | S | **high** |
-| #111 | **Firestore Rules — Workspace-Isolation** | M | **high** |
-| #115 | **Claude Code Deny Rules + Sandbox** | S | **high** |
-| #116 | **Semgrep Pre-Commit Hook** | S | **high** |
-| #112 | **Google Sign-In (Firebase Auth)** | M | **high** |
-| #113 | **User-Profil + Workspace-Zuordnung** | M | — |
-| #106 | Homebase-Foto fehlt | S | low |
-| #77 | Seed-POIs entfernen (leerer Trip = leere Liste) | S | — |
-| #5 | Voting / Wunschliste pro POI | M | — |
-| #11 | Walking Time zwischen Stops | S | — |
-| #27 | Quick-Navigate: Google Maps Deep-Link | S | — |
-| #29 | Tagesroute in Google Maps oeffnen | S | — |
+| #110 | ~~npm audit fix — Dependency-Vulnerabilities~~ | S | ✅ |
+| #111 | ~~Firestore Rules — Workspace-Isolation~~ | M | ✅ (via #112) |
+| #112 | ~~Google Sign-In + Admin Approval Workflow~~ | M | ✅ |
+| #139 | ~~Microsoft Sign-In (Azure AD / Entra ID)~~ | S | ✅ |
+| #106 | ~~Homebase-Foto fehlt~~ | S | ✅ |
+| #77 | ~~Seed-POIs entfernen~~ | S | ✅ |
+| #5 | ~~Voting / Wunschliste pro POI~~ | M | ✅ |
+| #11 | ~~Walking Time zwischen Stops~~ | S | ✅ |
+| #27 | ~~Quick-Navigate: Google Maps Deep-Link~~ | S | ✅ |
+| #29 | ~~Tagesroute in Google Maps öffnen~~ | S | ✅ |
+| #121 | ~~Street View Button auf POI-Card~~ | S | ✅ |
+| #115 | **Claude Code Deny Rules + Sandbox** | S | ⏳ offen |
+| #116 | **Semgrep Pre-Commit Hook** | S | ⏳ offen |
+| #113 | ~~User-Profil (Approval-Teil)~~ → Rest auf v3.0 | M | 🟡 teilweise |
 
-**Fokus:** Security-Hardening + Google Auth + restliche v1.0/v1.1 Items.  
-**Release:** `v1.2.0`
+**Status:** Fast komplett — nur noch #115 + #116 (Dev-Security-Tooling) offen.  
+**Release:** `v1.2.0` pending final 2 items.
 
 ---
 
-## Woche 2 — v1.5 AI Features (23.–25. Apr)
+## Woche 2/3 — v1.5 AI Features (23.–25. Apr)
 
 | Issue | Titel | Size | Prio |
 |---|---|---|---|
 | #14 | AI Tages-Briefing (Wetter + Öffnungszeiten + Tipps) | M | high |
-| #42 | AI NL-Suche mit Kontext (Homebase, Kinder, Besuche) | M | — |
+| #42 | AI NL-Suche mit Kontext (Homebase, Kinder, Besuche) — **konsolidiert #13** | M | high |
+| #23 | AI: Kindgerechte Aktivitäten-Vorschläge | M | — |
 | #75 | Generische Kategorien pro Trip | S | — |
 | #76 | AI-Prompt Dynamisierung (Stadt/Land aus Trip-Config) | S | — |
-| #121 | **Street View Button auf POI-Card** | S | — |
-| #123 | **Google Analytics Usage Tracking** | S | — |
+| #123 | Google Analytics Usage Tracking | S | — |
+| #133 | Email-Notification an Admin bei neuer Zugriffsanfrage | S | — |
+| #137 | Architektur-Dokumentation aufsetzen | M | — |
 
-**Fokus:** AI-Features abrunden + Kategorie-System auf Multi-Trip vorbereiten.  
+**Fokus:** AI-Features abrunden + Doku + Infra-Polish.  
 **Release:** `v1.5.0`
 
 ---
 
-## Woche 3 — v2.0 Travel Essentials (28. Apr – 2. Mai)
+## Woche 3 — v2.0 Travel Essentials + Polish (28. Apr – 2. Mai)
 
 | Issue | Titel | Size | Prio |
 |---|---|---|---|
@@ -65,10 +69,12 @@
 | #48 | Budget pro Tag mit Restbudget-Anzeige | S | — |
 | #46 | Packing List (kategorisiert, pro Person) | M | — |
 | #73 | Stadt-Konfiguration (CityConfig statt ROME_CENTER) | M | — |
-| #117 | **Hosting-Migration (weg von GitHub Pages)** | M | — |
-| #122 | **Multi-Language Support (DE + EN)** | L | — |
+| #117 | Hosting-Migration (weg von GitHub Pages) | M | — |
+| #122 | Multi-Language Support (DE + EN) | L | — |
+| #140 | Facebook Sign-In | M | — |
+| #132 | GitHub + Email/Password Sign-In | M | — |
 
-**Fokus:** Reise-Features für den praktischen Einsatz + Multi-Trip Infra beginnen.  
+**Fokus:** Reise-Features für den praktischen Einsatz + Multi-Trip Infra beginnen + Auth-Provider-Komplettierung.  
 **Release:** `v2.0.0`
 
 ---
@@ -116,17 +122,18 @@
 
 | Issue | Titel | Milestone |
 |---|---|---|
-| #13 | NL POI Search via Claude | v1.5 |
+| #13 | ~~NL POI Search via Claude~~ → **konsolidiert in #42** | — |
 | #15 | AI POI Suggestions | v1.5 |
 | #16 | Smarter Instagram-Import | v1.5 |
-| #23 | Kindgerechte Aktivitäten (AI) | v1.5 |
-| #43 | AI: Was wir verpasst haben | v1.5 |
+| #43 | AI: Was wir verpasst haben (Post-Trip) | v1.5 |
 | #47 | Expense Tracker | v2.0 |
 | #49 | Familien-Split | v2.0 |
-| #114 | Weitere Social Providers (Microsoft, GitHub, Apple) | v2.0 |
+| #132 | Auth: GitHub + Email/Password Sign-In | v2.0 |
+| #140 | Auth: Facebook Sign-In | v2.0 |
 | #44 | Notfall-Dashboard | v2.0 |
 | #39 | Reise-Statistik | v2.0 |
 | #40 | GPS-Tracking | v2.0 |
+| #114 | Apple Sign-In (braucht Apple Developer Account $99/Jahr) | v4.0 |
 | #80–#89 | App Stores (Capacitor) | v4.0 |
 
 ---
