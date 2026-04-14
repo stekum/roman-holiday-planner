@@ -1,14 +1,18 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app';
 import {
+  GoogleAuthProvider,
   getAuth,
+  getRedirectResult,
   onAuthStateChanged,
-  signInAnonymously,
+  signInWithPopup,
+  signInWithRedirect,
+  signOut,
   type Auth,
   type User,
 } from 'firebase/auth';
 import {
-  getFirestore,
   enableMultiTabIndexedDbPersistence,
+  getFirestore,
   type Firestore,
 } from 'firebase/firestore';
 
@@ -28,7 +32,6 @@ export const isFirebaseConfigured = !!(
 );
 
 let bundle: FirebaseBundle | null = null;
-let authReadyPromise: Promise<User> | null = null;
 
 export function getFirebase(): FirebaseBundle {
   if (bundle) return bundle;
@@ -45,12 +48,8 @@ export function getFirebase(): FirebaseBundle {
   });
   const db = getFirestore(app);
 
-  // Enable offline persistence — Firestore caches data locally so the
-  // app works without internet and syncs when back online.
   enableMultiTabIndexedDbPersistence(db).catch((err) => {
     console.warn('[Firebase] Offline persistence failed:', err.code);
-    // err.code === 'failed-precondition' → multiple tabs open
-    // err.code === 'unimplemented' → browser doesn't support IndexedDB
   });
 
   bundle = {
@@ -62,34 +61,48 @@ export function getFirebase(): FirebaseBundle {
   return bundle;
 }
 
-/**
- * Ensures there is an anonymous auth session and resolves once we have a user.
- * Safe to call many times — returns the same promise.
- */
-export function ensureAuth(): Promise<User> {
-  if (authReadyPromise) return authReadyPromise;
+/** Subscribe to auth state changes. Returns an unsubscribe function. */
+export function watchAuth(cb: (user: User | null) => void): () => void {
   const { auth } = getFirebase();
-  authReadyPromise = new Promise<User>((resolve, reject) => {
-    const unsub = onAuthStateChanged(
-      auth,
-      (user) => {
-        if (user) {
-          unsub();
-          resolve(user);
-        }
-      },
-      (err) => {
-        unsub();
-        reject(err);
-      },
-    );
-    // Kick off the anonymous sign-in if we're not already signed in
-    if (!auth.currentUser) {
-      signInAnonymously(auth).catch((err) => {
-        unsub();
-        reject(err);
-      });
+  return onAuthStateChanged(auth, cb);
+}
+
+/**
+ * Sign in with Google. Tries popup first (works on desktop + most modern
+ * browsers) and falls back to redirect flow if the popup is blocked or
+ * unavailable (iOS Safari, PWA standalone mode).
+ */
+export async function signInWithGoogle(): Promise<void> {
+  const { auth } = getFirebase();
+  const provider = new GoogleAuthProvider();
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (err) {
+    const code = (err as { code?: string })?.code;
+    const popupBlocked =
+      code === 'auth/popup-blocked' ||
+      code === 'auth/popup-closed-by-user' ||
+      code === 'auth/cancelled-popup-request' ||
+      code === 'auth/operation-not-supported-in-this-environment';
+    if (popupBlocked) {
+      await signInWithRedirect(auth, provider);
+      return;
     }
-  });
-  return authReadyPromise;
+    throw err;
+  }
+}
+
+/** Finalize a pending redirect sign-in (no-op if there is none). */
+export async function consumeRedirectResult(): Promise<void> {
+  const { auth } = getFirebase();
+  try {
+    await getRedirectResult(auth);
+  } catch (err) {
+    console.warn('[Firebase] redirect result failed:', err);
+  }
+}
+
+export async function signOutUser(): Promise<void> {
+  const { auth } = getFirebase();
+  await signOut(auth);
 }

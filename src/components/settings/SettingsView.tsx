@@ -7,6 +7,7 @@ import { DEFAULT_SETTINGS } from '../../settings/defaults';
 import { TripDatesEditor } from './TripDatesEditor';
 import { FamilyEditor } from './FamilyEditor';
 import { HomebaseEditor } from './HomebaseEditor';
+import { ApprovalQueue } from './ApprovalQueue';
 
 interface Props {
   settings: Settings;
@@ -21,6 +22,8 @@ interface Props {
     settings: Settings;
     plan: TripPlan;
   }) => Promise<void>;
+  /** Admin-only: show the approval queue section. */
+  isAdmin: boolean;
 }
 
 function readLocalData(): {
@@ -75,6 +78,7 @@ export function SettingsView({
   onRemoveFamily,
   onSetHomebase,
   onMigrateFromLocal,
+  isAdmin,
 }: Props) {
   const [migrationState, setMigrationState] = useState<
     'idle' | 'uploading' | 'done' | 'error'
@@ -106,6 +110,7 @@ export function SettingsView({
 
   return (
     <div className="mx-auto max-w-2xl space-y-4 px-4 py-5">
+      {isAdmin && <ApprovalQueue />}
       <TripDatesEditor
         tripStart={settings.tripStart}
         tripEnd={settings.tripEnd}

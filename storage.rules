@@ -1,16 +1,20 @@
 rules_version = '2';
 
+// Roman Holiday Planner — Storage Security Rules
+//
+// POI-Fotos sind öffentlich lesbar (via URL in Firestore-POI-Docs eingebettet).
+// Schreiben macht praktisch nur die Cloud Function `persistPoiPhoto` (via
+// Admin SDK, bypasst Rules). Client-Uploads sind aktuell disabled (#91).
+
 service firebase.storage {
   match /b/{bucket}/o {
-    // POI photos: any authenticated user can read/write
     match /poi-photos/{allPaths=**} {
-      allow read: if true;  // Public read — photos are not sensitive
+      allow read: if true;  // Public read — photos sind nicht sensitiv
       allow write: if request.auth != null
-                   && request.resource.size < 5 * 1024 * 1024  // Max 5 MB
+                   && request.resource.size < 5 * 1024 * 1024
                    && request.resource.contentType.matches('image/.*');
     }
 
-    // Block everything else
     match /{allPaths=**} {
       allow read, write: if false;
     }

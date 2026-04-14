@@ -2,29 +2,62 @@ rules_version = '2';
 
 // Roman Holiday Planner — Firestore Security Rules
 //
-// Modell:
-// - Ein Workspace pro Reisegruppe (workspaceId kommt aus VITE_FIREBASE_WORKSPACE_ID).
-// - Jede Person bekommt eine anonyme Firebase-Session (signInAnonymously).
-// - Regel: Wer eingeloggt ist (egal ob anonymous oder nicht) darf Workspaces
-//   lesen und schreiben. Zusätzlicher Schutz: das Passwort-Gate im Client sperrt
-//   die App vor Unbekannten weg, bevor Firebase überhaupt gesprochen wird.
+// ⚠️ MIGRATION PHASE (nach #112)
+// Diese Rules sind intentional noch semi-permissive: Workspace-Zugriff ist
+// erlaubt für JEDEN authentifizierten User (inkl. anonyme Sessions), damit
+// bestehende Prod-Clients beim Rollout des neuen Auth-Codes nicht sofort
+// ausgesperrt werden.
 //
-// Es gibt bewusst KEIN Owner-Model — jeder in der Gruppe darf alles editieren,
-// genau wie in einem gemeinsamen Google-Doc.
+// Nach der Migration (alle Family-Member haben sich neu mit Google eingeloggt
+// und wurden via ApprovalQueue approved) werden die Workspace-Rules auf
+// `hasAccess()` umgestellt (siehe TODO unten).
+//
+// User-Doc-Rules sind bereits strict — neue User können sich anlegen, nur
+// Admin kann approven/löschen.
+//
+// Admin-Email ist hardcoded. Mirrored in src/firebase/adminConfig.ts.
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Workspace-Hauptdokument (settings + tripPlan)
+
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email == 'stefan.kummert@gmail.com';
+    }
+
+    function isApproved() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'approved';
+    }
+
+    function hasAccess() {
+      return isAdmin() || isApproved();
+    }
+
+    // User-Profile — bereits strict
+    match /users/{uid} {
+      allow read: if request.auth != null
+                  && (request.auth.uid == uid || isAdmin());
+      allow create: if request.auth != null
+                    && request.auth.uid == uid
+                    && (
+                      request.resource.data.status == 'pending'
+                      || (isAdmin() && request.resource.data.status == 'approved')
+                    );
+      allow update, delete: if isAdmin();
+    }
+
+    // Workspace-Hauptdokument
+    // TODO(#112 migration): auf `hasAccess()` umstellen nach Prod-Rollout
     match /workspaces/{workspaceId} {
       allow read, write: if request.auth != null;
 
-      // POI-Subkollektion
       match /pois/{poiId} {
         allow read, write: if request.auth != null;
       }
     }
 
-    // Alles andere verbieten
     match /{document=**} {
       allow read, write: if false;
     }
