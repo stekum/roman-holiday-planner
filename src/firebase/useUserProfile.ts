@@ -5,6 +5,7 @@ import {
   onSnapshot,
   serverTimestamp,
   setDoc,
+  updateDoc,
   type FirestoreError,
 } from 'firebase/firestore';
 import { isAdminUser, isPreApprovedEmail } from './adminConfig';
@@ -81,6 +82,22 @@ export function useUserProfile(user: User | null): ProfileState {
         }
 
         const data = snap.data();
+
+        // Self-heal: if the stored doc is missing profile fields but the
+        // Firebase user object has them (race on first sign-in, or the user
+        // re-auths later with a provider that now returns more info), patch
+        // the doc so the Approval-Queue UI can show proper identifiers
+        // instead of "?".
+        const patch: Record<string, unknown> = {};
+        if (user.email && !data.email) patch.email = user.email;
+        if (user.displayName && !data.displayName) patch.displayName = user.displayName;
+        if (user.photoURL && !data.photoURL) patch.photoURL = user.photoURL;
+        if (Object.keys(patch).length > 0) {
+          void updateDoc(ref, patch).catch((err) => {
+            console.warn('[useUserProfile] self-heal failed:', err);
+          });
+        }
+
         setInternal({
           kind: 'ready',
           profile: {
