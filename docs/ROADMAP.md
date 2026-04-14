@@ -37,9 +37,11 @@
 | #115 | **Claude Code Deny Rules + Sandbox** | S | ⏳ offen |
 | #116 | **Semgrep Pre-Commit Hook** | S | ⏳ offen |
 | #113 | ~~User-Profil (Approval-Teil)~~ → Rest auf v3.0 | M | 🟡 teilweise |
+| #115 | ~~Claude Code Deny Rules + Sandbox~~ | S | ✅ |
+| #116 | ~~Semgrep Pre-Commit Hook~~ | S | ✅ |
+| #152 | ~~ApprovalQueue Bug: nur Pending sichtbar + '?' User~~ | S | ✅ (v1.2.1) |
 
-**Status:** Fast komplett — nur noch #115 + #116 (Dev-Security-Tooling) offen.  
-**Release:** `v1.2.0` pending final 2 items.
+**Status:** v1.2 komplett released als `v1.2.0` (14. Apr) + Patch `v1.2.1` (14. Apr, User-Management-Fix).
 
 ---
 
