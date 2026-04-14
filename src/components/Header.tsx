@@ -1,10 +1,13 @@
+import type { User } from 'firebase/auth';
 import { Compass, Route, Settings as SettingsIcon } from 'lucide-react';
+import { UserMenu } from './auth/UserMenu';
 
 export type Tab = 'discover' | 'trip' | 'settings';
 
 interface Props {
   tab: Tab;
   onTabChange: (t: Tab) => void;
+  user: User;
 }
 
 const TABS: { id: Tab; label: string; Icon: typeof Compass; activeClass: string }[] = [
@@ -13,7 +16,7 @@ const TABS: { id: Tab; label: string; Icon: typeof Compass; activeClass: string 
   { id: 'settings', label: 'Settings', Icon: SettingsIcon, activeClass: 'bg-ink text-cream' },
 ];
 
-export function Header({ tab, onTabChange }: Props) {
+export function Header({ tab, onTabChange, user }: Props) {
   return (
     <header className="sticky top-0 z-30 border-b border-cream-dark bg-cream/90 backdrop-blur">
       <div className="mx-auto flex max-w-2xl items-center justify-between gap-2 px-4 py-3">
@@ -28,22 +31,25 @@ export function Header({ tab, onTabChange }: Props) {
             Planner · Autunno
           </p>
         </div>
-        <nav className="flex flex-shrink-0 gap-1 rounded-full bg-white p-1 shadow-sm shadow-ink/5">
-          {TABS.map(({ id, label, Icon, activeClass }) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => onTabChange(id)}
-              className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium transition ${
-                tab === id ? activeClass : 'text-ink/60 hover:text-ink'
-              }`}
-              aria-label={label}
-            >
-              <Icon className="h-4 w-4" />
-              <span className="hidden sm:inline">{label}</span>
-            </button>
-          ))}
-        </nav>
+        <div className="flex items-center gap-2">
+          <nav className="flex flex-shrink-0 gap-1 rounded-full bg-white p-1 shadow-sm shadow-ink/5">
+            {TABS.map(({ id, label, Icon, activeClass }) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => onTabChange(id)}
+                className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium transition ${
+                  tab === id ? activeClass : 'text-ink/60 hover:text-ink'
+                }`}
+                aria-label={label}
+              >
+                <Icon className="h-4 w-4" />
+                <span className="hidden sm:inline">{label}</span>
+              </button>
+            ))}
+          </nav>
+          <UserMenu user={user} />
+        </div>
       </div>
     </header>
   );

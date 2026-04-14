@@ -8,7 +8,7 @@ import {
   updateDoc,
   type Unsubscribe,
 } from 'firebase/firestore';
-import { ensureAuth, getFirebase } from './firebase';
+import { getFirebase } from './firebase';
 import { type POI, SEED_POIS } from '../data/pois';
 import { DEFAULT_SETTINGS } from '../settings/defaults';
 import type { Family, Homebase, Settings } from '../settings/types';
@@ -105,9 +105,9 @@ export function useWorkspace(): WorkspaceAPI {
 
     const run = async () => {
       try {
-        await ensureAuth();
-        if (cancelled) return;
+        // Auth is guaranteed to be ready by AuthGate before this hook mounts.
         const { db, workspaceId } = getFirebase();
+        if (cancelled) return;
         const workspaceRef = doc(db, 'workspaces', workspaceId);
         const poisRef = collection(db, 'workspaces', workspaceId, 'pois');
 

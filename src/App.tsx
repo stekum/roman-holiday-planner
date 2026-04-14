@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { APIProvider, useMapsLibrary } from '@vis.gl/react-google-maps';
 import { Header, type Tab } from './components/Header';
-import { PasswordGate } from './components/PasswordGate';
+import { AuthGate } from './components/auth/AuthGate';
 import { MissingKeyNotice } from './components/MissingKeyNotice';
 import { RomeMap } from './components/map/RomeMap';
 import { PoiList, type ViewMode } from './components/poi/PoiList';
@@ -80,9 +80,16 @@ function FirebaseMissingNotice() {
   );
 }
 
-function AppInner() {
+const ADMIN_EMAIL = 'stefan.kummert@gmail.com';
+
+interface AppInnerProps {
+  user: import('firebase/auth').User;
+}
+
+function AppInner({ user }: AppInnerProps) {
   const apiKey = (import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined)?.trim();
   const hasKey = !!apiKey;
+  const isAdmin = user.email === ADMIN_EMAIL;
 
   const workspace = useWorkspace();
   const {
@@ -260,7 +267,7 @@ function AppInner() {
 
   const content = (
     <div className="flex h-full flex-col">
-      <Header tab={tab} onTabChange={setTab} />
+      <Header tab={tab} onTabChange={setTab} user={user} />
       {connectionBanner}
       {hasKey && (
         <HomebasePhotoSync
@@ -379,6 +386,7 @@ function AppInner() {
               onRemoveFamily={removeFamily}
               onSetHomebase={setHomebase}
               onMigrateFromLocal={workspace.migrateFromLocal}
+              isAdmin={isAdmin}
             />
           )}
         </div>
@@ -437,10 +445,11 @@ function AppInner() {
 }
 
 function App() {
+  if (!isFirebaseConfigured) return <FirebaseMissingNotice />;
   return (
-    <PasswordGate>
-      {isFirebaseConfigured ? <AppInner /> : <FirebaseMissingNotice />}
-    </PasswordGate>
+    <AuthGate>
+      {({ user }) => <AppInner user={user} />}
+    </AuthGate>
   );
 }
 
