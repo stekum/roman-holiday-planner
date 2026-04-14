@@ -1,23 +1,29 @@
 import { useState } from 'react';
 import { Sparkles } from 'lucide-react';
-import { signInWithGoogle } from '../../firebase/firebase';
+import {
+  signInWithGoogle,
+  signInWithMicrosoft,
+} from '../../firebase/firebase';
+
+type Provider = 'google' | 'microsoft';
 
 export function LoginScreen() {
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<Provider | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleGoogle = async () => {
+  const handleSignIn = async (provider: Provider) => {
     if (busy) return;
-    setBusy(true);
+    setBusy(provider);
     setError(null);
     try {
-      await signInWithGoogle();
+      if (provider === 'google') await signInWithGoogle();
+      else await signInWithMicrosoft();
     } catch (err) {
       setError(
         (err as { message?: string })?.message ??
           'Anmeldung fehlgeschlagen. Bitte versuch es erneut.',
       );
-      setBusy(false);
+      setBusy(null);
     }
   };
 
@@ -35,15 +41,27 @@ export function LoginScreen() {
           <Sparkles className="inline h-4 w-4 text-ocker" />
         </p>
 
-        <button
-          type="button"
-          onClick={handleGoogle}
-          disabled={busy}
-          className="flex w-full items-center justify-center gap-3 rounded-2xl border border-cream-dark bg-white px-4 py-3 font-semibold text-ink shadow-sm transition hover:bg-cream disabled:opacity-60"
-        >
-          <GoogleIcon className="h-5 w-5" />
-          {busy ? 'Anmeldung läuft…' : 'Mit Google anmelden'}
-        </button>
+        <div className="space-y-2">
+          <button
+            type="button"
+            onClick={() => void handleSignIn('google')}
+            disabled={!!busy}
+            className="flex w-full items-center justify-center gap-3 rounded-2xl border border-cream-dark bg-white px-4 py-3 font-semibold text-ink shadow-sm transition hover:bg-cream disabled:opacity-60"
+          >
+            <GoogleIcon className="h-5 w-5" />
+            {busy === 'google' ? 'Anmeldung läuft…' : 'Mit Google anmelden'}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => void handleSignIn('microsoft')}
+            disabled={!!busy}
+            className="flex w-full items-center justify-center gap-3 rounded-2xl border border-cream-dark bg-white px-4 py-3 font-semibold text-ink shadow-sm transition hover:bg-cream disabled:opacity-60"
+          >
+            <MicrosoftIcon className="h-5 w-5" />
+            {busy === 'microsoft' ? 'Anmeldung läuft…' : 'Mit Microsoft anmelden'}
+          </button>
+        </div>
 
         {error && (
           <p className="mt-3 text-center text-sm text-terracotta">{error}</p>
@@ -76,6 +94,17 @@ function GoogleIcon({ className }: { className?: string }) {
         fill="#EA4335"
         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"
       />
+    </svg>
+  );
+}
+
+function MicrosoftIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="2" y="2" width="9" height="9" fill="#F25022" />
+      <rect x="13" y="2" width="9" height="9" fill="#7FBA00" />
+      <rect x="2" y="13" width="9" height="9" fill="#00A4EF" />
+      <rect x="13" y="13" width="9" height="9" fill="#FFB900" />
     </svg>
   );
 }

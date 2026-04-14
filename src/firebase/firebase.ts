@@ -1,6 +1,7 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app';
 import {
   GoogleAuthProvider,
+  OAuthProvider,
   getAuth,
   getRedirectResult,
   onAuthStateChanged,
@@ -8,6 +9,7 @@ import {
   signInWithRedirect,
   signOut,
   type Auth,
+  type AuthProvider,
   type User,
 } from 'firebase/auth';
 import {
@@ -68,13 +70,12 @@ export function watchAuth(cb: (user: User | null) => void): () => void {
 }
 
 /**
- * Sign in with Google. Tries popup first (works on desktop + most modern
- * browsers) and falls back to redirect flow if the popup is blocked or
- * unavailable (iOS Safari, PWA standalone mode).
+ * Generic provider sign-in. Tries popup first (works on desktop + most
+ * modern browsers) and falls back to redirect flow if the popup is
+ * blocked or unavailable (iOS Safari, PWA standalone mode).
  */
-export async function signInWithGoogle(): Promise<void> {
+async function signInWithProvider(provider: AuthProvider): Promise<void> {
   const { auth } = getFirebase();
-  const provider = new GoogleAuthProvider();
   try {
     await signInWithPopup(auth, provider);
   } catch (err) {
@@ -90,6 +91,19 @@ export async function signInWithGoogle(): Promise<void> {
     }
     throw err;
   }
+}
+
+export function signInWithGoogle(): Promise<void> {
+  return signInWithProvider(new GoogleAuthProvider());
+}
+
+export function signInWithMicrosoft(): Promise<void> {
+  const provider = new OAuthProvider('microsoft.com');
+  // Request email + basic profile so we get displayName/photoURL.
+  provider.addScope('email');
+  provider.addScope('openid');
+  provider.addScope('profile');
+  return signInWithProvider(provider);
 }
 
 /** Finalize a pending redirect sign-in (no-op if there is none). */
