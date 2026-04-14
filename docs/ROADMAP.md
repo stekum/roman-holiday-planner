@@ -118,6 +118,27 @@
 
 ---
 
+## v4.5 — Go-to-Market (Post-Trip, nach v4.0)
+
+**Status:** Dormant / Planning. Aktivierung nach Abschluss von v4.0 App Stores (Capacitor, Native Plugins, Store-Deployment).
+
+Bündelt alle Issues rund um Monetarisierung, Marketing und professionellen Launch. Siehe [Umbrella Epic #150](https://github.com/stekum/roman-holiday-planner/issues/150) für den Gesamtüberblick.
+
+| Issue | Titel | Size | Kategorie |
+|---|---|---|---|
+| #142 | Business Model & Pricing Strategy | L | Monetization |
+| #143 | Monetization Tech: IAP + Subscriptions | L | Monetization |
+| #148 | Analytics & Unit Economics | M | Monetization |
+| #144 | ASO — App Store Optimization | M | Marketing |
+| #145 | Marketing Website + SEO | L | Marketing |
+| #146 | Launch Campaign Playbook | M | Marketing |
+| #147 | Paid Acquisition Strategy | M | Marketing |
+| #149 | Legal for Monetization | M | Legal |
+
+**Abhängigkeiten:** #80–#89 (App Stores Infra), #89 (Datenschutzerklärung), #123 (Usage Analytics).
+
+---
+
 ## Deferred (nach der Reise)
 
 | Issue | Titel | Milestone |
@@ -135,6 +156,7 @@
 | #40 | GPS-Tracking | v2.0 |
 | #114 | Apple Sign-In (braucht Apple Developer Account $99/Jahr) | v4.0 |
 | #80–#89 | App Stores (Capacitor) | v4.0 |
+| #142-#150 | Go-to-Market (Pricing, Marketing, Launch) | v4.5 |
 
 ---
 
