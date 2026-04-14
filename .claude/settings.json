@@ -3,7 +3,35 @@
     "allow": [
       "WebFetch(domain:www.webfuse.com)",
       "Bash(git commit -m ':*)",
-      "Bash(git tag:*)"
+      "Bash(git tag:*)",
+      "Bash(curl -s https://stekum.github.io/roman-holiday-planner/beta/)",
+      "Bash(curl -s https://stekum.github.io/roman-holiday-planner/beta/assets/index-Bu-0MIFL.js)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d['state'], d['title']\\)\")",
+      "Bash(break)",
+      "Bash(firebase --version)",
+      "Bash(npx firebase-tools:*)",
+      "Bash(git commit -m 'feat\\(#112\\): tighten Firestore rules — workspaces require hasAccess\\(\\):*)",
+      "Bash(git commit -m 'docs: sync ROADMAP.md with current state:*)",
+      "Bash(npx husky:*)",
+      "Bash(chmod +x /Users/stefankummert/Documents/_Roman-Holidays/.husky/pre-commit)",
+      "Bash(semgrep --version)",
+      "Bash(semgrep --config auto --severity ERROR --error src/ firestore.rules storage.rules functions/index.js)"
+    ],
+    "deny": [
+      "Read(./.env.local)",
+      "Read(./.env.*.local)",
+      "Read(./.env)",
+      "Read(./.env.production)",
+      "Read(./functions/.env)",
+      "Read(./functions/.env.*)",
+      "Read(./**/service-account*.json)",
+      "Read(./**/gcp-*.json)",
+      "Read(./**/*-credentials.json)",
+      "Read(./**/*.pem)",
+      "Read(./**/*.key)",
+      "Bash(git commit --no-verify*)",
+      "Bash(git push --force-with-lease*)",
+      "Bash(git push --force*)"
     ],
     "additionalDirectories": [
       "/Users/stefankummert/Documents/_Roman-Holidays"
