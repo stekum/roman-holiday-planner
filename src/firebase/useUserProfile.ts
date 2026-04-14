@@ -7,7 +7,7 @@ import {
   setDoc,
   type FirestoreError,
 } from 'firebase/firestore';
-import { isAdminUser } from './adminConfig';
+import { isAdminUser, isPreApprovedEmail } from './adminConfig';
 import { getFirebase } from './firebase';
 
 export type UserStatus = 'pending' | 'approved' | 'rejected';
@@ -59,10 +59,13 @@ export function useUserProfile(user: User | null): ProfileState {
           if (initialised) return;
           initialised = true;
           try {
-            // Admin is auto-approved on first sign-in so they can bootstrap the
-            // approval queue. All other users start as 'pending' and must be
-            // approved manually.
-            const initialStatus = isAdminUser(user.email) ? 'approved' : 'pending';
+            // Admin and pre-approved emails skip the approval queue — admin
+            // so they can bootstrap it, pre-approved emails so trusted family
+            // members don't have to wait when the admin is offline.
+            const initialStatus =
+              isAdminUser(user.email) || isPreApprovedEmail(user.email)
+                ? 'approved'
+                : 'pending';
             await setDoc(ref, {
               email: user.email,
               displayName: user.displayName,
