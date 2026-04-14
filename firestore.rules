@@ -18,6 +18,16 @@ service cloud.firestore {
         && request.auth.token.email == 'stefan.kummert@gmail.com';
     }
 
+    // Mirrored in src/firebase/adminConfig.ts — PRE_APPROVED_EMAILS.
+    // These users skip the approval queue: they can create their own
+    // users/{uid} doc directly with status='approved'.
+    function isPreApproved() {
+      return request.auth != null
+        && request.auth.token.email in [
+          'sandkumm@gmail.com',
+        ];
+    }
+
     function isApproved() {
       return request.auth != null
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
@@ -37,6 +47,7 @@ service cloud.firestore {
                     && (
                       request.resource.data.status == 'pending'
                       || (isAdmin() && request.resource.data.status == 'approved')
+                      || (isPreApproved() && request.resource.data.status == 'approved')
                     );
       allow update, delete: if isAdmin();
     }
