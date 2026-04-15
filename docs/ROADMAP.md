@@ -49,7 +49,7 @@
 
 | Issue | Titel | Size | Prio |
 |---|---|---|---|
-| #14 | AI Tages-Briefing (Wetter + Öffnungszeiten + Tipps) | M | high |
+| #14 | ~~AI Tages-Briefing (Wetter + Öffnungszeiten + Tipps)~~ | M | ✅ |
 | #42 | AI NL-Suche mit Kontext (Homebase, Kinder, Besuche) — **konsolidiert #13** | M | high |
 | #23 | AI: Kindgerechte Aktivitäten-Vorschläge | M | — |
 | #75 | Generische Kategorien pro Trip | S | — |

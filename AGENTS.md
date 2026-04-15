@@ -218,6 +218,33 @@ gh release create v1.x.y --target main --generate-notes
 - Light-Workflow: direktes Production-Deploy ohne Beta ist ok bei size:S
 - Playwright-Tests laufen über Playwright MCP (nicht Desktop Commander)
 
+### 🚨 HARTE REGEL: Niemals uncommitted deployen
+
+**`npm run build` und `npm run deploy*` arbeiten aus dem Working Tree** — sie kümmern sich nicht darum ob die Dateien committed sind. Das ist ein Fußschuss der Prod stillschweigend regredieren lässt.
+
+**Warum das kritisch ist:**
+1. Du änderst lokal Dateien (ohne commit)
+2. `npm run deploy` baut aus dem Working Tree und pusht das Bundle auf gh-pages
+3. Beta/Prod funktionieren → sieht alles gut aus
+4. **Source-Code existiert nur noch auf deiner Festplatte**
+5. Nächster `npm run deploy` von main (z.B. nach einem anderen Fix) baut aus main (ohne den Code) → Bundle ohne Feature → **Production-Regression ohne Warnung**
+
+**Die Regel:**
+
+> **Bevor `npm run deploy:beta` oder `npm run deploy` ausgeführt wird, MUSS der gesamte Feature-Code committed, gepusht und nach main gemerged sein. `git status` muss clean sein (außer `.claude/settings.json` Noise).**
+
+Konkret vor jedem Deploy:
+
+```bash
+git status                           # muss clean sein (außer settings.json)
+git rev-parse HEAD                   # muss auf main zeigen
+git diff origin/main..HEAD --stat    # muss leer sein (nichts un-pushed)
+```
+
+**Präzedenz:** #14 AI Tages-Briefing (April 2026) wurde gebaut und deployed ohne Commit. Source war nur im Working Tree. Recovery-PR #156 musste den Code retroaktiv in git bringen bevor der nächste Deploy Prod zerschossen hätte.
+
+**Gilt für beide Agents (Claude Code + Codex) gleichermaßen.** Wenn ein Agent nicht selbst committen darf (z.B. Review-Modus), dann auch nicht deployen — sondern warten bis Stefan oder der andere Agent das committet.
+
 ---
 
 ## Code-Konventionen
