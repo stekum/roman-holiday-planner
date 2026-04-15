@@ -28,8 +28,16 @@ interface Props {
   onReorder: (newOrder: string[]) => void;
   /** Full settings for AI planner context. */
   settings: Settings;
+  /** AI-generated briefing text for this day. */
+  dayBriefing: string;
   /** AI-generated day description (overview text). */
   dayDescription: string;
+  /** Whether the AI briefing is currently being generated. */
+  briefingLoading: boolean;
+  /** Visible error message for briefing generation failures. */
+  briefingError?: string | null;
+  /** Trigger a fresh day briefing for the active day. */
+  onGenerateBriefing: () => void;
   /** Callback when AI planner generates POIs + order + overview. */
   onAiAccept: (pois: POI[], order: string[], overview: string) => void;
 }
@@ -49,7 +57,11 @@ export function DayPlanner({
   onClear,
   onReorder,
   settings,
+  dayBriefing,
   dayDescription,
+  briefingLoading,
+  briefingError,
+  onGenerateBriefing,
   onAiAccept,
 }: Props) {
   const routesLib = useMapsLibrary('routes');
@@ -67,6 +79,10 @@ export function DayPlanner({
   const selected = dayOrder
     .map((id) => pois.find((p) => p.id === id))
     .filter(Boolean) as POI[];
+  const canGenerateBriefing = selected.length > 0;
+  const briefingButtonLabel = dayBriefing
+    ? 'Briefing aktualisieren'
+    : 'Briefing erzeugen';
 
   const canOptimize =
     !!routesLib && selected.length >= 3 && selected.every((p) => !!p.coords);
@@ -189,6 +205,21 @@ export function DayPlanner({
               AI Tagesplan
             </button>
           )}
+          {isGeminiConfigured && (
+            <button
+              type="button"
+              onClick={onGenerateBriefing}
+              disabled={!canGenerateBriefing || briefingLoading}
+              className="flex items-center gap-1 rounded-full bg-ocker px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-95 disabled:opacity-60"
+            >
+              {briefingLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
+              {briefingLoading ? 'Erzeuge Briefing…' : briefingButtonLabel}
+            </button>
+          )}
           {canOptimize && (
             <button
               type="button"
@@ -229,12 +260,28 @@ export function DayPlanner({
         </div>
       )}
 
+      {briefingError && (
+        <div className="rounded-2xl bg-terracotta/10 px-4 py-2 text-sm font-semibold text-terracotta">
+          {briefingError}
+        </div>
+      )}
+
       <RouteSummary
         summary={summary}
         stops={selected.length}
         waypoints={selected.flatMap((p) => p.coords ? [p.coords] : [])}
         homebase={settings.homebase?.coords}
       />
+
+      {dayBriefing && (
+        <DayBriefingCard
+          key={activeDay}
+          briefing={dayBriefing}
+          weather={weather[activeDay]}
+          pois={selected}
+          summary={summary}
+        />
+      )}
 
       {dayDescription && (
         <div className="rounded-2xl bg-olive/10 px-4 py-3 text-sm text-olive-dark">
@@ -343,6 +390,106 @@ export function DayPlanner({
         existingPoiNames={pois.filter((p) => p.coords).map((p) => p.title)}
         onAccept={onAiAccept}
       />
+    </div>
+  );
+}
+
+function getWarningChip(
+  weather?: DayWeather,
+  pois?: POI[],
+  summary?: Summary | null,
+) {
+  if (weather && weather.code >= 80) {
+    return `Hinweis: Schauer moeglich`;
+  }
+  if (weather && [51, 53, 55, 61, 63, 65].includes(weather.code)) {
+    return `Hinweis: Regen einplanen`;
+  }
+  if (pois?.some((poi) => !poi.openingHours?.length)) {
+    return 'Hinweis: Zeiten pruefen';
+  }
+  if (summary && summary.durationSeconds >= 2 * 60 * 60) {
+    return 'Hinweis: Langer Tourtag';
+  }
+  return 'Hinweis: Locker geplant';
+}
+
+function getHighlightChip(pois: POI[]) {
+  const ratedPoi = [...pois]
+    .filter((poi) => poi.rating !== undefined)
+    .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))[0];
+
+  const highlightPoi =
+    ratedPoi ??
+    pois.find((poi) => poi.category === 'Kultur') ??
+    pois[0];
+
+  return highlightPoi ? `Highlight: ${highlightPoi.title}` : null;
+}
+
+function DayBriefingCard({
+  briefing,
+  weather,
+  pois,
+  summary,
+}: {
+  briefing: string;
+  weather?: DayWeather;
+  pois: POI[];
+  summary: Summary | null;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const canCollapse = briefing.length > 320;
+  const chips = [
+    weather
+      ? `${weather.icon} ${weather.label}, ${weather.tempMin}-${weather.tempMax} °C`
+      : null,
+    getWarningChip(weather, pois, summary),
+    getHighlightChip(pois),
+  ].filter(Boolean) as string[];
+
+  return (
+    <div className="rounded-2xl bg-ocker/10 px-4 py-3 text-sm text-ink">
+      <div className="mb-2 flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-ink/50">
+            AI Tages-Briefing
+          </p>
+          <p className="text-xs text-ink/45">
+            Kurzueberblick, Timing-Hinweise und praktische Tipps.
+          </p>
+        </div>
+        {canCollapse && (
+          <button
+            type="button"
+            onClick={() => setExpanded((value) => !value)}
+            className="flex-shrink-0 rounded-full bg-white/80 px-2.5 py-1 text-[11px] font-semibold text-ink/60 shadow-sm transition hover:text-terracotta"
+          >
+            {expanded ? 'Weniger' : 'Mehr lesen'}
+          </button>
+        )}
+      </div>
+      {chips.length > 0 && (
+        <div className="mb-3 flex flex-wrap gap-2">
+          {chips.map((chip) => (
+            <span
+              key={chip}
+              className="max-w-full truncate rounded-full bg-white/80 px-2.5 py-1 text-[11px] font-semibold text-ink/65 shadow-sm"
+              title={chip}
+            >
+              {chip}
+            </span>
+          ))}
+        </div>
+      )}
+      <div className={`relative ${expanded || !canCollapse ? '' : 'max-h-40 overflow-hidden'}`}>
+        <p className="whitespace-pre-line leading-6">
+          {briefing}
+        </p>
+        {!expanded && canCollapse && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-ocker/10 to-transparent" />
+        )}
+      </div>
     </div>
   );
 }

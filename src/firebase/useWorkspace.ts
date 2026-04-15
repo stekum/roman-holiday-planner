@@ -20,6 +20,7 @@ interface WorkspaceDoc {
   settings: Settings;
   tripPlan: TripPlan;
   dayDescriptions: Record<string, string>; // ISO date → AI-generated overview text
+  dayBriefings: Record<string, string>; // ISO date → AI-generated day briefing
 }
 
 export interface WorkspaceAPI {
@@ -60,6 +61,8 @@ export interface WorkspaceAPI {
   setDayOrder: (dayIso: string, order: string[]) => Promise<void>;
   setDayDescription: (dayIso: string, description: string) => Promise<void>;
   getDayDescription: (dayIso: string) => string;
+  setDayBriefing: (dayIso: string, briefing: string) => Promise<void>;
+  getDayBriefing: (dayIso: string) => string;
   clearDay: (dayIso: string) => Promise<void>;
   removePoiFromAll: (poiId: string) => Promise<void>;
 
@@ -96,6 +99,7 @@ export function useWorkspace(): WorkspaceAPI {
     settings: DEFAULT_SETTINGS,
     tripPlan: {},
     dayDescriptions: {},
+    dayBriefings: {},
   });
 
   // --- Subscribe on mount ---
@@ -121,6 +125,8 @@ export function useWorkspace(): WorkspaceAPI {
               await setDoc(workspaceRef, {
                 settings: DEFAULT_SETTINGS,
                 tripPlan: {},
+                dayDescriptions: {},
+                dayBriefings: {},
                 createdAt: Date.now(),
               });
               return;
@@ -130,6 +136,7 @@ export function useWorkspace(): WorkspaceAPI {
               settings: data.settings ?? DEFAULT_SETTINGS,
               tripPlan: data.tripPlan ?? {},
               dayDescriptions: data.dayDescriptions ?? {},
+              dayBriefings: data.dayBriefings ?? {},
             });
             setStatus('ready');
           },
@@ -388,6 +395,20 @@ export function useWorkspace(): WorkspaceAPI {
     [doc_.dayDescriptions],
   );
 
+  const setDayBriefing = useCallback(
+    async (dayIso: string, briefing: string) => {
+      await updateDoc(workspaceDocRef(), {
+        [`dayBriefings.${dayIso}`]: briefing,
+      });
+    },
+    [workspaceDocRef],
+  );
+
+  const getDayBriefing = useCallback(
+    (dayIso: string) => doc_.dayBriefings[dayIso] ?? '',
+    [doc_.dayBriefings],
+  );
+
   const clearDay = useCallback(
     async (dayIso: string) => {
       await updateDoc(workspaceDocRef(), {
@@ -458,6 +479,8 @@ export function useWorkspace(): WorkspaceAPI {
     setDayOrder,
     setDayDescription,
     getDayDescription,
+    setDayBriefing,
+    getDayBriefing,
     clearDay,
     removePoiFromAll,
     migrateFromLocal,

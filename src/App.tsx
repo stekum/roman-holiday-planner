@@ -17,6 +17,7 @@ import { useMyLocation } from './hooks/useMyLocation';
 import { isFirebaseConfigured } from './firebase/firebase';
 import type { POI, Category } from './data/pois';
 import { eachDayInRange } from './lib/dates';
+import { generateDayBriefing } from './lib/aiDayBriefing';
 import type { RouteSummary } from './components/map/RoutePolyline';
 import type { Homebase } from './settings/types';
 import { Loader2, WifiOff } from 'lucide-react';
@@ -117,6 +118,8 @@ function AppInner({ user }: AppInnerProps) {
     setDayOrder,
     setDayDescription,
     getDayDescription,
+    setDayBriefing,
+    getDayBriefing,
     clearDay,
     removePoiFromAll,
   } = workspace;
@@ -167,13 +170,33 @@ function AppInner({ user }: AppInnerProps) {
     [settings.tripStart, settings.tripEnd],
   );
   const [activeDay, setActiveDay] = useState<string>(() => days[0] ?? '');
+  const [briefingLoadingDay, setBriefingLoadingDay] = useState<string | null>(null);
+  const [briefingError, setBriefingError] = useState<{
+    dayIso: string;
+    message: string;
+  } | null>(null);
 
   // fall back to first day if active day falls out of range
   if (days.length > 0 && !days.includes(activeDay)) {
     setActiveDay(days[0]);
   }
 
-  const activeDayOrder = activeDay ? getDay(activeDay) : [];
+  const activeDayOrder = useMemo(
+    () => (activeDay ? getDay(activeDay) : []),
+    [activeDay, getDay],
+  );
+  const activeDayPois = useMemo(
+    () =>
+      activeDayOrder
+        .map((id) => pois.find((p) => p.id === id))
+        .filter(Boolean) as POI[],
+    [activeDayOrder, pois],
+  );
+  const activeDayLabel = useMemo(() => {
+    if (!activeDay) return '';
+    const dayNumber = days.indexOf(activeDay) + 1;
+    return `Tag ${dayNumber} — ${activeDay}`;
+  }, [activeDay, days]);
   const dayCounts: Record<string, number> = {};
   const assignedDaysByPoi: Record<string, string[]> = {};
   for (const d of days) {
@@ -267,6 +290,49 @@ function AppInner({ user }: AppInnerProps) {
     (hb: Homebase) => { void setHomebase(hb); },
     [setHomebase],
   );
+
+  const handleGenerateBriefing = useCallback(() => {
+    if (!activeDay || activeDayPois.length === 0) return;
+
+    const dayIso = activeDay;
+    const dayLabel = activeDayLabel;
+    const weather = weatherByDay[dayIso];
+    const poisForBriefing = activeDayPois;
+
+    setBriefingLoadingDay(dayIso);
+    setBriefingError(null);
+
+    void (async () => {
+      try {
+        const briefing = await generateDayBriefing({
+          dayIso,
+          dayLabel,
+          homebase: settings.homebase,
+          weather,
+          pois: poisForBriefing,
+        });
+        await setDayBriefing(dayIso, briefing);
+      } catch (err) {
+        console.error('[AI Briefing] generation failed:', err);
+        setBriefingError({
+          dayIso,
+          message:
+            err instanceof Error
+              ? err.message
+              : 'AI-Briefing fehlgeschlagen. Bitte erneut versuchen.',
+        });
+      } finally {
+        setBriefingLoadingDay((current) => (current === dayIso ? null : current));
+      }
+    })();
+  }, [
+    activeDay,
+    activeDayLabel,
+    activeDayPois,
+    settings.homebase,
+    setDayBriefing,
+    weatherByDay,
+  ]);
 
   const content = (
     <div className="flex h-full flex-col">
@@ -372,7 +438,11 @@ function AppInner({ user }: AppInnerProps) {
                 if (activeDay) void setDayOrder(activeDay, newOrder);
               }}
               settings={settings}
+              dayBriefing={activeDay ? getDayBriefing(activeDay) : ''}
               dayDescription={activeDay ? getDayDescription(activeDay) : ''}
+              briefingLoading={briefingLoadingDay === activeDay}
+              briefingError={briefingError?.dayIso === activeDay ? briefingError.message : null}
+              onGenerateBriefing={handleGenerateBriefing}
               onAiAccept={(newPois, order, overview) => {
                 for (const poi of newPois) void handleAddPoi(poi);
                 if (activeDay) {
