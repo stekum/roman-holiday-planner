@@ -57,6 +57,7 @@
 | #123 | Google Analytics Usage Tracking | S | — |
 | #133 | Email-Notification an Admin bei neuer Zugriffsanfrage | S | — |
 | #137 | Architektur-Dokumentation aufsetzen | M | — |
+| #154 | Docs: CarPlay/Android Auto Handoff via Deep-Links | S | — |
 
 **Fokus:** AI-Features abrunden + Doku + Infra-Polish.  
 **Release:** `v1.5.0`
@@ -158,6 +159,7 @@ Bündelt alle Issues rund um Monetarisierung, Marketing und professionellen Laun
 | #40 | GPS-Tracking | v2.0 |
 | #114 | Apple Sign-In (braucht Apple Developer Account $99/Jahr) | v4.0 |
 | #80–#89 | App Stores (Capacitor) | v4.0 |
+| #155 | Native CarPlay + Android Auto Itinerary Viewer (depends on Capacitor + CarPlay Entitlement) | v4.0 |
 | #142-#150 | Go-to-Market (Pricing, Marketing, Launch) | v4.5 |
 
 ---
