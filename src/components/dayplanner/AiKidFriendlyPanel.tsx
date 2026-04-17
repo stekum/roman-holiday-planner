@@ -23,6 +23,7 @@ interface EnrichedSuggestion extends AiKidSuggestion {
   photoUrl?: string;
   rating?: number;
   userRatingCount?: number;
+  priceLevel?: number;
   address?: string;
   mapsUrl?: string;
   openingHours?: string[];
@@ -48,6 +49,7 @@ function buildPoiFromSuggestion(
     address: sug.address,
     rating: sug.rating,
     userRatingCount: sug.userRatingCount,
+    priceLevel: sug.priceLevel,
     mapsUrl: sug.mapsUrl,
     openingHours: sug.openingHours,
     aiSummary: sug.aiSummary,
@@ -113,6 +115,7 @@ export function AiKidFriendlyPanel({
             photoUrl: r.photos?.[0]?.getUrl({ maxWidth: 600, maxHeight: 400 }),
             rating: r.rating,
             userRatingCount: r.user_ratings_total,
+            priceLevel: r.price_level,
             address: r.formatted_address ?? r.vicinity ?? undefined,
           };
           if (!enriched.coords) {

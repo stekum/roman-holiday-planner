@@ -12,17 +12,8 @@ import { RouteSummary } from './RouteSummary';
 import { AiDayPlannerModal } from './AiDayPlannerModal';
 import { AiKidFriendlyPanel } from './AiKidFriendlyPanel';
 import { DayBudgetCard } from './DayBudgetCard';
-import { getTripConfig } from '../../settings/tripConfig';
+import { getTripConfig, currencyFromCountry } from '../../settings/tripConfig';
 import type { DayBudget } from '../../firebase/useWorkspace';
-
-function currencyFromCountry(country: string): string {
-  const c = country.toLowerCase().trim();
-  if (['japan', 'japon', 'japanisch'].includes(c)) return '¥';
-  if (['usa', 'us', 'vereinigte staaten', 'united states'].includes(c)) return '$';
-  if (['uk', 'vereinigtes königreich', 'united kingdom'].includes(c)) return '£';
-  if (['schweiz', 'switzerland'].includes(c)) return 'CHF';
-  return '€';
-}
 
 interface Props {
   pois: POI[];

@@ -14,6 +14,8 @@ export interface PlaceResult {
   mapsUrl?: string;
   openingHours?: string[];
   aiSummary?: string;
+  /** Google Places price_level 0-4 (#34). */
+  priceLevel?: number;
 }
 
 interface Props {
@@ -35,6 +37,7 @@ interface SearchResult {
   photoUrl?: string;
   rating?: number;
   userRatingCount?: number;
+  priceLevel?: number;
   icon?: string;
 }
 
@@ -88,6 +91,7 @@ export function PlacesAutocomplete({ onSelect }: Props) {
                 photoUrl: p.photos?.[0]?.getUrl({ maxWidth: 600, maxHeight: 400 }),
                 rating: p.rating,
                 userRatingCount: p.user_ratings_total,
+                priceLevel: p.price_level,
                 icon: p.icon,
               }));
             setResults(mapped);
@@ -125,6 +129,7 @@ export function PlacesAutocomplete({ onSelect }: Props) {
             photoUrl: result.photoUrl,
             rating: result.rating,
             userRatingCount: result.userRatingCount,
+            priceLevel: result.priceLevel,
             mapsUrl,
             openingHours,
             aiSummary: aiSummary ?? undefined,

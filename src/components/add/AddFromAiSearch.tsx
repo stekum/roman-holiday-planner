@@ -23,6 +23,7 @@ interface SearchResult {
   photoUrl?: string;
   rating?: number;
   userRatingCount?: number;
+  priceLevel?: number;
 }
 
 interface Props {
@@ -90,6 +91,7 @@ export function AddFromAiSearch({ families, onCancel, onSave, tripConfig }: Prop
                 photoUrl: p.photos?.[0]?.getUrl({ maxWidth: 600, maxHeight: 400 }),
                 rating: p.rating,
                 userRatingCount: p.user_ratings_total,
+                priceLevel: p.price_level,
               }));
             setResults(mapped);
             if (mapped.length === 0) {
@@ -123,6 +125,7 @@ export function AddFromAiSearch({ families, onCancel, onSave, tripConfig }: Prop
             photoUrl: result.photoUrl,
             rating: result.rating,
             userRatingCount: result.userRatingCount,
+            priceLevel: result.priceLevel,
             mapsUrl: ok ? detail?.url : undefined,
             openingHours: ok ? detail?.opening_hours?.weekday_text : undefined,
             aiSummary: aiSummary ?? undefined,
@@ -148,6 +151,7 @@ export function AddFromAiSearch({ families, onCancel, onSave, tripConfig }: Prop
       address: place.address,
       rating: place.rating,
       userRatingCount: place.userRatingCount,
+      priceLevel: place.priceLevel,
       mapsUrl: place.mapsUrl,
       openingHours: place.openingHours,
       aiSummary: place.aiSummary,

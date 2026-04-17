@@ -38,6 +38,7 @@ export function AddFromSearch({ families, onCancel, onSave }: Props) {
       address: place.address,
       rating: place.rating,
       userRatingCount: place.userRatingCount,
+      priceLevel: place.priceLevel,
       mapsUrl: place.mapsUrl,
       openingHours: place.openingHours,
       aiSummary: place.aiSummary,
