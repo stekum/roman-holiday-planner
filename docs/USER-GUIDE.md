@@ -134,6 +134,16 @@ Alle Methoden bieten: **Familie-Auswahl** (farbige Pill-Buttons) + **Kategorie-A
 
 - Nach KI-Plan-Akzeptierung wird eine Zusammenfassung des Tages angezeigt (vom KI generiert)
 
+### Tagesbudget (💰)
+
+- Pro Tag eigene Budget-Karte mit Wallet-Icon
+- **Budget** und **Ausgegeben** als einfache Zahlenfelder (manuell aktualisierbar)
+- Progress-Bar zeigt Fortschritt: grün → ocker ab 80% → rot wenn überzogen
+- Text: _„€80 übrig (€120 von €200)"_ oder _„€30 über Budget"_
+- Währung wird aus der Trip-Konfiguration abgeleitet (Italien → €, Japan → ¥, USA → $, UK → £, Schweiz → CHF, sonst €)
+- Pro Tag isoliert, Firestore-Sync zwischen allen Geräten
+- Leer lassen → keine Progress-Bar, keine Warnung
+
 ### Kindgerechte Vorschläge (👶)
 
 - Kollabierbarer Bereich unten im Tagesplan: **„Kindgerechte Vorschläge"**

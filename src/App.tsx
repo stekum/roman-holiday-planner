@@ -125,6 +125,8 @@ function AppInner({ user }: AppInnerProps) {
     getDayDescription,
     setDayBriefing,
     getDayBriefing,
+    setDayBudget,
+    getDayBudget,
     clearDay,
     removePoiFromAll,
   } = workspace;
@@ -471,6 +473,8 @@ function AppInner({ user }: AppInnerProps) {
               }}
               myFamilyId={myFamilyId}
               onAddPoi={handleAddPoi}
+              dayBudget={activeDay ? getDayBudget(activeDay) : undefined}
+              onSetDayBudget={(dayIso, b) => void setDayBudget(dayIso, b)}
             />
           )}
           {tab === 'settings' && (

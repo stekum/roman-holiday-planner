@@ -16,11 +16,19 @@ import type { TripPlan } from '../hooks/useTripPlan';
 
 export type ConnectionStatus = 'connecting' | 'ready' | 'error';
 
+export interface DayBudget {
+  /** Tagesbudget (Zielwert). */
+  budget: number;
+  /** Bisher ausgegeben (manuell). */
+  spent: number;
+}
+
 interface WorkspaceDoc {
   settings: Settings;
   tripPlan: TripPlan;
   dayDescriptions: Record<string, string>; // ISO date → AI-generated overview text
   dayBriefings: Record<string, string>; // ISO date → AI-generated day briefing
+  dayBudgets: Record<string, DayBudget>; // ISO date → {budget, spent} (#48)
 }
 
 export interface WorkspaceAPI {
@@ -66,6 +74,8 @@ export interface WorkspaceAPI {
   getDayDescription: (dayIso: string) => string;
   setDayBriefing: (dayIso: string, briefing: string) => Promise<void>;
   getDayBriefing: (dayIso: string) => string;
+  setDayBudget: (dayIso: string, budget: DayBudget) => Promise<void>;
+  getDayBudget: (dayIso: string) => DayBudget | undefined;
   clearDay: (dayIso: string) => Promise<void>;
   removePoiFromAll: (poiId: string) => Promise<void>;
 
@@ -103,6 +113,7 @@ export function useWorkspace(): WorkspaceAPI {
     tripPlan: {},
     dayDescriptions: {},
     dayBriefings: {},
+    dayBudgets: {},
   });
 
   // --- Subscribe on mount ---
@@ -130,6 +141,7 @@ export function useWorkspace(): WorkspaceAPI {
                 tripPlan: {},
                 dayDescriptions: {},
                 dayBriefings: {},
+                dayBudgets: {},
                 createdAt: Date.now(),
               });
               return;
@@ -140,6 +152,7 @@ export function useWorkspace(): WorkspaceAPI {
               tripPlan: data.tripPlan ?? {},
               dayDescriptions: data.dayDescriptions ?? {},
               dayBriefings: data.dayBriefings ?? {},
+              dayBudgets: data.dayBudgets ?? {},
             });
             setStatus('ready');
           },
@@ -449,6 +462,23 @@ export function useWorkspace(): WorkspaceAPI {
     [doc_.dayBriefings],
   );
 
+  const setDayBudget = useCallback(
+    async (dayIso: string, budget: DayBudget) => {
+      await updateDoc(workspaceDocRef(), {
+        [`dayBudgets.${dayIso}`]: {
+          budget: Number.isFinite(budget.budget) ? budget.budget : 0,
+          spent: Number.isFinite(budget.spent) ? budget.spent : 0,
+        },
+      });
+    },
+    [workspaceDocRef],
+  );
+
+  const getDayBudget = useCallback(
+    (dayIso: string) => doc_.dayBudgets[dayIso],
+    [doc_.dayBudgets],
+  );
+
   const clearDay = useCallback(
     async (dayIso: string) => {
       await updateDoc(workspaceDocRef(), {
@@ -524,6 +554,8 @@ export function useWorkspace(): WorkspaceAPI {
     getDayDescription,
     setDayBriefing,
     getDayBriefing,
+    setDayBudget,
+    getDayBudget,
     clearDay,
     removePoiFromAll,
     migrateFromLocal,
