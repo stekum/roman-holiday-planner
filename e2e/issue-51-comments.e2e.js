@@ -35,10 +35,16 @@ async function main() {
     process.exit(1);
   }
 
+  console.log('→ Switching to Grid-Ansicht (pencil buttons only visible there)...');
+  const gridBtn = page.locator('button[aria-label="Grid-Ansicht"]');
+  if (await gridBtn.count()) {
+    await gridBtn.click();
+    await page.waitForTimeout(800);
+  }
+
   console.log('→ Opening first POI via Edit (pencil)...');
-  const editButton = page.locator('button[aria-label*="earbeit"]').first();
-  await editButton.click();
-  await page.waitForTimeout(800);
+  const editButton = page.locator('button[aria-label="Bearbeiten"]').first();
+  await editButton.click({ timeout: 10000 });
   await page.waitForSelector('text=Ort bearbeiten', { timeout: 5000 });
   await page.screenshot({ path: '.playwright-results/issue-51-2-edit-modal.png', fullPage: true });
 
