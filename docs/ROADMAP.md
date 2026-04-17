@@ -67,6 +67,7 @@
 |---|---|---|---|
 | #51 | ~~Kommentare / Notizen pro POI~~ | S | ✅ |
 | #48 | ~~Budget pro Tag mit Restbudget-Anzeige~~ | S | ✅ |
+| #38 | ~~Besuchsstatus pro POI (✅ Besucht / ⏭️ Übersprungen)~~ | S | ✅ |
 | #46 | Packing List (kategorisiert, pro Person) | M | — |
 | #73 | Stadt-Konfiguration (CityConfig statt ROME_CENTER) | M | — |
 | #117 | Hosting-Migration (weg von GitHub Pages) | M | — |
