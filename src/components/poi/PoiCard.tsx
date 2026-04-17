@@ -9,6 +9,7 @@ import {
   MapPin,
   MapPinOff,
   Meh,
+  MessageCircle,
   Navigation,
   Pencil,
   Plus,
@@ -158,6 +159,7 @@ function CompactCard({
   onLike,
   onVote,
   onToggleSelect,
+  onEdit,
   onHighlight,
   homebase,
 }: PoiCardProps) {
@@ -238,6 +240,16 @@ function CompactCard({
       </div>
 
       <div className="flex flex-shrink-0 items-center gap-1">
+        <button
+          type="button"
+          onClick={() => onEdit(poi.id)}
+          className="flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold text-ink/60 hover:bg-cream hover:text-ink disabled:opacity-30"
+          disabled={!(poi.comments && poi.comments.length > 0)}
+          aria-label={`${poi.comments?.length ?? 0} Kommentare`}
+        >
+          <MessageCircle className="h-3.5 w-3.5" />
+          {poi.comments?.length ?? 0}
+        </button>
         <button
           type="button"
           onClick={() => onLike(poi.id)}

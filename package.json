@@ -17,6 +17,7 @@
     "e2e:issue-15": "node e2e/issue-15-ai-suggestions.e2e.js",
     "e2e:issue-23": "node e2e/issue-23-kid-friendly.e2e.js",
     "e2e:issue-75-76": "node e2e/issue-75-76-trip-config.e2e.js",
+    "e2e:issue-51": "node e2e/issue-51-comments.e2e.js",
     "prepare": "husky"
   },
   "dependencies": {

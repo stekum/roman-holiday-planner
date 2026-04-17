@@ -9,7 +9,7 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 import { getFirebase } from './firebase';
-import { type POI, SEED_POIS, type Vote } from '../data/pois';
+import { type POI, SEED_POIS, type Vote, type Comment } from '../data/pois';
 import { DEFAULT_SETTINGS } from '../settings/defaults';
 import type { Family, Homebase, Settings, TripConfig } from '../settings/types';
 import type { TripPlan } from '../hooks/useTripPlan';
@@ -38,6 +38,8 @@ export interface WorkspaceAPI {
   ) => Promise<void>;
   likePoi: (id: string) => Promise<void>;
   votePoi: (id: string, familyId: string, vote: Vote) => Promise<void>;
+  addComment: (poiId: string, familyId: string, text: string) => Promise<void>;
+  removeComment: (poiId: string, commentId: string) => Promise<void>;
   removePoi: (id: string) => Promise<void>;
 
   // Settings
@@ -249,6 +251,34 @@ export function useWorkspace(): WorkspaceAPI {
       });
     },
     [poiDocRef],
+  );
+
+  const addComment = useCallback(
+    async (poiId: string, familyId: string, text: string) => {
+      const trimmed = text.trim();
+      if (!familyId || !trimmed) return;
+      const current = pois.find((p) => p.id === poiId);
+      if (!current) return;
+      const comment: Comment = {
+        id: `c-${Date.now().toString(36)}`,
+        familyId,
+        text: trimmed,
+        createdAt: Date.now(),
+      };
+      const next = [...(current.comments ?? []), comment];
+      await updateDoc(poiDocRef(poiId), { comments: next });
+    },
+    [pois, poiDocRef],
+  );
+
+  const removeComment = useCallback(
+    async (poiId: string, commentId: string) => {
+      const current = pois.find((p) => p.id === poiId);
+      if (!current?.comments) return;
+      const next = current.comments.filter((c) => c.id !== commentId);
+      await updateDoc(poiDocRef(poiId), { comments: next });
+    },
+    [pois, poiDocRef],
   );
 
   const removePoi = useCallback(
@@ -474,6 +504,8 @@ export function useWorkspace(): WorkspaceAPI {
     setLocation,
     likePoi,
     votePoi,
+    addComment,
+    removeComment,
     removePoi,
     settings: doc_.settings,
     setTripDates,

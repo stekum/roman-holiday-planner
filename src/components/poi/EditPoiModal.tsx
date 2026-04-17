@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pencil, X } from 'lucide-react';
+import { MessageCircle, Pencil, Send, Trash2, X } from 'lucide-react';
 import type { Category, POI } from '../../data/pois';
 import { CATEGORIES } from '../../data/pois';
 import type { Family } from '../../settings/types';
@@ -11,9 +11,33 @@ interface Props {
   onCancel: () => void;
   onSave: (patch: Partial<POI>) => void;
   categories?: string[];
+  myFamilyId: string;
+  onAddComment: (poiId: string, familyId: string, text: string) => void;
+  onRemoveComment: (poiId: string, commentId: string) => void;
 }
 
-export function EditPoiModal({ poi, families, onCancel, onSave, categories = CATEGORIES }: Props) {
+function formatCommentTime(ts: number): string {
+  const d = new Date(ts);
+  const today = new Date();
+  const sameDay =
+    d.getFullYear() === today.getFullYear() &&
+    d.getMonth() === today.getMonth() &&
+    d.getDate() === today.getDate();
+  const time = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  if (sameDay) return `heute, ${time}`;
+  return `${d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}, ${time}`;
+}
+
+export function EditPoiModal({
+  poi,
+  families,
+  onCancel,
+  onSave,
+  categories = CATEGORIES,
+  myFamilyId,
+  onAddComment,
+  onRemoveComment,
+}: Props) {
   const [title, setTitle] = useState(poi.title);
   const [familyId, setFamilyId] = useState(poi.familyId);
   const [category, setCategory] = useState<Category>(poi.category);
@@ -166,6 +190,14 @@ export function EditPoiModal({ poi, families, onCancel, onSave, categories = CAT
             </div>
           )}
 
+          <CommentThread
+            poi={poi}
+            families={families}
+            myFamilyId={myFamilyId}
+            onAdd={(text) => onAddComment(poi.id, myFamilyId, text)}
+            onRemove={(commentId) => onRemoveComment(poi.id, commentId)}
+          />
+
           <div className="flex gap-2 pt-2">
             <button
               type="button"
@@ -184,6 +216,113 @@ export function EditPoiModal({ poi, families, onCancel, onSave, categories = CAT
             </button>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function CommentThread({
+  poi,
+  families,
+  myFamilyId,
+  onAdd,
+  onRemove,
+}: {
+  poi: POI;
+  families: Family[];
+  myFamilyId: string;
+  onAdd: (text: string) => void;
+  onRemove: (commentId: string) => void;
+}) {
+  const [text, setText] = useState('');
+  const comments = poi.comments ?? [];
+  const familyById = (id: string) => families.find((f) => f.id === id);
+
+  const submit = () => {
+    if (!myFamilyId || !text.trim()) return;
+    onAdd(text);
+    setText('');
+  };
+
+  return (
+    <div>
+      <div className="mb-2 flex items-center gap-2">
+        <MessageCircle className="h-4 w-4 text-terracotta" />
+        <span className="text-xs font-semibold uppercase tracking-wider text-ink/60">
+          Notizen & Kommentare{comments.length > 0 && ` (${comments.length})`}
+        </span>
+      </div>
+
+      {comments.length === 0 ? (
+        <p className="mb-2 rounded-2xl bg-cream px-3 py-2 text-xs text-ink/50">
+          Noch keine Kommentare. _"War da gestern, Carbonara göttlich, ABER 45 min Wartezeit."_
+        </p>
+      ) : (
+        <ul className="mb-2 space-y-1.5">
+          {comments.map((c) => {
+            const fam = familyById(c.familyId);
+            const isMine = c.familyId === myFamilyId;
+            return (
+              <li
+                key={c.id}
+                className="group flex items-start gap-2 rounded-2xl bg-cream px-3 py-2 text-sm"
+              >
+                <div className="flex flex-1 flex-col">
+                  <div className="flex items-center gap-2 text-xs text-ink/50">
+                    <span
+                      className="inline-block h-2 w-2 rounded-full"
+                      style={{ backgroundColor: fam?.color ?? '#999' }}
+                    />
+                    <span className="font-semibold text-ink/80">{fam?.name ?? 'Unbekannt'}</span>
+                    <span>·</span>
+                    <span>{formatCommentTime(c.createdAt)}</span>
+                  </div>
+                  <div className="mt-0.5 whitespace-pre-wrap text-ink">{c.text}</div>
+                </div>
+                {isMine && (
+                  <button
+                    type="button"
+                    onClick={() => onRemove(c.id)}
+                    className="opacity-0 transition group-hover:opacity-100 rounded-full p-1 text-ink/40 hover:bg-terracotta/20 hover:text-terracotta"
+                    aria-label="Kommentar löschen"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      <div className="flex gap-2">
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+              e.preventDefault();
+              submit();
+            }
+          }}
+          rows={2}
+          placeholder={
+            myFamilyId
+              ? 'Deine Notiz oder Erfahrung… (Cmd+Enter zum Senden)'
+              : 'Setze erst „Meine Familie" in Settings'
+          }
+          disabled={!myFamilyId}
+          className="flex-1 resize-none rounded-2xl border border-cream-dark bg-cream px-3 py-2 text-sm text-ink outline-none focus:border-terracotta focus:bg-white disabled:opacity-50"
+        />
+        <button
+          type="button"
+          onClick={submit}
+          disabled={!myFamilyId || !text.trim()}
+          className="flex items-center gap-1 self-end rounded-2xl bg-terracotta px-3 py-2 text-sm font-semibold text-white transition hover:bg-terracotta-dark disabled:opacity-50"
+        >
+          <Send className="h-4 w-4" />
+          Senden
+        </button>
       </div>
     </div>
   );
