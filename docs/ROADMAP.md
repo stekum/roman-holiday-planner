@@ -54,15 +54,10 @@
 | #23 | ~~AI: Kindgerechte Aktivitäten-Vorschläge~~ | M | ✅ |
 | #75 | ~~Generische Kategorien pro Trip~~ | S | ✅ |
 | #76 | ~~AI-Prompt Dynamisierung (Stadt/Land aus Trip-Config)~~ | S | ✅ |
-| #123 | Google Analytics Usage Tracking | S | — |
-| #133 | Email-Notification an Admin bei neuer Zugriffsanfrage | S | — |
-| #137 | Architektur-Dokumentation aufsetzen | M | — |
-| #154 | Docs: CarPlay/Android Auto Handoff via Deep-Links | S | — |
 | #158 | ~~E2E Test-Auth Scaffolding (Firebase Custom Token → Playwright)~~ | M | ✅ |
 | #15 | ~~AI POI Suggestions basierend auf Favoriten~~ | L | ✅ |
 
-**Fokus:** AI-Features abrunden + Doku + Infra-Polish.  
-**Release:** `v1.5.0`
+**Status:** v1.5.0 released. Die offenen Nicht-AI-Issues (#123/#133/#137/#154) wurden nach v2.0 verschoben — trip-unkritisch + thematisch besser bei Polish.
 
 ---
 
@@ -78,6 +73,10 @@
 | #122 | Multi-Language Support (DE + EN) | L | — |
 | #140 | Facebook Sign-In | M | — |
 | #132 | GitHub + Email/Password Sign-In | M | — |
+| #123 | Google Analytics Usage Tracking (aus v1.5 verschoben) | S | — |
+| #133 | Email-Notification an Admin bei neuer Zugriffsanfrage (aus v1.5) | S | — |
+| #137 | Architektur-Dokumentation aufsetzen (aus v1.5) | M | — |
+| #154 | Docs: CarPlay/Android Auto Handoff via Deep-Links (aus v1.5) | S | — |
 
 **Fokus:** Reise-Features für den praktischen Einsatz + Multi-Trip Infra beginnen + Auth-Provider-Komplettierung.  
 **Release:** `v2.0.0`
