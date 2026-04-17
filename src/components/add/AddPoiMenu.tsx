@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Camera, MapPin, Pencil, Plus, Search, X } from 'lucide-react';
+import { Camera, MapPin, Pencil, Plus, Search, Sparkles, X } from 'lucide-react';
 import type { POI } from '../../data/pois';
 import type { Family } from '../../settings/types';
 import { AddFromSearch } from './AddFromSearch';
+import { AddFromAiSearch } from './AddFromAiSearch';
 import { AddFromMap } from './AddFromMap';
 import { AddManual } from './AddManual';
 import { AddFromInstagram } from './AddFromInstagram';
 
-export type AddMode = null | 'menu' | 'search' | 'map' | 'manual' | 'instagram';
+export type AddMode = null | 'menu' | 'search' | 'ai-search' | 'map' | 'manual' | 'instagram';
 
 interface Props {
   families: Family[];
@@ -34,6 +35,12 @@ const TILES: {
     label: 'Suchen',
     desc: 'Google-Places-Suche',
     Icon: Search,
+  },
+  {
+    id: 'ai-search',
+    label: 'Vibes-Suche',
+    desc: 'Mit KI beschreiben',
+    Icon: Sparkles,
   },
   {
     id: 'map',
@@ -65,7 +72,7 @@ export function AddPoiMenu({
   onClearPicked,
 }: Props) {
   const open = mode !== null;
-  const showSheet = mode === 'menu' || mode === 'search' || mode === 'manual' || mode === 'instagram' || (mode === 'map' && pickedMapCoords !== null);
+  const showSheet = mode === 'menu' || mode === 'search' || mode === 'ai-search' || mode === 'manual' || mode === 'instagram' || (mode === 'map' && pickedMapCoords !== null);
   const [hint, setHint] = useState(false);
 
   // Show hint banner when in map-pick mode with sheet hidden
@@ -126,6 +133,7 @@ export function AddPoiMenu({
               >
                 {mode === 'menu' && 'Ort hinzufügen'}
                 {mode === 'search' && 'Ort suchen'}
+                {mode === 'ai-search' && 'Vibes-Suche'}
                 {mode === 'map' && 'Auf Karte gesetzt'}
                 {mode === 'manual' && 'Manueller Eintrag'}
                 {mode === 'instagram' && 'Instagram-Import'}
@@ -162,6 +170,13 @@ export function AddPoiMenu({
 
             {mode === 'search' && (
               <AddFromSearch
+                families={families}
+                onCancel={close}
+                onSave={handleSave}
+              />
+            )}
+            {mode === 'ai-search' && (
+              <AddFromAiSearch
                 families={families}
                 onCancel={close}
                 onSave={handleSave}

@@ -62,11 +62,12 @@ Die App hat drei Hauptbereiche (Tabs in der oberen Leiste):
 
 ### POIs hinzufügen
 
-**„+"**-Button unten rechts → 4 Methoden:
+**„+"**-Button unten rechts → 5 Methoden:
 
 | Methode | Beschreibung |
 |---|---|
 | **Suchen** | Google Places Textsuche (debounced 350ms, bis 8 Ergebnisse) — findet echte Orte mit Foto, Adresse, Bewertung, Öffnungszeiten |
+| **Vibes-Suche** ✨ | Natürliche Sprache → Gemini übersetzt Vibes + Stadtteil in eine Places-API-Suche. Beispiel: _„Romantisches Restaurant mit Terrasse in Trastevere"_ → zeigt passende Treffer + erkannte Kriterien als Chips |
 | **Auf Karte** | Crosshair-Modus — Karte tippen oder Google POI antippen → Place-Details werden automatisch geladen |
 | **Manuell** | Freitext-Eingabe (Name, Kategorie, Beschreibung) — landet in der Inbox (ohne Koordinaten) |
 | **Instagram** | Instagram-URL einfügen → extrahiert Name + Foto aus og:metadata (via CORS-Proxy: corsproxy.io → allorigins.win → codetabs.com) |

@@ -50,7 +50,7 @@
 | Issue | Titel | Size | Prio |
 |---|---|---|---|
 | #14 | ~~AI Tages-Briefing (Wetter + Öffnungszeiten + Tipps)~~ | M | ✅ |
-| #42 | AI NL-Suche mit Kontext (Homebase, Kinder, Besuche) — **konsolidiert #13** | M | high |
+| #13 | AI NL POI Search (Freitext → Gemini → Places API) | M | high |
 | #23 | AI: Kindgerechte Aktivitäten-Vorschläge | M | — |
 | #75 | Generische Kategorien pro Trip | S | — |
 | #76 | AI-Prompt Dynamisierung (Stadt/Land aus Trip-Config) | S | — |
@@ -146,7 +146,7 @@ Bündelt alle Issues rund um Monetarisierung, Marketing und professionellen Laun
 
 | Issue | Titel | Milestone |
 |---|---|---|
-| #13 | ~~NL POI Search via Claude~~ → **konsolidiert in #42** | — |
+| #42 | ~~AI NL-Suche mit Kontext~~ → **Kontext-Erweiterung, geschlossen als Duplicate von #13** | — |
 | #15 | AI POI Suggestions | v1.5 |
 | #16 | Smarter Instagram-Import | v1.5 |
 | #43 | AI: Was wir verpasst haben (Post-Trip) | v1.5 |
