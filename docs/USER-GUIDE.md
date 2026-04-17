@@ -86,6 +86,15 @@ Alle Methoden bieten: **Familie-Auswahl** (farbige Pill-Buttons) + **Kategorie-A
 - Änderbar: Titel, Kategorie, Familie, Beschreibung
 - Google Places-Daten (Foto, Adresse, Bewertung) werden nicht überschrieben
 
+### Besuchsstatus (✅ / ⏭️)
+
+- Auf jeder POI-Card ein **Visit-Status-Button** mit Zyklus-Verhalten
+- **1. Klick:** Offen → ✅ **Besucht** (olive-grün)
+- **2. Klick:** Besucht → ⏭️ **Übersprungen** (gedämpft)
+- **3. Klick:** zurück auf Offen
+- Am Ende der Reise siehst du auf einen Blick was geschafft wurde und was für nächstes Mal bleibt
+- Sync zwischen allen Geräten via Firestore
+
 ### Kommentare / Notizen pro POI (💬)
 
 - Auf jeder POI-Card ein **💬-Badge mit Zähler** (grau + disabled wenn keine Kommentare)

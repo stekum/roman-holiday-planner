@@ -19,6 +19,7 @@
     "e2e:issue-75-76": "node e2e/issue-75-76-trip-config.e2e.js",
     "e2e:issue-51": "node e2e/issue-51-comments.e2e.js",
     "e2e:issue-48": "node e2e/issue-48-budget.e2e.js",
+    "e2e:issue-38": "node e2e/issue-38-visit-status.e2e.js",
     "prepare": "husky"
   },
   "dependencies": {

@@ -107,6 +107,7 @@ function AppInner({ user }: AppInnerProps) {
     votePoi,
     addComment,
     removeComment,
+    setVisitStatus,
     removePoi,
     settings,
     setTripDates,
@@ -438,6 +439,7 @@ function AppInner({ user }: AppInnerProps) {
                 setFilterInbox(false);
               }}
               categories={getTripConfig(settings).categories}
+              onSetVisitStatus={(id, status) => void setVisitStatus(id, status)}
             />
             </>
           )}

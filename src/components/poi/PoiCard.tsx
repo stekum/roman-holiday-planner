@@ -2,6 +2,8 @@ import { useState } from 'react';
 import {
   Camera,
   Check,
+  CheckCircle2,
+  Circle,
   Eye,
   ExternalLink,
   Heart,
@@ -13,12 +15,13 @@ import {
   Navigation,
   Pencil,
   Plus,
+  SkipForward,
   Star,
   ThumbsDown,
   ThumbsUp,
   Trash2,
 } from 'lucide-react';
-import type { POI, Vote } from '../../data/pois';
+import type { POI, Vote, VisitStatus } from '../../data/pois';
 import { CATEGORY_EMOJI, countVotes } from '../../data/pois';
 import type { Family, Homebase } from '../../settings/types';
 import { formatDayLabel } from '../../lib/dates';
@@ -46,6 +49,20 @@ export interface PoiCardProps {
   onLocate?: (id: string) => void;
   /** Opens Street View panorama in the shared map container for this POI. */
   onStreetView?: (id: string) => void;
+  /** Cycles visitStatus: undefined → visited → skipped → null (unset). */
+  onSetVisitStatus: (id: string, status: VisitStatus | null) => void;
+}
+
+function nextVisitStatus(current: VisitStatus | undefined): VisitStatus | null {
+  if (current === undefined) return 'visited';
+  if (current === 'visited') return 'skipped';
+  return null; // skipped → unset
+}
+
+function visitStatusLabel(current: VisitStatus | undefined): string {
+  if (current === 'visited') return 'Besucht — zum Überspringen tippen';
+  if (current === 'skipped') return 'Übersprungen — zum Zurücksetzen tippen';
+  return 'Als besucht markieren';
 }
 
 function VoteRow({
@@ -161,6 +178,7 @@ function CompactCard({
   onToggleSelect,
   onEdit,
   onHighlight,
+  onSetVisitStatus,
   homebase,
 }: PoiCardProps) {
   const [imgFailed, setImgFailed] = useState(false);
@@ -252,6 +270,27 @@ function CompactCard({
         </button>
         <button
           type="button"
+          onClick={() => onSetVisitStatus(poi.id, nextVisitStatus(poi.visitStatus))}
+          className={`rounded-full p-1.5 text-xs transition ${
+            poi.visitStatus === 'visited'
+              ? 'bg-olive/15 text-olive-dark hover:bg-olive/25'
+              : poi.visitStatus === 'skipped'
+                ? 'text-ink/40 hover:bg-cream'
+                : 'text-ink/30 hover:bg-cream hover:text-ink/60'
+          }`}
+          aria-label={visitStatusLabel(poi.visitStatus)}
+          title={visitStatusLabel(poi.visitStatus)}
+        >
+          {poi.visitStatus === 'visited' ? (
+            <CheckCircle2 className="h-4 w-4" />
+          ) : poi.visitStatus === 'skipped' ? (
+            <SkipForward className="h-4 w-4" />
+          ) : (
+            <Circle className="h-4 w-4" />
+          )}
+        </button>
+        <button
+          type="button"
           onClick={() => onLike(poi.id)}
           className="flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold text-terracotta hover:bg-terracotta/10"
         >
@@ -291,6 +330,7 @@ function FullCard({
   onEdit,
   onHighlight,
   onSetAsHomebase,
+  onSetVisitStatus,
   homebase,
   onLocate,
   onStreetView,
@@ -527,14 +567,37 @@ function FullCard({
         </div>
 
         <div className="flex items-center justify-between pt-1">
-          <button
-            type="button"
-            onClick={() => onLike(poi.id)}
-            className="flex items-center gap-1.5 rounded-full bg-cream px-3 py-1.5 text-sm font-semibold text-terracotta transition hover:bg-terracotta/10"
-          >
-            <Heart className="h-4 w-4 fill-current" />
-            {poi.likes}
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => onLike(poi.id)}
+              className="flex items-center gap-1.5 rounded-full bg-cream px-3 py-1.5 text-sm font-semibold text-terracotta transition hover:bg-terracotta/10"
+            >
+              <Heart className="h-4 w-4 fill-current" />
+              {poi.likes}
+            </button>
+            <button
+              type="button"
+              onClick={() => onSetVisitStatus(poi.id, nextVisitStatus(poi.visitStatus))}
+              className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-semibold transition ${
+                poi.visitStatus === 'visited'
+                  ? 'bg-olive/15 text-olive-dark hover:bg-olive/25'
+                  : poi.visitStatus === 'skipped'
+                    ? 'bg-cream text-ink/40 hover:bg-cream-dark'
+                    : 'bg-cream text-ink/30 hover:text-ink/60'
+              }`}
+              aria-label={visitStatusLabel(poi.visitStatus)}
+              title={visitStatusLabel(poi.visitStatus)}
+            >
+              {poi.visitStatus === 'visited' ? (
+                <><CheckCircle2 className="h-4 w-4" />Besucht</>
+              ) : poi.visitStatus === 'skipped' ? (
+                <><SkipForward className="h-4 w-4" />Übersprungen</>
+              ) : (
+                <><Circle className="h-4 w-4" />Offen</>
+              )}
+            </button>
+          </div>
           {poi.needsLocation && onLocate ? (
             <button
               type="button"
