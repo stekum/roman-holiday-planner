@@ -462,6 +462,8 @@ function AppInner({ user }: AppInnerProps) {
                   if (overview) void setDayDescription(activeDay, overview);
                 }
               }}
+              myFamilyId={myFamilyId}
+              onAddPoi={handleAddPoi}
             />
           )}
           {tab === 'settings' && (

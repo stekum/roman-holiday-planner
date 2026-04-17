@@ -15,6 +15,7 @@
     "e2e:token": "node scripts/mint-e2e-token.mjs",
     "e2e:issue-13": "node e2e/issue-13-vibes-search.e2e.js",
     "e2e:issue-15": "node e2e/issue-15-ai-suggestions.e2e.js",
+    "e2e:issue-23": "node e2e/issue-23-kid-friendly.e2e.js",
     "prepare": "husky"
   },
   "dependencies": {

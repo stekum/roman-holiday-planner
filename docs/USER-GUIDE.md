@@ -126,6 +126,14 @@ Alle Methoden bieten: **Familie-Auswahl** (farbige Pill-Buttons) + **Kategorie-A
 
 - Nach KI-Plan-Akzeptierung wird eine Zusammenfassung des Tages angezeigt (vom KI generiert)
 
+### Kindgerechte Vorschläge (👶)
+
+- Kollabierbarer Bereich unten im Tagesplan: **„Kindgerechte Vorschläge"**
+- **„Vorschläge finden"** → Gemini analysiert die Stops des aktuellen Tages + Homebase und schlägt 3-4 kindgerechte Orte in der Nähe vor: Spielplätze, Gelaterien, Parks, Kinder-Museen, Brunnen, interaktive Kunst
+- Jede Card zeigt: Foto, **Kind-Tag** (z.B. Spielplatz / Gelateria / Park), Kategorie, Rating, Adresse, Begründung mit **Bezug zu einem Tages-Stop** („nur 5 Gehminuten vom Pantheon")
+- **„Hinzufügen"**-Button legt den POI in der Entdecken-Liste ab (nicht automatisch im Tagesplan — der User fügt ihn manuell via „+ Zum Tag" ein)
+- **„Neue Runde"** lädt frische Vorschläge
+
 ---
 
 ## 3. Settings-Tab
