@@ -58,6 +58,7 @@
 | #133 | Email-Notification an Admin bei neuer Zugriffsanfrage | S | — |
 | #137 | Architektur-Dokumentation aufsetzen | M | — |
 | #154 | Docs: CarPlay/Android Auto Handoff via Deep-Links | S | — |
+| #158 | E2E Test-Auth Scaffolding (Firebase Custom Token → Playwright) | M | high |
 
 **Fokus:** AI-Features abrunden + Doku + Infra-Polish.  
 **Release:** `v1.5.0`

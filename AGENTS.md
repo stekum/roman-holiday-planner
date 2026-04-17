@@ -200,26 +200,39 @@ npm run deploy       # Build + Deploy nach / (Production — nur nach Beta-Valid
 | **Beta** | `https://stekum.github.io/roman-holiday-planner/beta/` | `npm run deploy:beta` | Testen nach jedem Fix |
 | **Production** | `https://stekum.github.io/roman-holiday-planner/` | `npm run deploy` | Stabile Version für alle Nutzer |
 
-### Dev Workflow — zwei Modi
+### Dev Workflow — drei Stufen nach T-Shirt-Size
 
 **Gemeinsame Regel:** Beta → Production. NIEMALS direkt nach Production (sonst out-of-sync).
 
-**Light (size:S, Bugfix):**
+**Lokales Testen ist OPTIONAL** — Stefan kann jederzeit `git pull && npm run dev` laufen lassen, muss aber nicht. Standard-Weg: Agent implementiert → PR → merge → `deploy:beta` → **Agent verifiziert via Playwright auf der Beta-URL** → Stefan testet auf Beta → `deploy` (Prod). Local-Iteration macht vor allem bei size:L Sinn, wenn Deploy-Zyklus bremst.
+
+**size:S — Light (Bugfix, CSS-Tweak, Copy-Change, Dependency-Bump):**
 1. Branch + Implementieren + Build/Lint
 2. PR merge
-3. `deploy:beta` → Stefan testet
-4. Nach Validierung: `deploy` (Production)
-5. Issue → Done (erst nach Stefan-Validierung)
+3. `deploy:beta`
+4. Stefan smoke-testet auf Beta
+5. Nach Validierung: `deploy` (Production)
+6. Issue → Done (erst nach Stefan-Validierung)
 
-**Full (size:M/L, Feature):**
+**size:M — Standard (Feature mit UI-Änderung, neue Lib, neue API-Integration):**
 1. Branch + Implementieren + Build/Lint
-2. Playwright-Test via MCP, Screenshots nach `.playwright-results/`
-3. Manuelles Testscript in `e2e/manual/`
-4. PR merge
-5. `deploy:beta` → Stefan testet auf Beta
-6. Nach Validierung: `deploy` (Production)
-7. USER-GUIDE.md aktualisieren (wenn user-facing)
-8. Issue → Done
+2. Manuelles Testscript in `e2e/manual/<issue>.md`
+3. PR merge
+4. `deploy:beta`
+5. **Playwright-Smoke via MCP auf der Beta-URL** — aktuell **BLOCKIERT** durch Google-Sign-In-Gate (seit #112). Aktivierung sobald [#158 (Test-Auth-Scaffolding)](https://github.com/stekum/roman-holiday-planner/issues/158) erledigt ist.
+   - **Bis dahin:** Playwright-Schritt SKIPPEN, manueller Test durch Stefan auf Beta ist der einzige Smoke-Test
+   - **Nach #158:** `node -e` mit `e2e/auth-helper.js` → `getAuthenticatedPage()`, Screenshots nach `.playwright-results/` (gitignored), Resultat-Report vom Agent
+6. Stefan testet auf Beta
+7. Nach Validierung: `deploy` (Production)
+8. USER-GUIDE.md aktualisieren (wenn user-facing)
+9. Issue → Done
+
+**size:L — Deep Work (Multi-File-Refactor, Auth-Migration, Schema-Change, Daten-Migration):**
+- Wie size:M, plus:
+- Mid-Development-Local-Iteration (schneller als Deploy-Cycle für Debugging)
+- Playwright mit erweiterten Szenarien (Happy + Fehler-Pfade + Edge Cases)
+- Design-Check vor Implementation (kurzer Plan / Architektur-Skizze vor dem Schreiben)
+- ROADMAP + USER-GUIDE Impact meist größer — beide müssen aktualisiert werden
 
 ### Releases
 
@@ -233,8 +246,8 @@ gh release create v1.x.y --target main --generate-notes
 
 - `deploy:beta` nutzt `--add` → ersetzt nur den `beta/`-Ordner, Production bleibt unangetastet
 - `deploy` ersetzt den **gesamten** gh-pages Branch → nur ausführen wenn Beta validiert ist
-- Light-Workflow: direktes Production-Deploy ohne Beta ist ok bei size:S
-- Playwright-Tests laufen über Playwright MCP (nicht Desktop Commander)
+- **KEIN direktes Production-Deploy ohne Beta mehr** (auch nicht bei size:S) — Ausnahme war zu risky
+- Playwright-Tests via `node -e` gegen die Beta-URL (nicht Desktop Commander, nicht localhost)
 
 ### 🚨 HARTE REGEL: Niemals uncommitted deployen
 
