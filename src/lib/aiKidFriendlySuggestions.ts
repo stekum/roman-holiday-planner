@@ -14,8 +14,8 @@
 
 import { getGeminiModel } from './gemini';
 import type { Category, POI } from '../data/pois';
-import { CATEGORIES } from '../data/pois';
-import type { Homebase } from '../settings/types';
+import type { Homebase, TripConfig } from '../settings/types';
+import { DEFAULT_TRIP_CONFIG } from '../settings/tripConfig';
 
 export interface AiKidSuggestion {
   name: string;
@@ -36,12 +36,14 @@ export interface AiKidSuggestionsContext {
   familyNames: string[];
   dayLabel?: string;
   count?: number;
+  tripConfig?: TripConfig;
 }
 
 function buildPrompt(ctx: AiKidSuggestionsContext): string {
   const count = ctx.count ?? 4;
+  const cfg = ctx.tripConfig ?? DEFAULT_TRIP_CONFIG;
   const parts: string[] = [
-    'Du bist ein Rom-Reise-Experte mit Fokus auf Familien mit Kindern.',
+    `Du bist ein ${cfg.city}-Reise-Experte (${cfg.country}) mit Fokus auf Familien mit Kindern. Antworte auf ${cfg.language}.`,
     '',
     `Reisegruppe: ${ctx.familyNames.join(', ') || 'Unbekannt'}.`,
   ];
@@ -67,22 +69,22 @@ function buildPrompt(ctx: AiKidSuggestionsContext): string {
   parts.push(
     '',
     `AUFGABE:`,
-    `Schlage ${count} KINDGERECHTE Orte in Rom vor die sich als Zwischen- oder Zusatzstopp anbieten. Beispiele: Spielplätze, Gelaterien, Parks, Kinder-Museen, interaktive Kunst, Pasta-Kurse für Kinder, Aussichtspunkte die Kinder beeindrucken, Brunnen zum Planschen.`,
+    `Schlage ${count} KINDGERECHTE Orte in ${cfg.city} vor die sich als Zwischen- oder Zusatzstopp anbieten. Beispiele: Spielplätze, Eisdielen, Parks, Kinder-Museen, interaktive Kunst, Aussichtspunkte die Kinder beeindrucken, Brunnen zum Planschen.`,
     '',
     `ANTWORT-FORMAT (strikt JSON, kein Markdown):`,
     `{`,
     `  "suggestions": [`,
     `    {`,
     `      "name": "Exakter Name des Ortes wie auf Google Maps",`,
-    `      "category": "Kultur|Pizza|Gelato|Trattoria|Aperitivo|Instagram|Sonstiges",`,
+    `      "category": "${cfg.categories.join('|')}",`,
     `      "kind": "Spielplatz|Gelateria|Park|Kinder-Museum|Interaktive-Kunst|Aussichtspunkt|Brunnen|Sonstiges",`,
-    `      "reason": "1-2 Sätze auf Deutsch — WARUM kindgerecht + BEZUG zu einem der Stops oben (z.B. 'Nur 5 Gehminuten vom Pantheon', 'Perfekte Gelato-Pause nach dem Kolosseum')"`,
+    `      "reason": "1-2 Sätze auf ${cfg.language} — WARUM kindgerecht + BEZUG zu einem der Stops oben"`,
     `    }`,
     `  ]`,
     `}`,
     '',
     `REGELN:`,
-    `- NUR echte existierende Orte in Rom`,
+    `- NUR echte existierende Orte in ${cfg.city}`,
     `- KEINE Duplikate der Stops oben (${existingTitles.slice(0, 10).join(', ') || '—'})`,
     `- Geografisch nah zu mindestens EINEM der Tages-Stops oder auf dem Weg dazwischen`,
     `- Kindgerecht: sicher, nicht zu lange Wartezeiten, interaktiv oder Ausruh-Gelegenheit`,
@@ -92,9 +94,9 @@ function buildPrompt(ctx: AiKidSuggestionsContext): string {
   return parts.join('\n');
 }
 
-function normalizeCategory(cat: string | undefined): Category {
+function normalizeCategory(cat: string | undefined, allowed: string[]): Category {
   if (!cat) return 'Sonstiges';
-  const match = CATEGORIES.find((c) => c.toLowerCase() === cat.toLowerCase().trim());
+  const match = allowed.find((c) => c.toLowerCase() === cat.toLowerCase().trim());
   return match ?? 'Sonstiges';
 }
 
@@ -125,12 +127,13 @@ export async function generateKidFriendlySuggestions(
     const parsed = JSON.parse(cleanJson) as {
       suggestions?: Array<{ name?: string; category?: string; kind?: string; reason?: string }>;
     };
+    const effectiveCategories = (ctx.tripConfig ?? DEFAULT_TRIP_CONFIG).categories;
     const existingLower = new Set(ctx.dayPois.map((p) => p.title.toLowerCase().trim()));
     const seen = new Set<string>();
     const suggestions: AiKidSuggestion[] = (parsed.suggestions ?? [])
       .map((s) => ({
         name: (s.name ?? '').trim(),
-        category: normalizeCategory(s.category),
+        category: normalizeCategory(s.category, effectiveCategories),
         kind: (s.kind ?? '').trim() || 'Sonstiges',
         reason: (s.reason ?? '').trim(),
       }))

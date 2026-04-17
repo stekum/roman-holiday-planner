@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import { Pencil, X } from 'lucide-react';
 import type { Category, POI } from '../../data/pois';
-import { CATEGORIES, CATEGORY_EMOJI } from '../../data/pois';
+import { CATEGORIES } from '../../data/pois';
 import type { Family } from '../../settings/types';
+import { getCategoryEmoji } from '../../settings/tripConfig';
 
 interface Props {
   poi: POI;
   families: Family[];
   onCancel: () => void;
   onSave: (patch: Partial<POI>) => void;
+  categories?: string[];
 }
 
-export function EditPoiModal({ poi, families, onCancel, onSave }: Props) {
+export function EditPoiModal({ poi, families, onCancel, onSave, categories = CATEGORIES }: Props) {
   const [title, setTitle] = useState(poi.title);
   const [familyId, setFamilyId] = useState(poi.familyId);
   const [category, setCategory] = useState<Category>(poi.category);
@@ -109,7 +111,7 @@ export function EditPoiModal({ poi, families, onCancel, onSave }: Props) {
               Kategorie
             </span>
             <div className="flex flex-wrap gap-2">
-              {CATEGORIES.map((c) => {
+              {categories.map((c) => {
                 const active = c === category;
                 return (
                   <button
@@ -122,7 +124,7 @@ export function EditPoiModal({ poi, families, onCancel, onSave }: Props) {
                         : 'bg-cream text-ink/70 hover:bg-cream-dark'
                     }`}
                   >
-                    {CATEGORY_EMOJI[c]} {c}
+                    {getCategoryEmoji(c)} {c}
                   </button>
                 );
               })}

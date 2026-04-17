@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Camera, MapPin, Pencil, Plus, Search, Sparkles, X } from 'lucide-react';
 import type { POI } from '../../data/pois';
-import type { Family } from '../../settings/types';
+import type { Family, TripConfig } from '../../settings/types';
 import { AddFromSearch } from './AddFromSearch';
 import { AddFromAiSearch } from './AddFromAiSearch';
 import { AddFromMap } from './AddFromMap';
@@ -22,6 +22,8 @@ interface Props {
   setMode: (m: AddMode) => void;
   /** Called when map sub-mode is entered/exited — parent uses this to clear pickedCoords. */
   onClearPicked: () => void;
+  /** Trip-Kontext fuer Vibes-Suche (AddFromAiSearch). */
+  tripConfig?: TripConfig;
 }
 
 const TILES: {
@@ -70,6 +72,7 @@ export function AddPoiMenu({
   mode,
   setMode,
   onClearPicked,
+  tripConfig,
 }: Props) {
   const open = mode !== null;
   const showSheet = mode === 'menu' || mode === 'search' || mode === 'ai-search' || mode === 'manual' || mode === 'instagram' || (mode === 'map' && pickedMapCoords !== null);
@@ -180,6 +183,7 @@ export function AddPoiMenu({
                 families={families}
                 onCancel={close}
                 onSave={handleSave}
+                tripConfig={tripConfig}
               />
             )}
             {mode === 'map' && pickedMapCoords && (

@@ -1,11 +1,10 @@
-export type Category =
-  | 'Kultur'
-  | 'Pizza'
-  | 'Gelato'
-  | 'Trattoria'
-  | 'Aperitivo'
-  | 'Instagram'
-  | 'Sonstiges';
+/**
+ * Kategorie — seit #75 als `string` definiert, damit pro Trip
+ * konfigurierbar (z.B. "Ramen", "Tempel" fuer Tokyo). Die bekannten
+ * Rom-Defaults liefert `CATEGORIES`; Emoji-Lookup mit Fallback via
+ * `src/settings/tripConfig.ts → getCategoryEmoji`.
+ */
+export type Category = string;
 
 export interface POI {
   id: string;
@@ -57,6 +56,14 @@ export function countVotes(votes: POI['votes']): VoteCounts {
   return counts;
 }
 
+/**
+ * Rom-Default-Kategorien. Seit #75 pro Trip ueberschreibbar:
+ * `settings.tripConfig.categories`. Der Rom-Default wird verwendet
+ * wenn kein TripConfig gesetzt ist oder als Fallback.
+ *
+ * Fuer live-Zugriff bitte `getTripConfig(settings).categories` aus
+ * `src/settings/tripConfig.ts` verwenden, nicht diesen Export.
+ */
 export const CATEGORIES: Category[] = [
   'Kultur',
   'Pizza',
@@ -69,7 +76,12 @@ export const CATEGORIES: Category[] = [
 
 export const ROME_CENTER = { lat: 41.8925, lng: 12.4853 };
 
-export const CATEGORY_EMOJI: Record<Category, string> = {
+/**
+ * Emoji-Lookup fuer Rom-Default-Kategorien. Fuer custom-Kategorien
+ * (z.B. Ramen in einem Tokyo-Trip) bitte `getCategoryEmoji` aus
+ * `src/settings/tripConfig.ts` verwenden — das hat Fallback auf 📍.
+ */
+export const CATEGORY_EMOJI: Record<string, string> = {
   Kultur: '🏛️',
   Pizza: '🍕',
   Gelato: '🍨',

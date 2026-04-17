@@ -7,8 +7,9 @@
  */
 
 import { getGeminiModel } from './gemini';
-import type { Homebase } from '../settings/types';
+import type { Homebase, TripConfig } from '../settings/types';
 import type { POI } from '../data/pois';
+import { DEFAULT_TRIP_CONFIG } from '../settings/tripConfig';
 
 export interface AiStop {
   order: number;
@@ -31,9 +32,12 @@ function buildSystemPrompt(context: {
   familyNames: string[];
   dayLabel: string;
   childrenInfo?: string;
+  tripConfig?: TripConfig;
 }): string {
+  const cfg = context.tripConfig ?? DEFAULT_TRIP_CONFIG;
   const parts: string[] = [
-    `Du bist ein lokaler Reiseplaner für Rom, Italien.`,
+    `Du bist ein lokaler Reiseplaner für ${cfg.city}, ${cfg.country}.`,
+    `Antworte auf ${cfg.language}.`,
     `Du erstellst einen Tagesplan für ${context.dayLabel}.`,
     `Die Reisegruppe besteht aus: ${context.familyNames.join(', ')}.`,
   ];
@@ -65,7 +69,7 @@ function buildSystemPrompt(context: {
     `- Plane Pausen ein (Kaffee, Gelato, Mittagessen) — nicht nur Sehenswürdigkeiten.`,
     `- Wenn Kinder dabei sind: kindgerechte Aktivitäten einbauen, nicht zu viel laufen.`,
     `- Gib für jeden Stop eine ungefähre Uhrzeit an.`,
-    `- Nenne echte, existierende Orte in Rom mit korrektem Namen.`,
+    `- Nenne echte, existierende Orte in ${cfg.city} mit korrektem Namen.`,
     ``,
     `ANTWORT-FORMAT (strikt JSON, kein Markdown):`,
     `{`,
@@ -75,7 +79,7 @@ function buildSystemPrompt(context: {
     `      "order": 1,`,
     `      "name": "Exakter Name des Ortes wie auf Google Maps",`,
     `      "description": "Was man dort macht / warum der Ort gut ist",`,
-    `      "category": "Kultur|Pizza|Gelato|Trattoria|Aperitivo|Sonstiges",`,
+    `      "category": "${cfg.categories.join('|')}",`,
     `      "estimatedTime": "10:00–11:30",`,
     `      "reason": "Warum dieser Stop zum Wunsch des Users passt"`,
     `    }`,
@@ -94,6 +98,7 @@ export async function generateDayPlan(
     familyNames: string[];
     dayLabel: string;
     childrenInfo?: string;
+    tripConfig?: TripConfig;
   },
 ): Promise<AiDayPlanResult> {
   const model = getGeminiModel();
@@ -176,9 +181,10 @@ export async function generateDayPlan(
 export function aiStopToPoi(
   stop: AiStop,
   familyId: string,
+  allowedCategories: string[] = DEFAULT_TRIP_CONFIG.categories,
 ): Omit<POI, 'coords' | 'placeId' | 'image' | 'address' | 'rating' | 'userRatingCount' | 'mapsUrl'> {
-  const category = (['Kultur', 'Pizza', 'Gelato', 'Trattoria', 'Aperitivo', 'Sonstiges'] as const)
-    .find((c) => c.toLowerCase() === stop.category?.toLowerCase()) ?? 'Sonstiges';
+  const category =
+    allowedCategories.find((c) => c.toLowerCase() === stop.category?.toLowerCase()) ?? 'Sonstiges';
 
   return {
     id: `ai-${Date.now().toString(36)}-${stop.order}`,

@@ -14,8 +14,8 @@
 
 import { getGeminiModel } from './gemini';
 import type { Category, POI } from '../data/pois';
-import { CATEGORIES } from '../data/pois';
-import type { Homebase } from '../settings/types';
+import type { Homebase, TripConfig } from '../settings/types';
+import { DEFAULT_TRIP_CONFIG } from '../settings/tripConfig';
 
 export interface AiSuggestion {
   name: string;
@@ -33,12 +33,15 @@ export interface AiSuggestionsContext {
   homebase?: Homebase;
   familyNames: string[];
   count?: number;
+  tripConfig?: TripConfig;
 }
 
 function buildPrompt(ctx: AiSuggestionsContext): string {
   const count = ctx.count ?? 5;
+  const cfg = ctx.tripConfig ?? DEFAULT_TRIP_CONFIG;
   const parts: string[] = [
-    'Du bist ein Rom-Reise-Experte. Analysiere die POI-Liste einer Reisegruppe und schlage NEUE Orte vor, die zu deren Geschmacksprofil passen.',
+    `Du bist ein ${cfg.city}-Reise-Experte (${cfg.country}). Antworte auf ${cfg.language}.`,
+    'Analysiere die POI-Liste einer Reisegruppe und schlage NEUE Orte vor, die zu deren Geschmacksprofil passen.',
     '',
     `Reisegruppe: ${ctx.familyNames.join(', ') || 'Unbekannt'}.`,
   ];
@@ -73,23 +76,23 @@ function buildPrompt(ctx: AiSuggestionsContext): string {
   parts.push(
     '',
     `AUFGABE:`,
-    `Schlage ${count} NEUE Orte in Rom vor die zu diesem Profil passen. Die Orte MÜSSEN echt existieren und NICHT bereits in der Liste oben sein.`,
+    `Schlage ${count} NEUE Orte in ${cfg.city} vor die zu diesem Profil passen. Die Orte MÜSSEN echt existieren und NICHT bereits in der Liste oben sein.`,
     '',
     `ANTWORT-FORMAT (strikt JSON, kein Markdown):`,
     `{`,
     `  "suggestions": [`,
     `    {`,
     `      "name": "Exakter Name des Ortes wie auf Google Maps",`,
-    `      "category": "Kultur|Pizza|Gelato|Trattoria|Aperitivo|Instagram|Sonstiges",`,
-    `      "reason": "1-2 Sätze auf Deutsch — warum dieser Ort zum Geschmack der Gruppe passt"`,
+    `      "category": "${cfg.categories.join('|')}",`,
+    `      "reason": "1-2 Sätze auf ${cfg.language} — warum dieser Ort zum Geschmack der Gruppe passt"`,
     `    }`,
     `  ]`,
     `}`,
     '',
     `REGELN:`,
-    `- Nur echte, existierende Orte in Rom (oder Umgebung, wenn es Sinn macht)`,
+    `- Nur echte, existierende Orte in ${cfg.city} (oder Umgebung, wenn es Sinn macht)`,
     `- KEINE Duplikate der bestehenden Liste (${existingNames.slice(0, 20).join(', ') || '—'})`,
-    `- Diversifiziere: wenn die Gruppe viel Trattoria hat, kann 1 Trattoria dabei sein, aber auch andere Kategorien`,
+    `- Diversifiziere die Kategorien — nicht alle aus dem gleichen Typ`,
     `- Geografisch sinnvoll zur Homebase wo möglich`,
     `- Name-Schreibweise wie auf Google Maps, damit Places-Suche sie findet`,
   );
@@ -97,9 +100,9 @@ function buildPrompt(ctx: AiSuggestionsContext): string {
   return parts.join('\n');
 }
 
-function normalizeCategory(cat: string | undefined): Category {
+function normalizeCategory(cat: string | undefined, allowed: string[]): Category {
   if (!cat) return 'Sonstiges';
-  const match = CATEGORIES.find((c) => c.toLowerCase() === cat.toLowerCase().trim());
+  const match = allowed.find((c) => c.toLowerCase() === cat.toLowerCase().trim());
   return match ?? 'Sonstiges';
 }
 
@@ -130,12 +133,13 @@ export async function generateAiSuggestions(
     const parsed = JSON.parse(cleanJson) as {
       suggestions?: Array<{ name?: string; category?: string; reason?: string }>;
     };
+    const effectiveCategories = (ctx.tripConfig ?? DEFAULT_TRIP_CONFIG).categories;
     const existingLower = new Set(ctx.pois.map((p) => p.title.toLowerCase().trim()));
     const seen = new Set<string>();
     const suggestions: AiSuggestion[] = (parsed.suggestions ?? [])
       .map((s) => ({
         name: (s.name ?? '').trim(),
-        category: normalizeCategory(s.category),
+        category: normalizeCategory(s.category, effectiveCategories),
         reason: (s.reason ?? '').trim(),
       }))
       .filter((s) => {

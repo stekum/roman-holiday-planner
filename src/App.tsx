@@ -12,6 +12,7 @@ import { AddPoiMenu, type AddMode } from './components/add/AddPoiMenu';
 import { LocatePoiModal } from './components/inbox/LocatePoiModal';
 import { EditPoiModal } from './components/poi/EditPoiModal';
 import { useWorkspace } from './firebase/useWorkspace';
+import { getTripConfig } from './settings/tripConfig';
 import { useWeather } from './hooks/useWeather';
 import { useMyFamily } from './hooks/useMyFamily';
 import { useMyLocation } from './hooks/useMyLocation';
@@ -112,6 +113,7 @@ function AppInner({ user }: AppInnerProps) {
     removeFamily,
     getFamily,
     setHomebase,
+    setTripConfig,
     plan,
     getDay,
     togglePoi,
@@ -311,6 +313,7 @@ function AppInner({ user }: AppInnerProps) {
           homebase: settings.homebase,
           weather,
           pois: poisForBriefing,
+          tripConfig: getTripConfig(settings),
         });
         await setDayBriefing(dayIso, briefing);
       } catch (err) {
@@ -330,7 +333,7 @@ function AppInner({ user }: AppInnerProps) {
     activeDay,
     activeDayLabel,
     activeDayPois,
-    settings.homebase,
+    settings,
     setDayBriefing,
     weatherByDay,
   ]);
@@ -392,6 +395,7 @@ function AppInner({ user }: AppInnerProps) {
                   families={settings.families}
                   myFamilyId={myFamilyId}
                   onAddPoi={handleAddPoi}
+                  tripConfig={getTripConfig(settings)}
                 />
               </div>
               <PoiList
@@ -429,6 +433,7 @@ function AppInner({ user }: AppInnerProps) {
                 setFilterFamily(null);
                 setFilterInbox(false);
               }}
+              categories={getTripConfig(settings).categories}
             />
             </>
           )}
@@ -474,6 +479,7 @@ function AppInner({ user }: AppInnerProps) {
               onUpdateFamily={updateFamily}
               onRemoveFamily={removeFamily}
               onSetHomebase={setHomebase}
+              onSetTripConfig={(cfg) => void setTripConfig(cfg)}
               onMigrateFromLocal={workspace.migrateFromLocal}
               isAdmin={isAdmin}
               myFamilyId={myFamilyId}
@@ -485,6 +491,7 @@ function AppInner({ user }: AppInnerProps) {
       {tab !== 'settings' && (
         <AddPoiMenu
           families={settings.families}
+          tripConfig={getTripConfig(settings)}
           mode={addMode}
           setMode={(m) => {
             setAddMode(m);
@@ -516,6 +523,7 @@ function AppInner({ user }: AppInnerProps) {
         <EditPoiModal
           poi={editingPoi}
           families={settings.families}
+          categories={getTripConfig(settings).categories}
           onCancel={() => setEditingPoiId(null)}
           onSave={(patch) => {
             updatePoi(editingPoi.id, patch);

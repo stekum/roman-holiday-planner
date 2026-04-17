@@ -11,7 +11,7 @@ import {
 import { getFirebase } from './firebase';
 import { type POI, SEED_POIS, type Vote } from '../data/pois';
 import { DEFAULT_SETTINGS } from '../settings/defaults';
-import type { Family, Homebase, Settings } from '../settings/types';
+import type { Family, Homebase, Settings, TripConfig } from '../settings/types';
 import type { TripPlan } from '../hooks/useTripPlan';
 
 export type ConnectionStatus = 'connecting' | 'ready' | 'error';
@@ -48,6 +48,7 @@ export interface WorkspaceAPI {
   removeFamily: (id: string) => Promise<void>;
   getFamily: (id: string) => Family | undefined;
   setHomebase: (hb: Homebase | undefined) => Promise<void>;
+  setTripConfig: (cfg: TripConfig) => Promise<void>;
 
   // Trip plan
   plan: TripPlan;
@@ -333,6 +334,15 @@ export function useWorkspace(): WorkspaceAPI {
     [doc_.settings, workspaceDocRef],
   );
 
+  const setTripConfig = useCallback(
+    async (cfg: TripConfig) => {
+      await updateDoc(workspaceDocRef(), {
+        'settings.tripConfig': stripUndefined(cfg as unknown as Record<string, unknown>),
+      });
+    },
+    [workspaceDocRef],
+  );
+
   // --- Trip plan operations ---
   const getDay = useCallback(
     (dayIso: string) => doc_.tripPlan[dayIso] ?? [],
@@ -472,6 +482,7 @@ export function useWorkspace(): WorkspaceAPI {
     removeFamily,
     getFamily,
     setHomebase,
+    setTripConfig,
     plan: doc_.tripPlan,
     getDay,
     togglePoi,

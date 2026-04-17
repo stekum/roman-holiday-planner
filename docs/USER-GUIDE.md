@@ -143,6 +143,14 @@ Alle Methoden bieten: **Familie-Auswahl** (farbige Pill-Buttons) + **Kategorie-A
 - **Von / Bis:** Start- und Enddatum der Reise
 - Daraus werden die Tag-Tabs im Reise-Tab berechnet
 
+### Trip-Konfiguration (🌐)
+
+- **Stadt / Land:** Kontext für alle AI-Prompts (Tagesplan, Briefing, Vibes-Suche, Vorschläge). Default: Rom / Italien.
+- **Sprache:** In welcher Sprache die AI antwortet (Deutsch / English / Italienisch / Japanisch / Spanisch / Französisch). Default: Deutsch.
+- **Kategorien:** Liste der POI-Kategorien pro Trip. Default: 7 Rom-Kategorien (Kultur, Pizza, Gelato, Trattoria, Aperitivo, Instagram, Sonstiges). Eigene hinzufügen (z.B. „Ramen", „Tempel", „Sushi") und entfernen via Pill-Editor. Bekannte Kategorien bekommen automatisch ein Emoji, unbekannte einen 📍-Fallback.
+- **„Auf Rom-Default zurücksetzen":** Setzt alles auf die Rom-Werte.
+- Bereitet die App auf v3.0 Multi-Trip vor — aktuell reicht ein Trip pro Workspace, ab v3.0 pro Trip konfigurierbar.
+
 ### Familien
 
 - **Familien hinzufügen/bearbeiten:** Name + Farbe
