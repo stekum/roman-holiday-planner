@@ -52,8 +52,8 @@
 | #14 | ~~AI Tages-Briefing (Wetter + Öffnungszeiten + Tipps)~~ | M | ✅ |
 | #13 | ~~AI NL POI Search (Freitext → Gemini → Places API)~~ | M | ✅ |
 | #23 | ~~AI: Kindgerechte Aktivitäten-Vorschläge~~ | M | ✅ |
-| #75 | Generische Kategorien pro Trip | S | — |
-| #76 | AI-Prompt Dynamisierung (Stadt/Land aus Trip-Config) | S | — |
+| #75 | ~~Generische Kategorien pro Trip~~ | S | ✅ |
+| #76 | ~~AI-Prompt Dynamisierung (Stadt/Land aus Trip-Config)~~ | S | ✅ |
 | #123 | Google Analytics Usage Tracking | S | — |
 | #133 | Email-Notification an Admin bei neuer Zugriffsanfrage | S | — |
 | #137 | Architektur-Dokumentation aufsetzen | M | — |
