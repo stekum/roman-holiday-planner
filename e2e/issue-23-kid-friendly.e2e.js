@@ -31,7 +31,7 @@ async function main() {
   await page.waitForSelector('button[aria-label="Ort hinzufügen"]', { timeout: 30000 });
 
   console.log('→ Switching to Reise-Tab...');
-  await page.click('text=Reise');
+  await page.click('button[aria-label="Reise"]');
   await page.waitForTimeout(1500);
   await page.screenshot({ path: '.playwright-results/issue-23-1-reise-tab.png' });
 
