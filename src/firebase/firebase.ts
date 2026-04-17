@@ -5,6 +5,7 @@ import {
   getAuth,
   getRedirectResult,
   onAuthStateChanged,
+  signInWithCustomToken,
   signInWithPopup,
   signInWithRedirect,
   signOut,
@@ -104,6 +105,18 @@ export function signInWithMicrosoft(): Promise<void> {
   provider.addScope('openid');
   provider.addScope('profile');
   return signInWithProvider(provider);
+}
+
+/**
+ * Sign in with a Firebase Custom Token (E2E tests only).
+ *
+ * The token must be minted server-side via Firebase Admin SDK with a
+ * valid service account. The only supported source is `scripts/mint-e2e-token.mjs`.
+ * Clients cannot mint tokens themselves.
+ */
+export function signInWithE2EToken(token: string): Promise<void> {
+  const { auth } = getFirebase();
+  return signInWithCustomToken(auth, token).then(() => undefined);
 }
 
 /** Finalize a pending redirect sign-in (no-op if there is none). */

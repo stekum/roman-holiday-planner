@@ -29,3 +29,9 @@ dist-ssr
 
 # Playwright test artifacts (local only)
 .playwright-results/
+
+# Firebase Admin SDK service account — NEVER commit
+service-account*.json
+**/service-account*.json
+*-credentials.json
+**/*-credentials.json
