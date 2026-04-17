@@ -20,13 +20,15 @@ async function main() {
   await page.goto(BETA_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForSelector('button[aria-label="Ort hinzufügen"]', { timeout: 30000 });
 
+  console.log('→ Waiting for POIs to load (Firestore sync)...');
+  await page.waitForSelector('article', { timeout: 15000 });
+
   console.log('→ Switching to Grid-Ansicht for clearer priceLevel display...');
   await page.click('button[aria-label="Grid-Ansicht"]');
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(1500);
   await page.screenshot({ path: '.playwright-results/issue-34-1-grid-view.png', fullPage: false });
 
-  // Count POI cards
-  const cardCount = await page.locator('button[aria-label*="Kommentare"]').count();
+  const cardCount = await page.locator('article').count();
   console.log(`POI cards visible: ${cardCount}`);
 
   if (cardCount === 0) {
