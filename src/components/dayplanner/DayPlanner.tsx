@@ -10,6 +10,7 @@ import { isGeminiConfigured } from '../../lib/gemini';
 import { DayTabs } from './DayTabs';
 import { RouteSummary } from './RouteSummary';
 import { AiDayPlannerModal } from './AiDayPlannerModal';
+import { AiKidFriendlyPanel } from './AiKidFriendlyPanel';
 
 interface Props {
   pois: POI[];
@@ -40,6 +41,10 @@ interface Props {
   onGenerateBriefing: () => void;
   /** Callback when AI planner generates POIs + order + overview. */
   onAiAccept: (pois: POI[], order: string[], overview: string) => void;
+  /** My family id — used for kid-friendly suggestions added to workspace. */
+  myFamilyId: string;
+  /** Add a POI to the workspace (from kid-friendly suggestions). */
+  onAddPoi: (poi: POI) => void;
 }
 
 export function DayPlanner({
@@ -63,6 +68,8 @@ export function DayPlanner({
   briefingError,
   onGenerateBriefing,
   onAiAccept,
+  myFamilyId,
+  onAddPoi,
 }: Props) {
   const routesLib = useMapsLibrary('routes');
   const [optimizing, setOptimizing] = useState(false);
@@ -290,6 +297,17 @@ export function DayPlanner({
           </p>
           {dayDescription}
         </div>
+      )}
+
+      {isGeminiConfigured && (
+        <AiKidFriendlyPanel
+          dayPois={selected}
+          dayLabel={activeDay}
+          homebase={settings.homebase}
+          families={settings.families}
+          myFamilyId={myFamilyId}
+          onAddPoi={onAddPoi}
+        />
       )}
 
       {selected.length === 0 ? (
