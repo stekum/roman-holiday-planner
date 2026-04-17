@@ -3,11 +3,11 @@ import { Filter, Grid3x3, List, X } from 'lucide-react';
 import type { POI, Vote } from '../../data/pois';
 import {
   CATEGORIES,
-  CATEGORY_EMOJI,
   countVotes,
   type Category,
 } from '../../data/pois';
 import type { Family, Homebase } from '../../settings/types';
+import { getCategoryEmoji } from '../../settings/tripConfig';
 import { haversineKm } from '../../lib/geo';
 import { InboxBanner } from '../inbox/InboxBanner';
 import { PoiCard, type PoiCardProps } from './PoiCard';
@@ -45,6 +45,8 @@ interface Props {
   onFilterInboxChange: (v: boolean) => void;
   onShowFiltersChange: (v: boolean) => void;
   onClearFilters: () => void;
+  /** Effektive Kategorien fuer den Filter-Picker. Default: CATEGORIES (Rom). */
+  categories?: string[];
 }
 
 const SORT_OPTIONS: { key: SortKey; label: string }[] = [
@@ -84,6 +86,7 @@ export function PoiList({
   onFilterInboxChange,
   onShowFiltersChange,
   onClearFilters,
+  categories = CATEGORIES,
 }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('date');
 
@@ -237,7 +240,7 @@ export function PoiList({
             )}
           </div>
           <div className="flex flex-wrap gap-1.5">
-            {CATEGORIES.map((cat) => {
+            {categories.map((cat) => {
               const active = filterCategory === cat;
               const count = pois.filter((p) => p.category === cat).length;
               if (count === 0) return null;
@@ -252,7 +255,7 @@ export function PoiList({
                       : 'bg-cream text-ink/60 hover:bg-cream-dark'
                   }`}
                 >
-                  {CATEGORY_EMOJI[cat]} {cat} ({count})
+                  {getCategoryEmoji(cat)} {cat} ({count})
                 </button>
               );
             })}

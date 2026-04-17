@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import { Loader2, MapPin, Sparkles, Star } from 'lucide-react';
 import type { POI } from '../../data/pois';
-import type { Family } from '../../settings/types';
+import type { Family, TripConfig } from '../../settings/types';
 import { aiNlSearch } from '../../lib/aiNlSearch';
 import { fetchAiSummary } from '../../lib/placesNewApi';
 import { AddPoiFields, type AddPoiFieldsValue } from './AddPoiFields';
@@ -29,9 +29,10 @@ interface Props {
   families: Family[];
   onCancel: () => void;
   onSave: (poi: POI) => void;
+  tripConfig?: TripConfig;
 }
 
-export function AddFromAiSearch({ families, onCancel, onSave }: Props) {
+export function AddFromAiSearch({ families, onCancel, onSave, tripConfig }: Props) {
   const placesLib = useMapsLibrary('places');
   const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
 
@@ -64,7 +65,7 @@ export function AddFromAiSearch({ families, onCancel, onSave }: Props) {
     setTranslatedQuery('');
     setPlace(null);
     try {
-      const ai = await aiNlSearch(trimmed);
+      const ai = await aiNlSearch(trimmed, tripConfig);
       setCriteria(ai.criteria);
       setTranslatedQuery(ai.placesQuery);
       placesServiceRef.current.textSearch(

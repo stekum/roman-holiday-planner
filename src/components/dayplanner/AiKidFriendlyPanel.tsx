@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import { Baby, ChevronDown, ChevronUp, Loader2, MapPin, Plus, Star } from 'lucide-react';
 import type { Category, POI } from '../../data/pois';
-import { CATEGORY_EMOJI } from '../../data/pois';
-import type { Family, Homebase } from '../../settings/types';
+import type { Family, Homebase, TripConfig } from '../../settings/types';
+import { getCategoryEmoji } from '../../settings/tripConfig';
 import {
   generateKidFriendlySuggestions,
   type AiKidSuggestion,
@@ -62,6 +62,7 @@ interface Props {
   families: Family[];
   myFamilyId: string;
   onAddPoi: (poi: POI) => void;
+  tripConfig?: TripConfig;
 }
 
 type State =
@@ -77,6 +78,7 @@ export function AiKidFriendlyPanel({
   families,
   myFamilyId,
   onAddPoi,
+  tripConfig,
 }: Props) {
   const placesLib = useMapsLibrary('places');
   const serviceRef = useRef<google.maps.places.PlacesService | null>(null);
@@ -152,6 +154,7 @@ export function AiKidFriendlyPanel({
         homebase,
         familyNames,
         dayLabel,
+        tripConfig,
       });
       if (result.suggestions.length === 0) {
         setState({ kind: 'error', message: 'Keine Vorschläge erhalten. Nochmal versuchen?' });
@@ -304,7 +307,7 @@ function SuggestionCard({
   canAdd: boolean;
 }) {
   const { name, category, kind, reason, photoUrl, address, rating, userRatingCount } = suggestion;
-  const emoji = CATEGORY_EMOJI[category as Category] ?? '📍';
+  const emoji = getCategoryEmoji(category as Category);
   return (
     <div className="flex items-start gap-3 rounded-2xl border border-cream-dark bg-white p-3">
       {photoUrl ? (

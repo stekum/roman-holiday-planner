@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import { ChevronDown, ChevronUp, Loader2, MapPin, Plus, Sparkles, Star } from 'lucide-react';
 import type { Category, POI } from '../../data/pois';
-import { CATEGORY_EMOJI } from '../../data/pois';
-import type { Family, Homebase } from '../../settings/types';
+import type { Family, Homebase, TripConfig } from '../../settings/types';
+import { getCategoryEmoji } from '../../settings/tripConfig';
 import { generateAiSuggestions, type AiSuggestion } from '../../lib/aiPoiSuggestions';
 import { fetchAiSummary } from '../../lib/placesNewApi';
 
@@ -59,6 +59,7 @@ interface Props {
   families: Family[];
   myFamilyId: string;
   onAddPoi: (poi: POI) => void;
+  tripConfig?: TripConfig;
 }
 
 type State =
@@ -67,7 +68,7 @@ type State =
   | { kind: 'ready'; items: EnrichedSuggestion[] }
   | { kind: 'error'; message: string };
 
-export function AiSuggestionsPanel({ pois, homebase, families, myFamilyId, onAddPoi }: Props) {
+export function AiSuggestionsPanel({ pois, homebase, families, myFamilyId, onAddPoi, tripConfig }: Props) {
   const placesLib = useMapsLibrary('places');
   const serviceRef = useRef<google.maps.places.PlacesService | null>(null);
   const [state, setState] = useState<State>({ kind: 'idle' });
@@ -138,7 +139,7 @@ export function AiSuggestionsPanel({ pois, homebase, families, myFamilyId, onAdd
     setState({ kind: 'loading' });
     try {
       const familyNames = families.map((f) => f.name);
-      const result = await generateAiSuggestions({ pois, homebase, familyNames });
+      const result = await generateAiSuggestions({ pois, homebase, familyNames, tripConfig });
       if (result.suggestions.length === 0) {
         setState({ kind: 'error', message: 'Keine Vorschläge erhalten. Nochmal versuchen?' });
         return;
@@ -291,7 +292,7 @@ function SuggestionCard({
   canAdd: boolean;
 }) {
   const { name, category, reason, photoUrl, address, rating, userRatingCount } = suggestion;
-  const emoji = CATEGORY_EMOJI[category as Category] ?? '📍';
+  const emoji = getCategoryEmoji(category as Category);
   return (
     <div className="flex items-start gap-3 rounded-2xl border border-cream-dark bg-white p-3">
       {photoUrl ? (

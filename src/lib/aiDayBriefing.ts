@@ -1,6 +1,7 @@
 import { getGeminiModel } from './gemini';
 import type { POI } from '../data/pois';
-import type { Homebase } from '../settings/types';
+import type { Homebase, TripConfig } from '../settings/types';
+import { DEFAULT_TRIP_CONFIG } from '../settings/tripConfig';
 import type { DayWeather } from './weather';
 
 interface DayBriefingContext {
@@ -9,6 +10,7 @@ interface DayBriefingContext {
   homebase?: Homebase;
   weather?: DayWeather;
   pois: POI[];
+  tripConfig?: TripConfig;
 }
 
 function buildPrompt(context: DayBriefingContext): string {
@@ -36,8 +38,10 @@ function buildPrompt(context: DayBriefingContext): string {
     return parts.filter(Boolean).join('\n');
   });
 
+  const cfg = context.tripConfig ?? DEFAULT_TRIP_CONFIG;
   return [
-    'Du bist ein lokaler Reiseassistent fuer eine Rom-Reise.',
+    `Du bist ein lokaler Reiseassistent fuer eine ${cfg.city}-Reise (${cfg.country}).`,
+    `Antworte auf ${cfg.language}.`,
     `Erstelle ein kurzes Tages-Briefing fuer ${context.dayLabel} (${context.dayIso}).`,
     '',
     'KONTEXT:',

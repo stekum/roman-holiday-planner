@@ -1,6 +1,7 @@
 import type { Category } from '../../data/pois';
-import { CATEGORIES, CATEGORY_EMOJI } from '../../data/pois';
+import { CATEGORIES } from '../../data/pois';
 import type { Family } from '../../settings/types';
+import { getCategoryEmoji } from '../../settings/tripConfig';
 
 export interface AddPoiFieldsValue {
   familyId: string;
@@ -12,9 +13,10 @@ interface Props {
   families: Family[];
   value: AddPoiFieldsValue;
   onChange: (v: AddPoiFieldsValue) => void;
+  categories?: string[];
 }
 
-export function AddPoiFields({ families, value, onChange }: Props) {
+export function AddPoiFields({ families, value, onChange, categories = CATEGORIES }: Props) {
   return (
     <div className="space-y-3">
       <div>
@@ -56,7 +58,7 @@ export function AddPoiFields({ families, value, onChange }: Props) {
           Kategorie
         </span>
         <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((c) => {
+          {categories.map((c) => {
             const active = c === value.category;
             return (
               <button
@@ -69,7 +71,7 @@ export function AddPoiFields({ families, value, onChange }: Props) {
                     : 'bg-cream text-ink/70 hover:bg-cream-dark'
                 }`}
               >
-                {CATEGORY_EMOJI[c]} {c}
+                {getCategoryEmoji(c)} {c}
               </button>
             );
           })}

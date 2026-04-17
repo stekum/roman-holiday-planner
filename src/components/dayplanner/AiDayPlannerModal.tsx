@@ -8,6 +8,7 @@ import {
 import { isGeminiConfigured } from '../../lib/gemini';
 import type { POI, Category } from '../../data/pois';
 import type { Settings } from '../../settings/types';
+import { getTripConfig } from '../../settings/tripConfig';
 
 interface Props {
   open: boolean;
@@ -86,6 +87,7 @@ export function AiDayPlannerModal({
         familyNames: settings.families.map((f) => f.name),
         dayLabel,
         childrenInfo: 'Es sind Kinder dabei. Plane kindgerechte Pausen und Aktivitäten ein.',
+        tripConfig: getTripConfig(settings),
       });
       setResult(plan);
     } catch (err) {

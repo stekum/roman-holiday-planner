@@ -11,6 +11,7 @@ import { DayTabs } from './DayTabs';
 import { RouteSummary } from './RouteSummary';
 import { AiDayPlannerModal } from './AiDayPlannerModal';
 import { AiKidFriendlyPanel } from './AiKidFriendlyPanel';
+import { getTripConfig } from '../../settings/tripConfig';
 
 interface Props {
   pois: POI[];
@@ -307,6 +308,7 @@ export function DayPlanner({
           families={settings.families}
           myFamilyId={myFamilyId}
           onAddPoi={onAddPoi}
+          tripConfig={getTripConfig(settings)}
         />
       )}
 
