@@ -12,6 +12,8 @@
     "deploy": "gh-pages -d dist --add",
     "build:beta": "tsc -b && VITE_BASE=/roman-holiday-planner/beta/ vite build",
     "deploy:beta": "npm run build:beta && gh-pages -d dist --dest beta --add",
+    "e2e:token": "node scripts/mint-e2e-token.mjs",
+    "e2e:issue-13": "node e2e/issue-13-vibes-search.e2e.js",
     "prepare": "husky"
   },
   "dependencies": {
@@ -33,6 +35,7 @@
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
+    "firebase-admin": "^13.8.0",
     "firebase-tools": "^15.14.0",
     "gh-pages": "^6.3.0",
     "globals": "^17.4.0",

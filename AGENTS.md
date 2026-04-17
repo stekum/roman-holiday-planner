@@ -219,9 +219,13 @@ npm run deploy       # Build + Deploy nach / (Production — nur nach Beta-Valid
 2. Manuelles Testscript in `e2e/manual/<issue>.md`
 3. PR merge
 4. `deploy:beta`
-5. **Playwright-Smoke via MCP auf der Beta-URL** — aktuell **BLOCKIERT** durch Google-Sign-In-Gate (seit #112). Aktivierung sobald [#158 (Test-Auth-Scaffolding)](https://github.com/stekum/roman-holiday-planner/issues/158) erledigt ist.
-   - **Bis dahin:** Playwright-Schritt SKIPPEN, manueller Test durch Stefan auf Beta ist der einzige Smoke-Test
-   - **Nach #158:** `node -e` mit `e2e/auth-helper.js` → `getAuthenticatedPage()`, Screenshots nach `.playwright-results/` (gitignored), Resultat-Report vom Agent
+5. **Playwright-Smoke auf der Beta-URL** via Test-Auth-Scaffolding (#158):
+   - Einmalige Einrichtung: Service-Account-JSON aus Firebase Console nach `./service-account.json` (gitignored) ODER `GOOGLE_APPLICATION_CREDENTIALS` setzen
+   - Token minten: `npm run e2e:token` (erzeugt `.playwright-results/e2e-token.txt`, läuft 1h)
+   - Test schreiben in `e2e/issue-<N>-<slug>.e2e.js`, Helper verwenden: `require('./auth-helper').getAuthenticatedContext(browser)`
+   - Ausführen: `node e2e/issue-<N>-<slug>.e2e.js` (oder per `npm run e2e:issue-<N>`-Alias)
+   - Screenshots landen in `.playwright-results/` (gitignored)
+   - Agent reportet: "Happy Path grün, N Ergebnisse, Screenshots bei …" oder "Regression → Fix"
 6. Stefan testet auf Beta
 7. Nach Validierung: `deploy` (Production)
 8. USER-GUIDE.md aktualisieren (wenn user-facing)
