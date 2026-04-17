@@ -51,6 +51,8 @@ export interface PoiCardProps {
   onStreetView?: (id: string) => void;
   /** Cycles visitStatus: undefined → visited → skipped → null (unset). */
   onSetVisitStatus: (id: string, status: VisitStatus | null) => void;
+  /** Waehrungssymbol fuer price-level-Badge. Default: €. */
+  currencySymbol?: string;
 }
 
 function nextVisitStatus(current: VisitStatus | undefined): VisitStatus | null {
@@ -63,6 +65,11 @@ function visitStatusLabel(current: VisitStatus | undefined): string {
   if (current === 'visited') return 'Besucht — zum Überspringen tippen';
   if (current === 'skipped') return 'Übersprungen — zum Zurücksetzen tippen';
   return 'Als besucht markieren';
+}
+
+function priceLevelSymbols(priceLevel: number | undefined, symbol: string): string {
+  if (priceLevel === undefined || priceLevel < 1) return '';
+  return symbol.repeat(Math.min(4, priceLevel));
 }
 
 function VoteRow({
@@ -180,6 +187,7 @@ function CompactCard({
   onHighlight,
   onSetVisitStatus,
   homebase,
+  currencySymbol = '€',
 }: PoiCardProps) {
   const [imgFailed, setImgFailed] = useState(false);
   const familyColor = family?.color ?? '#94999d';
@@ -188,6 +196,7 @@ function CompactCard({
     homebase?.coords && poi.coords
       ? haversineKm(homebase.coords, poi.coords)
       : null;
+  const priceBadge = priceLevelSymbols(poi.priceLevel, currencySymbol);
 
   return (
     <article className="flex items-center gap-3 rounded-2xl bg-white p-2 shadow-sm shadow-ink/5 transition hover:shadow-md">
@@ -244,6 +253,9 @@ function CompactCard({
               <Star className="h-2.5 w-2.5 fill-current" />
               {poi.rating.toFixed(1)}
             </span>
+          )}
+          {priceBadge && (
+            <span className="font-semibold text-ink/60">{priceBadge}</span>
           )}
         </div>
         <div className="mt-1">
@@ -334,8 +346,10 @@ function FullCard({
   homebase,
   onLocate,
   onStreetView,
+  currencySymbol = '€',
 }: PoiCardProps) {
   const [imgFailed, setImgFailed] = useState(false);
+  const priceBadge = priceLevelSymbols(poi.priceLevel, currencySymbol);
   const familyName = family?.name ?? 'Unbekannt';
   const familyColor = family?.color ?? '#94999d';
   const distFromHome =
@@ -475,6 +489,9 @@ function FullCard({
                   <span className="text-ink/40">({poi.userRatingCount})</span>
                 )}
               </span>
+            )}
+            {priceBadge && (
+              <span className="font-semibold text-ink/60">{priceBadge}</span>
             )}
             {(() => {
               const status = getOpenStatus(poi.openingHours);

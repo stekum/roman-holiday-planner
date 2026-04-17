@@ -55,3 +55,17 @@ export function getTripConfig(settings: Settings | undefined): TripConfig {
 export function getCategoryEmoji(category: string): string {
   return DEFAULT_CATEGORY_EMOJI[category] ?? '📍';
 }
+
+/**
+ * Leitet das Waehrungssymbol aus dem TripConfig-Land ab.
+ * Nicht perfekt (Griechenland → € ist korrekt, Tuerkei → TRY haben wir noch nicht),
+ * aber deckt die haeufigsten Europa-/Asien-Reise-Targets ab.
+ */
+export function currencyFromCountry(country: string): string {
+  const c = country.toLowerCase().trim();
+  if (['japan', 'japon', 'japanisch'].includes(c)) return '¥';
+  if (['usa', 'us', 'vereinigte staaten', 'united states'].includes(c)) return '$';
+  if (['uk', 'vereinigtes königreich', 'united kingdom', 'england'].includes(c)) return '£';
+  if (['schweiz', 'switzerland'].includes(c)) return 'CHF';
+  return '€';
+}

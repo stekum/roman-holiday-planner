@@ -36,6 +36,8 @@ export interface POI {
   comments?: Comment[];
   /** Besuchsstatus (#38). Default/nicht gesetzt = geplant/offen. */
   visitStatus?: VisitStatus;
+  /** Google Places price_level (#34): 0=free, 1=inexpensive, 2=moderate, 3=expensive, 4=very expensive. */
+  priceLevel?: number;
   createdAt: number;
 }
 

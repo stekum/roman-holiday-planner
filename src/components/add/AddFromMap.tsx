@@ -21,6 +21,7 @@ interface EnrichedPlace {
   address?: string;
   rating?: number;
   userRatingCount?: number;
+  priceLevel?: number;
   photoUrl?: string;
   mapsUrl?: string;
   placeId?: string;
@@ -90,6 +91,7 @@ export function AddFromMap({
             address: place.formatted_address,
             rating: place.rating,
             userRatingCount: place.user_ratings_total,
+            priceLevel: place.price_level,
             photoUrl,
             mapsUrl: place.url,
             placeId: place.place_id,
@@ -144,6 +146,7 @@ export function AddFromMap({
       address: enriched.address,
       rating: enriched.rating,
       userRatingCount: enriched.userRatingCount,
+      priceLevel: enriched.priceLevel,
       mapsUrl: enriched.mapsUrl,
       openingHours: enriched.openingHours,
       placeId: enriched.placeId ?? pickedPlaceId ?? undefined,

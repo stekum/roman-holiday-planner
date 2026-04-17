@@ -48,6 +48,7 @@ interface Props {
   /** Effektive Kategorien fuer den Filter-Picker. Default: CATEGORIES (Rom). */
   categories?: string[];
   onSetVisitStatus: (id: string, status: import('../../data/pois').VisitStatus | null) => void;
+  currencySymbol?: string;
 }
 
 const SORT_OPTIONS: { key: SortKey; label: string }[] = [
@@ -89,6 +90,7 @@ export function PoiList({
   onClearFilters,
   categories = CATEGORIES,
   onSetVisitStatus,
+  currencySymbol,
 }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('date');
 
@@ -158,6 +160,7 @@ export function PoiList({
     homebase,
     onLocate,
     onStreetView,
+    currencySymbol,
   });
 
   return (

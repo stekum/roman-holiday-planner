@@ -86,6 +86,13 @@ Alle Methoden bieten: **Familie-Auswahl** (farbige Pill-Buttons) + **Kategorie-A
 - Änderbar: Titel, Kategorie, Familie, Beschreibung
 - Google Places-Daten (Foto, Adresse, Bewertung) werden nicht überschrieben
 
+### Lokale Währung (€ / ¥ / $ / £ / CHF)
+
+- POI-Cards zeigen ein kleines **Preis-Badge** (z.B. €€€) wenn Google Places einen `price_level` für den Ort liefert (1-4 Symbole für günstig bis sehr teuer)
+- Das Währungssymbol wird automatisch aus dem **Trip-Konfiguration-Land** abgeleitet: Italien → €, Japan → ¥, USA → $, UK → £, Schweiz → CHF, sonst €
+- POIs ohne price_level (z.B. Parks, Sehenswürdigkeiten ohne Eintritt) zeigen kein Badge
+- Auto-Umrechnung via Wechselkurs-API ist **nicht** Teil des MVP — Folge-Issue
+
 ### Besuchsstatus (✅ / ⏭️)
 
 - Auf jeder POI-Card ein **Visit-Status-Button** mit Zyklus-Verhalten
