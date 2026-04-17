@@ -74,6 +74,8 @@ Die App hat drei Hauptbereiche (Tabs in der oberen Leiste):
 
 Alle Methoden bieten: **Familie-Auswahl** (farbige Pill-Buttons) + **Kategorie-Auswahl** (7 Kategorien mit Emoji) + **Notiz** (Freitext).
 
+**AI-Vorschläge (oben im Entdecken-Tab):** Kollabierbarer Bereich 🪄 _„AI-Vorschläge — Basierend auf euren N Orten"_. Bei Klick auf **„Vorschläge generieren"** analysiert Gemini die vorhandene POI-Liste (Kategorien-Verteilung + Homebase) und schlägt 5 passende neue Orte in Rom vor. Jede Card zeigt Foto, Rating, Begründung + **„Hinzufügen"**-Button. „Neue Runde" lädt frische Vorschläge. Bestehende POIs werden automatisch ausgefiltert — keine Duplikate.
+
 **Inbox-System:** Manuell oder per Instagram hinzugefügte POIs haben keine Koordinaten. Sie erscheinen mit 📍-Badge „Ort fehlt" und können über den „Verorten"-Button auf der Karte platziert werden (Google Places Suche → Koordinaten + Details werden übernommen).
 
 **Inbox-Banner:** Erscheint über der Liste wenn POIs ohne Koordinaten existieren: _„N Ort(e) warten auf Verortung"_.
