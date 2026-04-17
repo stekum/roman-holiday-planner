@@ -10,8 +10,8 @@
  * tokens expire after 1 hour.
  *
  * Usage:
- *   const { chromium } = require('playwright');
- *   const { getAuthenticatedContext } = require('./auth-helper');
+ *   import { chromium } from 'playwright';
+ *   import { getAuthenticatedContext } from './auth-helper.js';
  *   const browser = await chromium.launch();
  *   const ctx = await getAuthenticatedContext(browser, { width: 390, height: 844 });
  *   const page = await ctx.newPage();
@@ -19,16 +19,18 @@
  *   // page is signed in as the E2E test user
  */
 
-const { readFileSync, existsSync } = require('node:fs');
-const { resolve } = require('node:path');
+import { readFileSync, existsSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const TOKEN_FILE = resolve(__dirname, '..', '.playwright-results', 'e2e-token.txt');
+const __dirname = dirname(fileURLToPath(import.meta.url));
+export const TOKEN_FILE = resolve(__dirname, '..', '.playwright-results', 'e2e-token.txt');
 
-function loadToken() {
+export function loadToken() {
   if (!existsSync(TOKEN_FILE)) {
     throw new Error(
       `E2E token file not found at ${TOKEN_FILE}. ` +
-        `Run: node scripts/mint-e2e-token.mjs`,
+        `Run: npm run e2e:token`,
     );
   }
   const token = readFileSync(TOKEN_FILE, 'utf8').trim();
@@ -42,7 +44,7 @@ function loadToken() {
  * @param {{ width?: number, height?: number }} [viewport]
  * @returns {Promise<import('playwright').BrowserContext>}
  */
-async function getAuthenticatedContext(browser, viewport) {
+export async function getAuthenticatedContext(browser, viewport) {
   const token = loadToken();
   const ctx = await browser.newContext({
     viewport: viewport || { width: 390, height: 844 },
@@ -52,5 +54,3 @@ async function getAuthenticatedContext(browser, viewport) {
   }, token);
   return ctx;
 }
-
-module.exports = { getAuthenticatedContext, loadToken, TOKEN_FILE };

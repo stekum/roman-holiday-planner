@@ -10,14 +10,14 @@
  *   6. Screenshots at each step into .playwright-results/
  *
  * Prereq:
- *   node scripts/mint-e2e-token.mjs
+ *   npm run e2e:token
  *
  * Run:
- *   node e2e/issue-13-vibes-search.e2e.js
+ *   npm run e2e:issue-13
  */
 
-const { chromium } = require('playwright');
-const { getAuthenticatedContext } = require('./auth-helper');
+import { chromium } from 'playwright';
+import { getAuthenticatedContext } from './auth-helper.js';
 
 const BETA_URL = 'https://stekum.github.io/roman-holiday-planner/beta/';
 const QUERY = 'Romantisches Restaurant mit Terrasse in Trastevere';
