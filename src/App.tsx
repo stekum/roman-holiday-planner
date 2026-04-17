@@ -5,6 +5,7 @@ import { AuthGate } from './components/auth/AuthGate';
 import { MissingKeyNotice } from './components/MissingKeyNotice';
 import { RomeMap } from './components/map/RomeMap';
 import { PoiList, type ViewMode } from './components/poi/PoiList';
+import { AiSuggestionsPanel } from './components/poi/AiSuggestionsPanel';
 import { DayPlanner } from './components/dayplanner/DayPlanner';
 import { SettingsView } from './components/settings/SettingsView';
 import { AddPoiMenu, type AddMode } from './components/add/AddPoiMenu';
@@ -383,7 +384,17 @@ function AppInner({ user }: AppInnerProps) {
         )}
         <div className="flex-1 overflow-y-auto">
           {tab === 'discover' && (
-            <PoiList
+            <>
+              <div className="px-4 pt-3">
+                <AiSuggestionsPanel
+                  pois={pois}
+                  homebase={settings.homebase}
+                  families={settings.families}
+                  myFamilyId={myFamilyId}
+                  onAddPoi={handleAddPoi}
+                />
+              </div>
+              <PoiList
               pois={pois}
               selectedIds={activeDayOrder}
               allDays={days}
@@ -419,6 +430,7 @@ function AppInner({ user }: AppInnerProps) {
                 setFilterInbox(false);
               }}
             />
+            </>
           )}
           {tab === 'trip' && (
             <DayPlanner
