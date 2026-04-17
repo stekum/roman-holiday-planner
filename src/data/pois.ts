@@ -34,8 +34,12 @@ export interface POI {
   votes?: Record<string, Vote>;
   /** Kollaborativer Kommentar-Thread (#51). */
   comments?: Comment[];
+  /** Besuchsstatus (#38). Default/nicht gesetzt = geplant/offen. */
+  visitStatus?: VisitStatus;
   createdAt: number;
 }
+
+export type VisitStatus = 'visited' | 'skipped';
 
 export type Vote = 'up' | 'down' | 'neutral';
 
