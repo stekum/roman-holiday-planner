@@ -50,7 +50,7 @@
 | Issue | Titel | Size | Prio |
 |---|---|---|---|
 | #14 | ~~AI Tages-Briefing (Wetter + Öffnungszeiten + Tipps)~~ | M | ✅ |
-| #13 | AI NL POI Search (Freitext → Gemini → Places API) | M | high |
+| #13 | ~~AI NL POI Search (Freitext → Gemini → Places API)~~ | M | ✅ |
 | #23 | AI: Kindgerechte Aktivitäten-Vorschläge | M | — |
 | #75 | Generische Kategorien pro Trip | S | — |
 | #76 | AI-Prompt Dynamisierung (Stadt/Land aus Trip-Config) | S | — |
@@ -58,7 +58,7 @@
 | #133 | Email-Notification an Admin bei neuer Zugriffsanfrage | S | — |
 | #137 | Architektur-Dokumentation aufsetzen | M | — |
 | #154 | Docs: CarPlay/Android Auto Handoff via Deep-Links | S | — |
-| #158 | E2E Test-Auth Scaffolding (Firebase Custom Token → Playwright) | M | high |
+| #158 | ~~E2E Test-Auth Scaffolding (Firebase Custom Token → Playwright)~~ | M | ✅ |
 
 **Fokus:** AI-Features abrunden + Doku + Infra-Polish.  
 **Release:** `v1.5.0`
