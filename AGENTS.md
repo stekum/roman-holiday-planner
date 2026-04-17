@@ -2,6 +2,24 @@
 
 Gemeinsames Briefing-Dokument für Codex CLI und Claude Code. Wird automatisch gelesen wenn du aus dem Projekt-Root arbeitest.
 
+**Source of Truth für den Dev-Workflow.** Alles was beide Agents wissen müssen steht hier. Claude Code ergänzt in `CLAUDE.md` nur Claude-spezifische Shortcuts (Sub-Agents, Claude-only MCPs). Codex braucht diese Datei allein.
+
+---
+
+## Session Start Checklist
+
+**Jeder Agent, Claude Code ODER Codex, bei jeder neuen Session:**
+
+1. **Diese Datei lesen** (automatisch via AGENTS.md / CLAUDE.md Konvention).
+2. **Git-State prüfen:** `git status && git log --oneline -5` — ist Working Tree clean, sind wir auf `main`, welche Commits sind zuletzt gelandet?
+3. **Offene Arbeit prüfen:** `git branch -a | grep -E '(feat|fix)/'` — gibt es noch offene Feature/Fix-Branches aus einer vorherigen Session?
+4. **Welche Issue?** Wenn der User eine Issue-Nummer nennt: `gh issue view N --repo stekum/roman-holiday-planner` — Status, Labels, Size lesen. Ist schon ein Branch offen? (`git branch -r | grep issue-N`)
+5. **Agent-Koordination:** Wenn ein anderer Agent (Codex/Claude) an der gleichen Issue arbeitet → NICHT parallel anfangen. Stefan fragen.
+6. **Workflow-Modus wählen** je nach Size: `size:S` → Light, `size:M/L` → Full. Siehe "Dev Workflow — zwei Modi".
+7. **Vor jedem Deploy:** siehe 🚨 HARTE REGEL "Niemals uncommitted deployen".
+
+Dieser Check ist billig (≤30 Sekunden) und verhindert fast alle Klassen von Fehlern die wir bisher hatten.
+
 ---
 
 ## Was dieses Projekt ist
@@ -244,6 +262,64 @@ git diff origin/main..HEAD --stat    # muss leer sein (nichts un-pushed)
 **Präzedenz:** #14 AI Tages-Briefing (April 2026) wurde gebaut und deployed ohne Commit. Source war nur im Working Tree. Recovery-PR #156 musste den Code retroaktiv in git bringen bevor der nächste Deploy Prod zerschossen hätte.
 
 **Gilt für beide Agents (Claude Code + Codex) gleichermaßen.** Wenn ein Agent nicht selbst committen darf (z.B. Review-Modus), dann auch nicht deployen — sondern warten bis Stefan oder der andere Agent das committet.
+
+---
+
+## Agent-Zusammenarbeit (Claude Code + Codex)
+
+Beide Agents arbeiten am selben Repo. Damit das nicht chaotisch wird:
+
+### Aufgabenteilung (Richtlinie, keine Hartregel)
+
+| Typ | Bevorzugter Agent | Warum |
+|---|---|---|
+| Issue-Triage, Labels, Project Board, Roadmap | Claude Code | GitHub-CLI + Kontext-schwere Ops, längerer Planning-Horizont |
+| Architektur-Entscheidungen, Firestore-Datenmodell | Claude Code | Multi-File-Analyse + Begründungsbedarf |
+| PR-Reviews des jeweils anderen Agents | Claude Code | Gegenlesen bevor Stefan merged |
+| Fokussierte Implementierungen (size:S/M) | Codex | Schnell, fokussiert, gut für klar umrissene Features |
+| Firebase Security Rules, Multi-File-Refactorings | Claude Code | Riskant, braucht Übersicht |
+| Schnelle Bugfixes mit klarem Scope | beide | Wer zuerst da ist |
+
+### Koordinationsregeln
+
+1. **Nie zwei Agents auf demselben Branch.** Vor Start prüfen: `git branch -r | grep issue-N`.
+2. **Ein Branch pro Issue.** Wenn Issue N schon einen Branch hat, entweder Stefan fragen oder ein anderes Issue nehmen.
+3. **PRs von Codex können von Claude Code reviewed werden** bevor Stefan merged — das ist erwünscht.
+4. **Commits:** Beide Agents committen direkt. Co-Authorship in Commit-Messages wenn gemeinsam gearbeitet wurde:
+   ```
+   Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+   Co-Authored-By: Codex (GPT-5) <noreply@openai.com>
+   ```
+5. **Deploys:** Wer deployed, übernimmt Verantwortung für git-clean-State (siehe 🚨 Harte Regel).
+
+### Was jeder Agent liest
+
+- **Claude Code:** `CLAUDE.md` → verweist auf diese `AGENTS.md` als SSoT. Zusätzlich: User-Global `~/.claude/CLAUDE.md` + Memory-Ordner pro Projekt.
+- **Codex:** `AGENTS.md` direkt. Keine zusätzliche Projekt-Konfiguration.
+
+Wenn Dev-Workflow-Regeln geändert werden: **immer in AGENTS.md**, nicht in CLAUDE.md. Sonst driften die Agents auseinander.
+
+---
+
+## Lessons Learned (Past Incidents)
+
+Kurze Einträge. Regel → was war passiert → wie es vermieden wird.
+
+### Uncommitted Code deployed (#14, April 2026)
+
+- **Was passierte:** Feature-Branch lokal entwickelt, auf Beta + Production deployed, Source-Code aber nie committed. Bundle auf gh-pages korrekt, aber git-Historie leer. Nächster Deploy von main hätte Prod stillschweigend regrediert.
+- **Regel:** Siehe 🚨 HARTE REGEL "Niemals uncommitted deployen".
+- **Recovery:** PR #156 (retroaktiver Commit) + Rebuild/Verify Bundle-Hash identisch.
+
+### ProjectV2 Field-Options regenerieren IDs
+
+- **Was passierte:** `updateProjectV2Field` mit `singleSelectOptions` regeneriert intern ALLE Options-IDs, auch die nicht geänderten. Alle Release-Zuordnungen zu Issues waren weg.
+- **Regel:** Bevor `singleSelectOptions` aktualisiert wird: Backup aller Item→Option-Zuordnungen mit neuen Titeln. Nach Update: Remap über Titel → neue ID → wieder zuweisen. Backup-jq MUSS `.id` auf Node-Level selektieren, nicht nur `.content`.
+
+### Zombie-Anonymous-Sessions nach Auth-Migration
+
+- **Was passierte:** Nach Migration von `signInAnonymously` zu Google OAuth blieben 36 anonyme Firebase-Auth-User übrig die aber keine User-Dokumente hatten → "?"-Einträge in Admin-UIs. Kein Race-Condition, sondern Alt-Daten.
+- **Regel:** Nach Auth-Provider-Änderungen immer die Auth-User-Liste checken (`firebase auth:export` oder Firebase MCP `auth_get_users`) und alte Sessions aufräumen — nicht in der UI.
 
 ---
 
