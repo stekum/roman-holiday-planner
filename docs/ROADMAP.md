@@ -59,6 +59,7 @@
 | #137 | Architektur-Dokumentation aufsetzen | M | — |
 | #154 | Docs: CarPlay/Android Auto Handoff via Deep-Links | S | — |
 | #158 | ~~E2E Test-Auth Scaffolding (Firebase Custom Token → Playwright)~~ | M | ✅ |
+| #15 | ~~AI POI Suggestions basierend auf Favoriten~~ | L | ✅ |
 
 **Fokus:** AI-Features abrunden + Doku + Infra-Polish.  
 **Release:** `v1.5.0`
@@ -148,7 +149,6 @@ Bündelt alle Issues rund um Monetarisierung, Marketing und professionellen Laun
 | Issue | Titel | Milestone |
 |---|---|---|
 | #42 | ~~AI NL-Suche mit Kontext~~ → **Kontext-Erweiterung, geschlossen als Duplicate von #13** | — |
-| #15 | AI POI Suggestions | v1.5 |
 | #16 | Smarter Instagram-Import | v1.5 |
 | #43 | AI: Was wir verpasst haben (Post-Trip) | v1.5 |
 | #47 | Expense Tracker | v2.0 |
