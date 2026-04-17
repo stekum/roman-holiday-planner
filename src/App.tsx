@@ -105,6 +105,8 @@ function AppInner({ user }: AppInnerProps) {
     setLocation,
     likePoi,
     votePoi,
+    addComment,
+    removeComment,
     removePoi,
     settings,
     setTripDates,
@@ -524,6 +526,9 @@ function AppInner({ user }: AppInnerProps) {
           poi={editingPoi}
           families={settings.families}
           categories={getTripConfig(settings).categories}
+          myFamilyId={myFamilyId}
+          onAddComment={(poiId, familyId, text) => void addComment(poiId, familyId, text)}
+          onRemoveComment={(poiId, commentId) => void removeComment(poiId, commentId)}
           onCancel={() => setEditingPoiId(null)}
           onSave={(patch) => {
             updatePoi(editingPoi.id, patch);

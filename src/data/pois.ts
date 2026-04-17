@@ -32,10 +32,19 @@ export interface POI {
   aiSummary?: string;
   /** Per-Familie-Vote. Key = familyId, Value = Richtung. */
   votes?: Record<string, Vote>;
+  /** Kollaborativer Kommentar-Thread (#51). */
+  comments?: Comment[];
   createdAt: number;
 }
 
 export type Vote = 'up' | 'down' | 'neutral';
+
+export interface Comment {
+  id: string;
+  familyId: string;
+  text: string;
+  createdAt: number;
+}
 
 export interface VoteCounts {
   up: number;

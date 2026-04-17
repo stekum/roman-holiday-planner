@@ -86,6 +86,14 @@ Alle Methoden bieten: **Familie-Auswahl** (farbige Pill-Buttons) + **Kategorie-A
 - Änderbar: Titel, Kategorie, Familie, Beschreibung
 - Google Places-Daten (Foto, Adresse, Bewertung) werden nicht überschrieben
 
+### Kommentare / Notizen pro POI (💬)
+
+- Auf jeder POI-Card ein **💬-Badge mit Zähler** (grau + disabled wenn keine Kommentare)
+- Klick auf das Badge ODER auf ✏️ → Edit-Modal → Abschnitt **„Notizen & Kommentare"**
+- Freitext eingeben → **„Senden"** (oder **Cmd/Ctrl+Enter**) → Kommentar erscheint mit Familien-Farbpunkt + Name + Zeit
+- **Nur eigene Kommentare** (von „Meine Familie") sind löschbar (Trash-Icon bei Hover)
+- Threaded discussion für Tipps ("Reservieren!", "Früh kommen!", "Nicht die Carbonara") — sync zwischen allen Geräten
+
 ---
 
 ## 2. Reise-Tab
