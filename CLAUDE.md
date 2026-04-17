@@ -1,8 +1,14 @@
 # Roman Holiday Planner — Claude Code Context
 
-Für vollständigen Projekt-Kontext, Tech Stack, Dateistruktur, Env-Setup, Code-Konventionen, Branch-Konventionen und Security-Regeln → **[AGENTS.md](./AGENTS.md) lesen.**
+**FIRST ACTION:** [AGENTS.md](./AGENTS.md) lesen — dort steht die **Session Start Checklist** und der gesamte Dev-Workflow (gilt für Claude Code UND Codex). Dieses Dokument enthält nur Claude-spezifische Ergänzungen.
 
-Dieses Dokument enthält nur Claude-Code-spezifische Ergänzungen.
+AGENTS.md ist Single Source of Truth für:
+- Projekt-Kontext, Tech Stack, Dateistruktur, Env-Setup
+- Dev Workflow (Light/Full), Deploy-Regeln, 🚨 Harte Regel gegen uncommitted Deploys
+- Code-/Branch-/PR-Konventionen, GitHub Project Board IDs
+- Agent-Zusammenarbeit mit Codex, Lessons Learned
+
+Wenn sich **Dev-Workflow-Regeln** ändern: in AGENTS.md editieren, nicht hier — sonst drift zwischen Agents.
 
 ---
 
