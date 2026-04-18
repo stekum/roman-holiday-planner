@@ -459,17 +459,27 @@ Vor `gh release create`:
 
 ### Post-Release-Checkliste
 
-Nach `gh release create`:
+Nach `gh release create`. **Alle Punkte sind Pflicht — keiner ist optional außer explizit so markiert.**
 
-1. **GitHub-Milestone schließen:**
+1. **GitHub-Milestone schließen + due_on + Description setzen** in einem Rutsch über das Helper-Script:
    ```bash
-   gh api repos/stekum/roman-holiday-planner/milestones \
-     --jq '.[] | select(.title == "v1.5 — AI") | .number' \
-     | xargs -I{} gh api -X PATCH repos/stekum/roman-holiday-planner/milestones/{} -f state=closed
+   # Argumente: <Milestone-Titel-Prefix> <Release-ISO-Datum> <Kurzinfo>
+   ./scripts/finalize-release-milestone.sh "v1.5 — AI" 2026-04-18 "AI Features"
    ```
-2. **ROADMAP.md:** Release-Sektion bekommt `✅ Released YYYY-MM-DD` Marker im Heading
-3. **Project Board:** prüfen ob die Release-Option für diese Version existiert. Falls ja (Normalfall bei Minor/Patch die wir geplant haben) → alle Items des Milestone auf diese Release-Option setzen. Falls nein → Regen-Prozedur (siehe Board/Milestone-Konvention unten). Merke: Board folgt Milestones 1:1, auch bei Patches.
-4. **Optional:** Release-Announcement für Family & Friends (kurze Zusammenfassung der Highlights, siehe v1.5.0-Vorlage in Release-Notes)
+   Das Script macht drei Dinge zugleich:
+   - setzt `state=closed`
+   - setzt `due_on=<Datum>T12:00:00Z` (Mittag UTC — sonst verschiebt GitHub auf Vortag wegen Timezone)
+   - setzt `description=✅ Released <Datum> — <Kurzinfo>` — **exakt dieses Format** triggert den grünen Release-Badge in der Project-Board-Roadmap-View
+   
+   🚨 **Die grüne Badge-Anzeige hängt am exakten Präfix `✅ Released YYYY-MM-DD`.** Abweichungen („v1.5 released" oder „Released on 18.04.") kippen die Anzeige und Stefan sieht die Release nicht mehr als released — siehe Memory `feedback_milestone_description_release_badge.md`. Das Script verhindert diese Drift.
+
+2. **ROADMAP.md:** Release-Sektion bekommt `✅ Released YYYY-MM-DD` Marker im Heading UND eine einzeilige **Release:** mit Tag-Link + Datum (Format siehe v1.1/v1.2/v1.5-Sektionen).
+
+3. **Project Board Release-Feld:** prüfen ob die Release-Option für diese Version existiert. Falls ja → alle Items des Milestone auf diese Release-Option setzen. Falls nein → Regen-Prozedur (siehe Board/Milestone-Konvention unten, Regen vorher mit Stefan absprechen!). Board folgt Milestones 1:1, auch bei Patches.
+
+4. **Verifikation in der Roadmap-View** (`https://github.com/users/stekum/projects/1/views/5`): grüner Badge `✅ Released YYYY-MM-DD — <Kurzinfo>` steht neben dem Milestone-Titel. Falls NEIN: Browser-Reload, falls immer noch nicht: Description-Format prüfen.
+
+5. **Optional:** Release-Announcement für Family & Friends (kurze Zusammenfassung der Highlights, siehe v1.5.0-Vorlage in Release-Notes).
 
 ### Leftover-Issues-Playbook
 
