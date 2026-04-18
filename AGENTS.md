@@ -393,8 +393,9 @@ Kurze Einträge. Regel → was war passiert → wie es vermieden wird.
   - In Progress: `47fc9ee4`
   - Done: `98236657`
 - **Release-Field ID:** `PVTSSF_lAHOALePRc4BUPjLzhBirwI`
-  - v1.1: `569b9bc8` | v1.2: `3708b2e2` | v1.5: `ca68f362`
-  - v2.0: `d8772cc2` | v3.0-beta: `aab63fe0` | v3.0: `a7336ff1`
+  - ⚠️ **Option-IDs NICHT hardcoden!** Sie regenerieren bei jeder Options-Aenderung.
+  - Frisch abfragen mit: `gh api graphql -f query='query { node(id: "PVT_kwHOALePRc4BUPjL") { ... on ProjectV2 { field(name: "Release") { ... on ProjectV2SingleSelectField { options { id name } } } } } }'`
+  - Options (Stand: regen am 2026-04-18, inkl. v1.5.1): v1.0, v1.1, v1.2, v1.5, v1.5.1, v2.0, v3.0-beta, v3.0, v4.0, v4.5
 - **Start-Field ID:** `PVTF_lAHOALePRc4BUPjLzhBil4I` (Date)
 - **Ziel-Field ID:** `PVTF_lAHOALePRc4BUPjLzhBil4M` (Date)
 - **Cluster-Field ID:** `PVTSSF_lAHOALePRc4BUPjLzhBfLaw`
@@ -484,12 +485,23 @@ Entscheidung beim Cut treffen, nicht drumrum lavieren. Option A ist gut wenn man
 
 ### Project Board Release-Feld ↔ GitHub-Milestone
 
-**Konvention:**
-- **Board Release-Feld** trackt nur **Major-Linien**: `v1.0`, `v1.1`, `v1.2`, `v1.5`, `v2.0`, `v3.0-beta`, `v3.0`, `v4.0`, `v4.5`
-- **GitHub-Milestones** sind granular: `v1.5 — AI`, `v1.5.1 — AI Follow-ups`, `v2.0 — Polish`
-- Issues in Patch-Milestones (`v1.5.1`) behalten auf dem Board das Release-Feld der **Major-Linie** (`v1.5`)
+**Konvention (aktualisiert 2026-04-18):**
+- **Board Release-Feld** spiegelt **jeden Release-Tag** den wir tatsächlich released haben — inkl. Patches wie `v1.5.1`. Ohne saubere Patch-Option wirken Items in der Roadmap-View falsch gruppiert (alt unter v1.5 obwohl sie zu v1.5.1 gehören) → Stefan blickt dann nicht durch.
+- **GitHub-Milestones** sind authoritativ — Board-Release-Feld folgt ihnen.
+- Issue in `v1.5.1 — AI Follow-ups` Milestone bekommt Release-Feld `v1.5.1` auf dem Board.
 
-**Warum?** `updateProjectV2Field` mit `singleSelectOptions` regeneriert bei jeder Options-Änderung ALLE Option-IDs — das zerschießt bestehende Item→Option-Zuordnungen für alle anderen Items (dokumentierter Incident). Eine neue Option = aufwändiges Backup + Remap. Lohnt sich nicht für Patch-Varianten. Major-Linien sind selten (~einmal pro Quartal), die fügen wir manuell zu.
+**Wenn eine neue Release-Option auf dem Board fehlt** (z.B. v1.5.1, v2.0.1, …), Regen-Prozedur:
+
+1. **Backup** aller Items mit ihrem aktuellen Release-Wert nach `/tmp/board-releases-backup.json` (paginiert, 100 pro Seite):
+   ```bash
+   gh api graphql -f query='query { node(id: "PVT_kwHOALePRc4BUPjL") { ... on ProjectV2 { items(first: 100) { pageInfo { hasNextPage endCursor } nodes { id content { ... on Issue { number } } fieldValues(first: 20) { nodes { ... on ProjectV2ItemFieldSingleSelectValue { name field { ... on ProjectV2SingleSelectField { name } } } } } } } } }' | jq '...'
+   ```
+2. **Regeneration** der kompletten Options-Liste (alle alten + neue). ALLE Option-IDs aendern sich.
+3. **Neue IDs abfragen** (`query field options`), als Name→neue-ID Map persistieren.
+4. **Remap-Loop** über alle Items: Old-Release-Name → New-ID via `updateProjectV2ItemFieldValue`. Shell-Script in Zsh (macOS bash 3.2 kein `declare -A`, also `case` statt assoc arrays).
+5. **Verify:** 3 stichproben-Issues checken dass Milestone + Release konsistent.
+
+Inzident-Memory beachten: bei der ersten Regen (v4.5 hinzugefuegt) ging ein Backup mit `null`-itemIds schief. Korrekte Query MUSS `id` auf Node-Level selektieren, nicht nur `content`. Das Script in diesem Ablauf macht das richtig.
 
 ### Rollback-Prozedur
 

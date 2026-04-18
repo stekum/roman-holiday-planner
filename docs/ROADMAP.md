@@ -57,7 +57,7 @@
 | #158 | ~~E2E Test-Auth Scaffolding (Firebase Custom Token → Playwright)~~ | M | ✅ |
 | #15 | ~~AI POI Suggestions basierend auf Favoriten~~ | L | ✅ |
 
-**Status:** v1.5.0 released. Die offenen Nicht-AI-Issues (#123/#133/#137/#154) wurden nach v2.0 verschoben — trip-unkritisch + thematisch besser bei Polish. Die AI-Follow-ups (#16, #43) landen als `v1.5.1` Patch (siehe nächste Sektion).
+**Status:** v1.5.0 released. Die offenen Nicht-AI-Issues (#123/#133/#137/#154) wurden nach v2.0 verschoben — trip-unkritisch + thematisch besser bei Polish. Die AI-Follow-ups (#16, #43, #169) landen als `v1.5.1` Patch (siehe nächste Sektion). Project Board hat v1.5.1 als eigene Release-Option (ID-Regen 2026-04-18 durchgeführt).
 
 ---
 
@@ -67,8 +67,9 @@
 |---|---|---|---|
 | #16 | Smarter Instagram-Import: extrahiert Ortsnamen aus Captions | M | — |
 | #43 | AI: Was wir verpasst haben (Post-Trip-Analyse) | M | — |
+| #169 | Bug: AI Tages-Briefing rendert mehrfach + falscher Tag-Content | S | — |
 
-**Fokus:** Nachgezogene AI-Features aus v1.5. Kleines Patch-Release ohne Deadline — wird eingeplant wenn zwischen v2.0-Features Zeit ist.
+**Fokus:** Nachgezogene AI-Features aus v1.5 + Bugfix. Kleines Patch-Release ohne Deadline — wird eingeplant wenn zwischen v2.0-Features Zeit ist.
 
 ---
 
