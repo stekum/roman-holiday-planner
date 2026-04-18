@@ -16,9 +16,16 @@ Gemeinsames Briefing-Dokument für Codex CLI und Claude Code. Wird automatisch g
 4. **Welche Issue?** Wenn der User eine Issue-Nummer nennt: `gh issue view N --repo stekum/roman-holiday-planner` — Status, Labels, Size lesen. Ist schon ein Branch offen? (`git branch -r | grep issue-N`)
 5. **Agent-Koordination:** Wenn ein anderer Agent (Codex/Claude) an der gleichen Issue arbeitet → NICHT parallel anfangen. Stefan fragen.
 6. **Workflow-Modus wählen** je nach Size: `size:S` → Light, `size:M/L` → Full. Siehe "Dev Workflow — zwei Modi".
-7. **Vor jedem Deploy:** siehe 🚨 HARTE REGEL "Niemals uncommitted deployen".
+7. **Release-Badge-Regression-Check** (30 Sekunden, verhindert stumme Regressionen):
+   ```bash
+   gh api graphql -f query='{ node(id: "PVTSSF_lAHOALePRc4BUPjLzhBirwI") { ... on ProjectV2SingleSelectField { options { name color description } } } }' \
+     --jq '.data.node.options[] | select(.description | startswith("✅ Released")) | select(.color != "GREEN") | "REGRESSION: \(.name) \(.color) \(.description)"'
+   ```
+   Wenn Output NICHT leer: released Option hat Farbe verloren. Stefan sofort sagen, nicht stumm leiten. Fix via `./scripts/finalize-release.sh`.
+8. **UI-Anomalie-Prinzip:** Bei „der Badge/Text/Farbe stimmt nicht" zuerst die Source-of-Truth des sichtbaren Elements tracen (Milestone vs. Project-Field-Option vs. Release-Tag vs. Custom-Field), BEVOR eine Mutation geschickt wird. Trace-first, Patch-second.
+9. **Vor jedem Deploy:** siehe 🚨 HARTE REGEL "Niemals uncommitted deployen".
 
-Dieser Check ist billig (≤30 Sekunden) und verhindert fast alle Klassen von Fehlern die wir bisher hatten.
+Dieser Check ist billig (≤60 Sekunden) und verhindert fast alle Klassen von Fehlern die wir bisher hatten.
 
 ---
 
@@ -461,25 +468,26 @@ Vor `gh release create`:
 
 Nach `gh release create`. **Alle Punkte sind Pflicht — keiner ist optional außer explizit so markiert.**
 
-1. **GitHub-Milestone schließen + due_on + Description setzen** in einem Rutsch über das Helper-Script:
+1. **Release finalisieren über das Helper-Script** — einziger erlaubter Weg:
    ```bash
-   # Argumente: <Milestone-Titel-Prefix> <Release-ISO-Datum> <Kurzinfo>
-   ./scripts/finalize-release-milestone.sh "v1.5 — AI" 2026-04-18 "AI Features"
+   # Argumente: <version> <release-datum> <kurzinfo>
+   ./scripts/finalize-release.sh "v1.5.1" 2026-04-25 "AI Follow-ups"
    ```
-   Das Script macht drei Dinge zugleich:
-   - setzt `state=closed`
-   - setzt `due_on=<Datum>T12:00:00Z` (Mittag UTC — sonst verschiebt GitHub auf Vortag wegen Timezone)
-   - setzt `description=✅ Released <Datum> — <Kurzinfo>` — **exakt dieses Format** triggert den grünen Release-Badge in der Project-Board-Roadmap-View
+   Das Script erledigt in einem Lauf atomisch:
+   - GitHub-Milestone: `state=closed`, `due_on=<datum>T12:00:00Z`, `description=✅ Released <datum> — <kurzinfo>`
+   - **ProjectV2 Release-Field-Option:** `color=GREEN`, `description=✅ Released <datum> — <kurzinfo>` — das ist die Quelle des grünen Badges in der Roadmap-View (NICHT `Milestone.description`, siehe Memory `feedback_release_badge_source_is_project_field.md`)
+   - Automatischer Backup+Remap aller 100+ Items beim Option-Regen (GitHub hat keine in-place Option-Update-Mutation)
+   - Assertion am Ende: Zielzustand verifiziert, sonst Exit 1
+   - Eintrag in `docs/release-log.md` als Trail
+   - Idempotent: mehrfach ausführbar, skipt wenn Zielzustand schon erreicht
    
-   🚨 **Die grüne Badge-Anzeige hängt am exakten Präfix `✅ Released YYYY-MM-DD`.** Abweichungen („v1.5 released" oder „Released on 18.04.") kippen die Anzeige und Stefan sieht die Release nicht mehr als released — siehe Memory `feedback_milestone_description_release_badge.md`. Das Script verhindert diese Drift.
+   🚨 **Niemals** direkt `gh api graphql … updateProjectV2Field(singleSelectOptions: …)` aufrufen — regeneriert Option-IDs ohne Backup und zerschießt alle Item-Zuordnungen. Das Script ist die einzig sichere Variante.
 
 2. **ROADMAP.md:** Release-Sektion bekommt `✅ Released YYYY-MM-DD` Marker im Heading UND eine einzeilige **Release:** mit Tag-Link + Datum (Format siehe v1.1/v1.2/v1.5-Sektionen).
 
-3. **Project Board Release-Feld:** prüfen ob die Release-Option für diese Version existiert. Falls ja → alle Items des Milestone auf diese Release-Option setzen. Falls nein → Regen-Prozedur (siehe Board/Milestone-Konvention unten, Regen vorher mit Stefan absprechen!). Board folgt Milestones 1:1, auch bei Patches.
+3. **Verifikation in der Roadmap-View** (`https://github.com/users/stekum/projects/1/views/5`): grüner Badge `✅ Released YYYY-MM-DD — <Kurzinfo>` steht neben dem Milestone-Titel. Falls NEIN: Browser Cmd+Shift+R. Falls immer noch nicht: Script-Assertion hätte failed — Log prüfen.
 
-4. **Verifikation in der Roadmap-View** (`https://github.com/users/stekum/projects/1/views/5`): grüner Badge `✅ Released YYYY-MM-DD — <Kurzinfo>` steht neben dem Milestone-Titel. Falls NEIN: Browser-Reload, falls immer noch nicht: Description-Format prüfen.
-
-5. **Optional:** Release-Announcement für Family & Friends (kurze Zusammenfassung der Highlights, siehe v1.5.0-Vorlage in Release-Notes).
+4. **Optional:** Release-Announcement für Family & Friends (kurze Zusammenfassung der Highlights, siehe v1.5.0-Vorlage in Release-Notes).
 
 ### Leftover-Issues-Playbook
 
