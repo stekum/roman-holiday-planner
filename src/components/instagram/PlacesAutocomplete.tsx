@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import { Loader2, MapPin, Search, Star } from 'lucide-react';
-import { fetchAiSummary } from '../../lib/placesNewApi';
+import { fetchPlaceEnrichment, type PriceRange } from '../../lib/placesNewApi';
 
 export interface PlaceResult {
   name: string;
@@ -16,6 +16,12 @@ export interface PlaceResult {
   aiSummary?: string;
   /** Google Places price_level 0-4 (#34). */
   priceLevel?: number;
+  /** Places API (New) priceRange (#167). */
+  priceRange?: PriceRange;
+  /** Places API (New) primaryType enum (#167). */
+  primaryType?: string;
+  /** Places API (New) primaryTypeDisplayName (#167). */
+  primaryTypeDisplayName?: string;
 }
 
 interface Props {
@@ -110,7 +116,7 @@ export function PlacesAutocomplete({ onSelect }: Props) {
     if (!placesServiceRef.current) return;
     // Fetch `url` (Google Maps link) via details — textSearch doesn't include it.
     // Also fetch AI summary from Places API (New) in parallel.
-    const aiSummaryPromise = fetchAiSummary(result.placeId);
+    const enrichmentPromise = fetchPlaceEnrichment(result.placeId);
     placesServiceRef.current.getDetails(
       {
         placeId: result.placeId,
@@ -120,7 +126,7 @@ export function PlacesAutocomplete({ onSelect }: Props) {
         const ok = status === google.maps.places.PlacesServiceStatus.OK;
         const mapsUrl = ok ? place?.url : undefined;
         const openingHours = ok ? place?.opening_hours?.weekday_text : undefined;
-        void aiSummaryPromise.then((aiSummary) => {
+        void enrichmentPromise.then((enrichment) => {
           onSelect({
             name: result.name,
             address: result.address,
@@ -132,7 +138,10 @@ export function PlacesAutocomplete({ onSelect }: Props) {
             priceLevel: result.priceLevel,
             mapsUrl,
             openingHours,
-            aiSummary: aiSummary ?? undefined,
+            aiSummary: enrichment.aiSummary,
+            priceRange: enrichment.priceRange,
+            primaryType: enrichment.primaryType,
+            primaryTypeDisplayName: enrichment.primaryTypeDisplayName,
           });
           setQuery('');
           setResults([]);

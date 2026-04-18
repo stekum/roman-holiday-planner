@@ -38,6 +38,16 @@ export interface POI {
   visitStatus?: VisitStatus;
   /** Google Places price_level (#34): 0=free, 1=inexpensive, 2=moderate, 3=expensive, 4=very expensive. */
   priceLevel?: number;
+  /** Places API (New) priceRange (#167): konkrete Betraege statt nur price_level. */
+  priceRange?: {
+    startAmount?: number;
+    endAmount?: number;
+    currencyCode?: string;
+  };
+  /** Places API (New) primaryType enum (#167): z.B. "italian_restaurant". */
+  primaryType?: string;
+  /** Places API (New) primaryTypeDisplayName (#167): z.B. "Italian restaurant". */
+  primaryTypeDisplayName?: string;
   createdAt: number;
 }
 

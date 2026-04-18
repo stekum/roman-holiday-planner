@@ -8,7 +8,7 @@ import {
   generateKidFriendlySuggestions,
   type AiKidSuggestion,
 } from '../../lib/aiKidFriendlySuggestions';
-import { fetchAiSummary } from '../../lib/placesNewApi';
+import { fetchPlaceEnrichment, type PlaceEnrichment, type PriceRange } from '../../lib/placesNewApi';
 
 const ROME_BIAS: google.maps.LatLngBoundsLiteral = {
   north: 41.99,
@@ -24,6 +24,9 @@ interface EnrichedSuggestion extends AiKidSuggestion {
   rating?: number;
   userRatingCount?: number;
   priceLevel?: number;
+  priceRange?: PriceRange;
+  primaryType?: string;
+  primaryTypeDisplayName?: string;
   address?: string;
   mapsUrl?: string;
   openingHours?: string[];
@@ -50,6 +53,9 @@ function buildPoiFromSuggestion(
     rating: sug.rating,
     userRatingCount: sug.userRatingCount,
     priceLevel: sug.priceLevel,
+    priceRange: sug.priceRange,
+    primaryType: sug.primaryType,
+    primaryTypeDisplayName: sug.primaryTypeDisplayName,
     mapsUrl: sug.mapsUrl,
     openingHours: sug.openingHours,
     aiSummary: sug.aiSummary,
@@ -122,11 +128,11 @@ export function AiKidFriendlyPanel({
             resolve({ ...enriched, unlocated: true });
             return;
           }
-          const summaryPromise = enriched.placeId
-            ? fetchAiSummary(enriched.placeId)
-            : Promise.resolve(null);
+          const enrichmentPromise: Promise<PlaceEnrichment> = enriched.placeId
+            ? fetchPlaceEnrichment(enriched.placeId)
+            : Promise.resolve({});
           if (!enriched.placeId) {
-            void summaryPromise.then(() => resolve(enriched));
+            void enrichmentPromise.then(() => resolve(enriched));
             return;
           }
           service.getDetails(
@@ -136,8 +142,11 @@ export function AiKidFriendlyPanel({
                 enriched.mapsUrl = detail.url;
                 enriched.openingHours = detail.opening_hours?.weekday_text;
               }
-              void summaryPromise.then((summary) => {
-                enriched.aiSummary = summary ?? undefined;
+              void enrichmentPromise.then((e) => {
+                enriched.aiSummary = e.aiSummary;
+                enriched.priceRange = e.priceRange;
+                enriched.primaryType = e.primaryType;
+                enriched.primaryTypeDisplayName = e.primaryTypeDisplayName;
                 resolve(enriched);
               });
             },

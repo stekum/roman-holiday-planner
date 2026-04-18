@@ -86,12 +86,15 @@ Alle Methoden bieten: **Familie-Auswahl** (farbige Pill-Buttons) + **Kategorie-A
 - Änderbar: Titel, Kategorie, Familie, Beschreibung
 - Google Places-Daten (Foto, Adresse, Bewertung) werden nicht überschrieben
 
-### Lokale Währung (€ / ¥ / $ / £ / CHF)
+### Preis-Badge + Cuisine-Tag (€ / ¥ / $ / £ / CHF)
 
-- POI-Cards zeigen ein kleines **Preis-Badge** (z.B. €€€) wenn Google Places einen `price_level` für den Ort liefert (1-4 Symbole für günstig bis sehr teuer)
-- Das Währungssymbol wird automatisch aus dem **Trip-Konfiguration-Land** abgeleitet: Italien → €, Japan → ¥, USA → $, UK → £, Schweiz → CHF, sonst €
-- POIs ohne price_level (z.B. Parks, Sehenswürdigkeiten ohne Eintritt) zeigen kein Badge
-- Auto-Umrechnung via Wechselkurs-API ist **nicht** Teil des MVP — Folge-Issue
+- POI-Cards zeigen bei vorhandener Places-Daten ein **Preis-Badge**:
+  - **Places API (New) `priceRange`** wird bevorzugt und als konkreter Betrag gerendert: **„€30–€50"** oder **„€100+"** (wenn Google eine obere Grenze offen lässt)
+  - **Fallback:** Klassischer `price_level` (0-4) als Symbolfolge: **„€€€"** — für Places die kein priceRange haben
+  - Währungssymbol aus Trip-Konfiguration-Land: Italien → €, Japan → ¥, USA → $, UK → £, Schweiz → CHF, sonst €
+- POI-Cards zeigen einen **Cuisine-Tag** (z.B. „Italian restaurant", „Pizzeria", „Wine bar") wenn Google Places einen `primaryType` liefert
+- Für ältere POIs (vor #167) werden priceRange + cuisine via Backfill-Script nachgetragen: `npm run backfill:places` (dry-run) + `--apply` zum Schreiben
+- Auto-Umrechnung zwischen Währungen ist **nicht** Teil des MVP — Folge-Issue
 
 ### Besuchsstatus (✅ / ⏭️)
 
