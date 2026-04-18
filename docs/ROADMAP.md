@@ -15,7 +15,7 @@
 | #59 | ~~AI Review-Zusammenfassungen auf POI-Cards~~ | S | ✅ |
 | #118 | ~~Map-Zucken im Reise-Tab~~ | S | ✅ |
 
-**Release:** [`v1.1.0`](https://github.com/stekum/roman-holiday-planner/releases/tag/v1.1.0)
+**Release:** [`v1.1.0`](https://github.com/stekum/roman-holiday-planner/releases/tag/v1.1.0) — 12. Apr 2026
 
 ---
 
@@ -41,7 +41,9 @@
 | #116 | ~~Semgrep Pre-Commit Hook~~ | S | ✅ |
 | #152 | ~~ApprovalQueue Bug: nur Pending sichtbar + '?' User~~ | S | ✅ (v1.2.1) |
 
-**Status:** v1.2 komplett released als `v1.2.0` (14. Apr) + Patch `v1.2.1` (14. Apr, User-Management-Fix).
+**Release:** [`v1.2.0`](https://github.com/stekum/roman-holiday-planner/releases/tag/v1.2.0) + [`v1.2.1`](https://github.com/stekum/roman-holiday-planner/releases/tag/v1.2.1) — 14. Apr 2026
+
+**Status:** v1.2 komplett released inkl. Patch v1.2.1 (User-Management-Fix #152).
 
 ---
 
@@ -56,6 +58,8 @@
 | #76 | ~~AI-Prompt Dynamisierung (Stadt/Land aus Trip-Config)~~ | S | ✅ |
 | #158 | ~~E2E Test-Auth Scaffolding (Firebase Custom Token → Playwright)~~ | M | ✅ |
 | #15 | ~~AI POI Suggestions basierend auf Favoriten~~ | L | ✅ |
+
+**Release:** [`v1.5.0`](https://github.com/stekum/roman-holiday-planner/releases/tag/v1.5.0) — 18. Apr 2026
 
 **Status:** v1.5.0 released. Die offenen Nicht-AI-Issues (#123/#133/#137/#154) wurden nach v2.0 verschoben — trip-unkritisch + thematisch besser bei Polish. Die AI-Follow-ups (#16, #43, #169) landen als `v1.5.1` Patch (siehe nächste Sektion). Project Board hat v1.5.1 als eigene Release-Option (ID-Regen 2026-04-18 durchgeführt).
 
