@@ -21,6 +21,31 @@
  *   - Places API (New) aktiviert im Google Cloud Console
  *
  * Rate-Limit: 250ms Pause zwischen Requests (vorsichtig, nicht bei Quota).
+ *
+ * ╔═══════════════════════════════════════════════════════════════════════╗
+ * ║ 🚨 SECURITY — API-Key-Restrictions                                    ║
+ * ║                                                                       ║
+ * ║ Der Standard-API-Key (VITE_GOOGLE_MAPS_API_KEY) ist HTTP-Referrer-    ║
+ * ║ restricted (nur stekum.github.io + localhost). Server-Calls von hier  ║
+ * ║ werden geblockt → 403 API_KEY_HTTP_REFERRER_BLOCKED.                  ║
+ * ║                                                                       ║
+ * ║ EMPFOHLENE Loesung: separaten Backfill-Key anlegen                    ║
+ * ║   1. Google Cloud Console → APIs & Credentials → "Create credentials" ║
+ * ║      → API Key, neuer Name "Backfill Server"                          ║
+ * ║   2. Application restriction: "IP addresses" → eigene Heim-IP         ║
+ * ║   3. API restrictions: nur "Places API (New)" aktivieren              ║
+ * ║   4. Key als env vars uebergeben:                                     ║
+ * ║      GOOGLE_MAPS_API_KEY=<neu> npm run backfill:places -- --apply    ║
+ * ║   5. Nach Backfill: diesen Key ggf. DEAKTIVIEREN oder loeschen wenn   ║
+ * ║      nicht mehr gebraucht (reduziert Angriffsflaeche).                ║
+ * ║                                                                       ║
+ * ║ NOTLOESUNG (nicht empfohlen): Referrer-Restriction temporaer vom      ║
+ * ║ Prod-Key entfernen → Backfill laufen → Restriction SOFORT wieder      ║
+ * ║ setzen. Risiko: Key ist offen im Netz waehrend der Phase.             ║
+ * ║                                                                       ║
+ * ║ Das Skript selbst kann Restrictions NICHT automatisch zuruecksetzen.  ║
+ * ║ Das ist dein manueller Verantwortungs-Schritt.                        ║
+ * ╚═══════════════════════════════════════════════════════════════════════╝
  */
 
 import { readFileSync, existsSync } from 'node:fs';
@@ -143,6 +168,12 @@ async function main() {
   console.log(`[backfill] ${workspacesSnap.size} Workspace(s) gefunden`);
   console.log(`[backfill] Mode: ${DRY_RUN ? 'DRY-RUN (keine Writes)' : 'APPLY (schreibt)'}`);
   console.log('');
+  console.log('🚨 SECURITY-ERINNERUNG:');
+  console.log('  Falls du den VITE_GOOGLE_MAPS_API_KEY temporaer entrestricted hast,');
+  console.log('  vergiss NICHT nach dem Backfill die HTTP-Referrer-Restriction wieder');
+  console.log('  zu setzen (Google Cloud Console → Credentials → dein Key).');
+  console.log('  Empfohlen: separaten Backfill-Key mit IP-Restriction nutzen.');
+  console.log('');
 
   let total = 0;
   let withPlaceId = 0;
@@ -219,6 +250,11 @@ async function main() {
   if (DRY_RUN) {
     console.log('');
     console.log('Dry-run beendet. Fuer echtes Backfill: --apply Flag hinzufuegen.');
+  } else {
+    console.log('');
+    console.log('🚨 NICHT VERGESSEN:');
+    console.log('  Falls du API-Key-Restrictions entfernt hast fuer den Backfill:');
+    console.log('  JETZT im Google Cloud Console zuruecksetzen.');
   }
 }
 

@@ -73,7 +73,17 @@ export async function fetchPlaceEnrichment(placeId: string): Promise<PlaceEnrich
         },
       },
     );
-    if (!res.ok) return {};
+    if (!res.ok) {
+      // Einmalige Dev-Diagnose in der Browser-Console — haeufigste Ursache:
+      // "Places API (New)" ist im Google Cloud Console nicht aktiviert (getrennt
+      // von der klassischen "Places API"). Tipp: API-Key Restrictions pruefen.
+      const body = await res.text().catch(() => '');
+      console.warn(
+        `[placesNewApi] ${res.status} for placeId ${placeId} — Places API (New) aktiviert?`,
+        body.slice(0, 200),
+      );
+      return {};
+    }
 
     const data = (await res.json()) as ApiPlaceResponse;
 

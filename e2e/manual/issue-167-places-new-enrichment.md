@@ -69,13 +69,36 @@
 
 ## TC-6: Backfill-Apply
 
-1. Nach Dry-Run-OK: `npm run backfill:places -- --apply`
+**🚨 Security-Vorbereitung (einmalig):**
 
-**Erwartetes Ergebnis:**
+Der Standard-API-Key (`VITE_GOOGLE_MAPS_API_KEY`) ist HTTP-Referrer-restricted → Server-Calls vom Backfill-Skript werden mit 403 geblockt (siehe Script-Output bei Dry-Run wenn alle Fetches failen).
+
+Zwei Wege:
+
+**Option A (empfohlen): separater Backfill-Key**
+1. Cloud Console → APIs & Credentials → „Create credentials" → API Key
+2. Name: z.B. „Backfill Server"
+3. Application restriction: **IP addresses** → deine Heim-IP
+4. API restriction: nur **Places API (New)** aktivieren
+5. Als env var übergeben: `GOOGLE_MAPS_API_KEY=<neu> npm run backfill:places -- --apply`
+6. Nach Backfill-Ende: diesen Key **deaktivieren/löschen** wenn nicht mehr benötigt
+
+**Option B (Notlösung): Referrer-Restriction am Prod-Key temporär entfernen**
+1. Cloud Console → Credentials → `VITE_GOOGLE_MAPS_API_KEY` → Restrictions → „None"
+2. `npm run backfill:places -- --apply`
+3. **NACH Erfolg SOFORT wieder setzen:** Restrictions → „HTTP referrer" → `https://stekum.github.io/roman-holiday-planner/*` + `http://localhost:5173/*`
+4. Das Script erinnert in seiner Endausgabe explizit daran
+
+**Erwartetes Ergebnis des Backfills:**
 - ✅ Output zeigt `✓` statt `~` pro POI
 - ✅ Rate-Limit: 250ms zwischen Requests (keine API-Quota-Fehler)
 - ✅ Nach Abschluss: `updated`-Zähler in Summary
+- ✅ Script-Endausgabe enthält Security-Erinnerung zum Restrictions-Reset
 - ✅ App-Reload: Alte POIs zeigen jetzt priceRange + Cuisine-Tag
+
+**🚨 Security-Nachbearbeitung — Pflicht:**
+- ☐ Restrictions am Key wieder gesetzt (oder separater Key deaktiviert)
+- ☐ Cloud Console → Credentials prüfen: kein unrestricted Key im Projekt
 
 ---
 
