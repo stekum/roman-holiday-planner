@@ -90,6 +90,7 @@
 | #133 | Email-Notification an Admin bei neuer Zugriffsanfrage (aus v1.5) | S | — |
 | #137 | Architektur-Dokumentation aufsetzen (aus v1.5) | M | — |
 | #154 | Docs: CarPlay/Android Auto Handoff via Deep-Links (aus v1.5) | S | — |
+| #167 | Places API (New): priceRange + Cuisine-Tags (Upgrade von #34) | M | — |
 
 **Fokus:** Reise-Features für den praktischen Einsatz + Multi-Trip Infra beginnen + Auth-Provider-Komplettierung.  
 **Release:** `v2.0.0`
