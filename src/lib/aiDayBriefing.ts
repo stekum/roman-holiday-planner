@@ -44,6 +44,11 @@ function buildPrompt(context: DayBriefingContext): string {
     `Antworte auf ${cfg.language}.`,
     `Erstelle ein kurzes Tages-Briefing fuer ${context.dayLabel} (${context.dayIso}).`,
     '',
+    '🚨 WICHTIG:',
+    `- Das Briefing ist SPEZIFISCH fuer ${context.dayLabel} am ${context.dayIso}.`,
+    `- Nimm NICHT an dass dies der erste Tag ist. Beziehe dich auf ${context.dayLabel}, nicht auf "Tag 1" oder den "ersten Tag in ${cfg.city}".`,
+    '- Verwende ausschliesslich die unten gelisteten Stops dieses Tages.',
+    '',
     'KONTEXT:',
     `- Homebase: ${homebaseLine}`,
     `- Wetter: ${weatherLine}`,
@@ -65,6 +70,7 @@ function buildPrompt(context: DayBriefingContext): string {
     'ANTWORT:',
     '- Nur der Briefing-Text.',
     '- Kein Markdown, keine Bullet-Points, keine JSON-Struktur.',
+    '- Gib den Briefing-Text GENAU EINMAL zurueck, nicht wiederholt.',
   ].join('\n');
 }
 
@@ -80,13 +86,36 @@ function extractText(response: { text: () => string; candidates?: Array<{ conten
   }
 }
 
+/**
+ * Entfernt zusammenhaengende Blockwiederholungen die Gemini manchmal in thinking+response-
+ * Parts produziert. Splittet an Doppel-Newlines, dedupliziert aufeinanderfolgende
+ * identische Bloecke unter Erhalt der Reihenfolge. Referenz: Issue #169 — Briefing rendert
+ * 3x denselben Absatz, Ursache liegt im joined response-text, nicht im Render.
+ */
+function deduplicateParagraphs(text: string): string {
+  const blocks = text.split(/\n{2,}/).map((b) => b.trim()).filter(Boolean);
+  if (blocks.length <= 1) return text;
+
+  const seen = new Set<string>();
+  const unique: string[] = [];
+  for (const block of blocks) {
+    // Normalisiere fuer Vergleich: whitespace-collapse + lowercase
+    const fingerprint = block.toLowerCase().replace(/\s+/g, ' ');
+    if (seen.has(fingerprint)) continue;
+    seen.add(fingerprint);
+    unique.push(block);
+  }
+  return unique.join('\n\n');
+}
+
 function sanitizeBriefing(rawText: string): string {
-  return rawText
+  const cleaned = rawText
     .replace(/^```(?:text|markdown)?\s*/i, '')
     .replace(/\s*```$/, '')
     .replace(/^"+|"+$/g, '')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
+  return deduplicateParagraphs(cleaned);
 }
 
 export async function generateDayBriefing(
@@ -102,6 +131,13 @@ export async function generateDayBriefing(
     candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
   });
   const briefing = sanitizeBriefing(rawText);
+
+  // Diagnostic-log gegen Wiederholung von Issue #169 — nur wenn Dedup gegriffen hat
+  if (briefing.length < rawText.trim().length * 0.9) {
+    console.warn(
+      `[AI Briefing] Dedup-pass hat Content gekuerzt. day=${context.dayIso}. raw=${rawText.length}ch, final=${briefing.length}ch. Erste 160ch von raw: ${rawText.slice(0, 160)}`,
+    );
+  }
 
   if (!briefing) {
     throw new Error('AI-Briefing konnte nicht erzeugt werden. Bitte erneut versuchen.');
