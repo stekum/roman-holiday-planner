@@ -54,6 +54,8 @@ function resolveServiceAccount() {
   throw new Error('service-account.json nicht gefunden. Siehe scripts/mint-e2e-token.mjs Header.');
 }
 
+let loggedFirstError = false;
+
 async function fetchEnrichment(placeId, apiKey) {
   try {
     const res = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
@@ -68,7 +70,19 @@ async function fetchEnrichment(placeId, apiKey) {
         ].join(','),
       },
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      if (!loggedFirstError) {
+        loggedFirstError = true;
+        const body = await res.text();
+        console.error(`\n  ✗ API response ${res.status}: ${body.slice(0, 300)}\n`);
+        if (res.status === 403) {
+          console.error('  Tipp: API-Key ist vermutlich HTTP-Referrer-restricted (client-only).');
+          console.error('  Fuer Server-Nutzung: unrestrictierten/IP-restricted Key in Cloud Console erstellen,');
+          console.error('  oder temporaer die Restrictions entfernen.\n');
+        }
+      }
+      return null;
+    }
     const data = await res.json();
     const aiSummary =
       data.generativeSummary?.overview?.text ??
