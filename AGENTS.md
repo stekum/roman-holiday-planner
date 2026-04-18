@@ -416,47 +416,101 @@ Bei jedem neuen Issue:
 
 ## Release Management
 
-### Versionierung (Semantic Versioning)
+### Versionsschema
 
-```
-v1.2.0   ← Minor: neues Feature
-v1.2.1   ← Patch: Bug-Fix
-v2.0.0   ← Major: Breaking Changes (unwahrscheinlich bei diesem Projekt)
-```
+SemVer mit produkt-spezifischer Interpretation:
+
+| Format | Wann verwenden |
+|---|---|
+| `vX.Y.0` (Minor) | Neue Feature-Gruppe — AI-Features, Collab-Block, Polish-Sprint. Jeder thematisch zusammenhängende Milestone-Release ist ein Minor. |
+| `vX.Y.Z` (Patch) | Bugfixes nach Release ODER vergessene Kleinigkeiten aus dem Minor (Follow-up-AI-Tweak, einzelne UX-Nachbesserung). Thematisch beim vorherigen Minor. |
+| `vX.0.0` (Major) | Breaking Changes oder echte Architektur-Umstellung. v3.0 (Multi-Trip) ist der einzige geplante Major für dieses Projekt. |
 
 Mehrere Releases pro Tag sind normal — jedes Patch bekommt eine eigene Version.
+
+### Pre-Release-Checkliste
+
+Vor `gh release create`:
+
+1. **Alle geplanten Milestone-Issues abgeschlossen** oder explizit in einen späteren Milestone verschoben (siehe Leftover-Playbook unten)
+2. **`main` = Prod:** der letzte Commit auf `main` ist auf Prod deployed (via `npm run deploy`, Published-Meldung)
+3. **Git clean:** `git status` zeigt nur erlaubtes `.claude/settings.json`-Rauschen
+4. **Sanity-Check auf Prod:** zentrale Flows funktionieren (Entdecken-Tab, Reise-Tab, neue Features des Releases)
+5. **ROADMAP.md synchron:** alle fertigen Issues des Releases sind mit `✅` markiert, das Release-Heading hat den Status-Marker vorbereitet
+6. **USER-GUIDE.md aktualisiert** für alle user-facing Features dieses Releases
 
 ### Release-Ablauf
 
 1. **Fix/Feature** landet via PR auf `main`
 2. **Beta-Deploy:** `npm run deploy:beta`
-3. **Validierung:** Playwright + manueller Test auf Beta-URL
-4. **Release erstellen:**
+3. **Validierung:** Playwright-Smoke (size:M+) + manueller Test auf Beta-URL
+4. **Production-Deploy:** `npm run deploy`
+5. **Pre-Release-Checkliste** abhaken (siehe oben)
+6. **Release erstellen:**
    ```bash
    # Aktuelle Version ermitteln
    gh release list --limit 1
-   
+
    # Neues Release mit auto-generiertem Changelog aus PR-Titeln
    gh release create v1.x.y --target main --generate-notes --title "v1.x.y — Kurzbeschreibung"
    ```
-5. **Production-Deploy:** `npm run deploy`
+7. **Post-Release-Checkliste** (siehe unten)
 
-### Was ein GitHub Release enthält
+### Post-Release-Checkliste
 
-- **Git-Tag** auf dem exakten Commit
-- **Auto-Changelog** aus allen PRs seit dem letzten Release
-- **Übersicht:** `https://github.com/stekum/roman-holiday-planner/releases`
+Nach `gh release create`:
 
-### Rollback
+1. **GitHub-Milestone schließen:**
+   ```bash
+   gh api repos/stekum/roman-holiday-planner/milestones \
+     --jq '.[] | select(.title == "v1.5 — AI") | .number' \
+     | xargs -I{} gh api -X PATCH repos/stekum/roman-holiday-planner/milestones/{} -f state=closed
+   ```
+2. **ROADMAP.md:** Release-Sektion bekommt `✅ Released YYYY-MM-DD` Marker im Heading
+3. **Project Board:** keine Änderung nötig (Release-Feld zeigt Major-Linie — siehe Board/Milestone-Konvention unten)
+4. **Optional:** Release-Announcement für Family & Friends (kurze Zusammenfassung der Highlights, siehe v1.5.0-Vorlage in Release-Notes)
+
+### Leftover-Issues-Playbook
+
+Wenn Milestone-Issues beim Release-Cut noch offen sind — drei Optionen:
+
+| Option | Wann | Beispiel |
+|---|---|---|
+| **A: Patch-Release** `vX.Y.1` | 1–3 kleine Items, thematisch beim Minor | v1.5 → #16, #43 (AI-Features noch nicht gebaut) → neuer Milestone `v1.5.1 — AI Follow-ups` |
+| **B: Slip zum nächsten Minor** | Items passen thematisch woanders besser | v1.5 → #123/#133/#137/#154 (Ops/Docs) → Milestone `v2.0 — Polish` |
+| **C: Defer** | Item nicht mehr aktuell, später oder nie | Nach `## Deferred` in ROADMAP, Milestone auf nichts oder weit entfernt (v4.0) |
+
+Entscheidung beim Cut treffen, nicht drumrum lavieren. Option A ist gut wenn man mental beim Minor bleiben will; Option B wenn ein Themenwechsel eh ansteht.
+
+### Project Board Release-Feld ↔ GitHub-Milestone
+
+**Konvention:**
+- **Board Release-Feld** trackt nur **Major-Linien**: `v1.0`, `v1.1`, `v1.2`, `v1.5`, `v2.0`, `v3.0-beta`, `v3.0`, `v4.0`, `v4.5`
+- **GitHub-Milestones** sind granular: `v1.5 — AI`, `v1.5.1 — AI Follow-ups`, `v2.0 — Polish`
+- Issues in Patch-Milestones (`v1.5.1`) behalten auf dem Board das Release-Feld der **Major-Linie** (`v1.5`)
+
+**Warum?** `updateProjectV2Field` mit `singleSelectOptions` regeneriert bei jeder Options-Änderung ALLE Option-IDs — das zerschießt bestehende Item→Option-Zuordnungen für alle anderen Items (dokumentierter Incident). Eine neue Option = aufwändiges Backup + Remap. Lohnt sich nicht für Patch-Varianten. Major-Linien sind selten (~einmal pro Quartal), die fügen wir manuell zu.
+
+### Rollback-Prozedur
 
 Falls ein Production-Deploy Probleme macht:
+
 ```bash
-# Alten Release-Tag auschecken
-git checkout v1.2.0
+# Schritt 1: Sofort-Fix — Prod auf letzten guten Tag zurückdrehen
+git checkout vX.Y.Z            # letzter bekannt guter Release-Tag
 npm run build
-npm run deploy
+npm run deploy                  # überschreibt Prod mit bekannt gutem Stand
 git checkout main
+
+# Schritt 2: Fix im Code committen
+# (neuer Commit auf main mit der Korrektur)
+
+# Schritt 3: Patch-Release erstellen
+gh release create vX.Y.(Z+1) --target main --generate-notes --title "vX.Y.(Z+1) — Hotfix …"
+npm run deploy
 ```
+
+**Milestone-Handling:** Der Milestone des kaputten Release bleibt offen wenn der Fix noch dazu gehört; Release-Notes dokumentieren den Kontext.
 
 ---
 

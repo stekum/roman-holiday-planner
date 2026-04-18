@@ -6,7 +6,7 @@
 
 ---
 
-## Woche 1 — v1.1 ✅ Released (18. Apr)
+## v1.1 — Quick Wins ✅ Released 2026-04-12
 
 | Issue | Titel | Size | Status |
 |---|---|---|---|
@@ -19,7 +19,7 @@
 
 ---
 
-## Woche 2 — v1.2 Security + Auth + Bugfixes
+## v1.2 — Security + Auth + Bugfixes ✅ Released 2026-04-14
 
 | Issue | Titel | Size | Status |
 |---|---|---|---|
@@ -45,7 +45,7 @@
 
 ---
 
-## Woche 2/3 — v1.5 AI Features (23.–25. Apr)
+## v1.5 — AI Features ✅ Released 2026-04-18
 
 | Issue | Titel | Size | Prio |
 |---|---|---|---|
@@ -72,7 +72,7 @@
 
 ---
 
-## Woche 3 — v2.0 Travel Essentials + Polish (28. Apr – 2. Mai)
+## v2.0 — Travel Essentials + Polish (Ziel: 2. Mai 2026)
 
 | Issue | Titel | Size | Prio |
 |---|---|---|---|
@@ -97,7 +97,7 @@
 
 ---
 
-## Woche 4 — v3.0-beta Multi-Trip Core (5.–9. Mai)
+## v3.0-beta — Multi-Trip Core (Ziel: 9. Mai 2026)
 
 | Issue | Titel | Size | Prio |
 |---|---|---|---|
@@ -110,7 +110,7 @@
 
 ---
 
-## Woche 5 — v3.0 Multi-Trip Complete (12.–16. Mai)
+## v3.0 — Multi-Trip Complete (Ziel: 16. Mai 2026)
 
 | Issue | Titel | Size | Prio |
 |---|---|---|---|
@@ -123,7 +123,7 @@
 
 ---
 
-## Woche 6 — Buffer + Polish (19.–23. Mai)
+## Buffer + Polish (19.–23. Mai, reserved)
 
 | Issue | Titel | Size | Prio |
 |---|---|---|---|
