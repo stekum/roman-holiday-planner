@@ -88,3 +88,82 @@ Future-Wünsche (CI-Automation, Auto-Deploy, E2E-im-CI, Semantic-Release) sind a
 - Nächste Session kann direkt mit einem klaren Startzustand beginnen
 
 **Session beendet 2026-04-18 18:57 CEST.** Alle Stabilisierungs-Edits committed + gepusht auf `main`. `#33`-WIP liegt im Stash `wip-issue-33-timezone-types-helpers`. `feat/issue-33-timezone-awareness` gelöscht. Vier CI/CD-Future-Issues (#170, #171, #172, #173) in v2.0 angelegt. AGENTS.md Release-Management + neue CI/CD-Sektion konsistent. Memory zu ProjectV2-Field-Options um Regen-Etikette erweitert.
+
+---
+
+# Nachtrag: #169 Debugging-Session (abends)
+
+## Ziel vs. Ergebnis
+
+**Ziel:** Bug #169 fixen — AI Tages-Briefing rendert mehrfach identisch + mit Content vom falschen Tag.
+
+**Ergebnis:** Nicht gelöst. Root-Cause aber lokalisiert; Fix-Richtung bekannt. Auf morgen geparkt.
+
+## Was heute an #169 gelandet ist (auf `main` + Beta)
+
+- **Dedup-Pass** in `src/lib/briefingDedup.ts` — pure Funktion + 9 Unit-Tests unter `scripts/test-briefing-dedup.ts` (`npm run test:briefing-dedup`). Greift nur wenn Gemini den Text mit `\n\n`-getrennten Duplikaten liefert — tut er derzeit nicht (siehe Befund unten). Harmlos, keine Regression.
+- **Prompt-Hardening** in `aiDayBriefing.ts` gegen „erster Tag"-Halluzination — greift auf Tag 1 nach Test. Kostenlose Verbesserung für neue Gens.
+- **clearDay-Fix** in `useWorkspace.ts` — löscht jetzt auch `dayBriefings.<dayIso>` und `dayDescriptions.<dayIso>`, nicht nur `tripPlan`. Vorher blieben alte korrupte Briefings nach „Tagesplan leeren" stehen.
+
+Commits: `628f44c` (Dedup + Prompt), `0f4c4ec` (clearDay + Unit-Tests).
+
+## Was NICHT gefixt ist (der eigentliche Bug)
+
+**Symptom:** Im Reise-Tab werden 3-6 identische DayBriefingCards untereinander gerendert. Alle zeigen denselben Briefing-Text (in unseren Tests meist Tag-1-Content, unabhängig vom aktiven Tab).
+
+**Harte Daten aus Playwright-Debugging auf Beta:**
+- DayPlanner-Parent mountet **1×** — nur Child DayBriefingCard mountet mehrfach.
+- `useEffect(() => ..., [])` in DayBriefingCard feuert **3-6× mit unterschiedlichen IDs**, **0 Unmounts**. D.h. 3-6 parallele Component-Instanzen als Siblings im DOM.
+- JSX-Source hat genau `{dayBriefing && <DayBriefingCard key={activeDay} … />}` — ein Element. Im deployed Bundle auch nur 1 `jsx(RD, …)`-Call (grep).
+- Cards akkumulieren über die Zeit (2 → 4 → 5 → 6 über 7 Sekunden). Tab-Switch „Entdecken" und zurück resettet den Counter.
+- **Ohne StrictMode** (main.tsx `<StrictMode>` entfernt, temporär getestet): DayPlanner mountet 1×, DayBriefingCard **0×**, 0 Cards im DOM — die App lädt Firestore-Data nicht.
+
+**Root-Cause-Hypothese:** Race-Condition im `useWorkspace.ts:121-200` async-Subscription-Setup kombiniert mit dem Lazy-init von `activeDay` in `App.tsx:180`. StrictMode's Dev-Mode double-invoke kompensiert den Bug in Dev — in Prod (Rolldown-built) produziert die Kompensation aber 3-6 parallele Card-Mounts statt 1. Ohne StrictMode fehlt die Kompensation → Data-Init failed → 0 Cards.
+
+**Belege gegen andere Hypothesen (durchgespielt und ausgeschlossen):**
+- Nicht Service-Worker-Cache allein: Der 5×-Mount ist im NEUEN Code mit SW-disabled auch da.
+- Nicht DayPlanner-Mehrfach-Mount: Parent mountet 1×, nur Child multi-mountet.
+- Nicht direkte DOM-Manipulation / Portal: `grep` findet keine innerHTML/insertAdjacent/cloneNode/outerHTML-Aufrufe im Source.
+- Nicht Animation-Library: Kein framer-motion o.ä. im `package.json`.
+- Nicht Text-Duplikation im Briefing-String: Firestore enthält je Tag 1× den richtigen Briefing, `<p className="whitespace-pre-line">` rendert 1 Absatz — die 3-6 Blöcke sind **3-6 separate `<div>`-Cards**, keine 3-6 Absätze in einer Card.
+
+## Sekundärer Befund: Service-Worker-Cache-Drift
+
+Bei aktivem SW bekommt der Browser eine Mischung aus alter und neuer JS — deshalb sieht Stefan auf Phone oft sogar nach Hard-Reload noch alte Versionen. Fix-Propagation braucht: DevTools → Application → Service Workers → „Unregister" + Storage „Clear site data". Dokumentiert für morgen.
+
+## Diagnose-Artefakte (committed als E2E-Scripts)
+
+Alle unter `e2e/issue-169-*.e2e.js`:
+- `briefing-response-capture` — versucht Gemini-Response zu interceptieren (hat bei mir nicht gematched, Filter zu eng)
+- `card-count-over-time` — zeigt Akkumulation: 2→4→5→6 Cards in 7s
+- `card-outerhtml` — beweist dass alle Cards byte-identische outerHTML haben
+- `count-cards` — zählt Cards pro Mount
+- `dom-inspection` — prüft Parent-Hierarchie und verwandte Elemente
+- `dom-raw` — dumpt Parent-Children-Struktur
+- `dump-all-briefings` — iteriert über 7 Tag-Tabs (zeigt: jeder Tab hat Tag-1-Text)
+- `mount-trace` — zählt MOUNT/UNMOUNT über 7s
+- `no-sw` — testet mit `--disable-features=ServiceWorker`
+- `structure-check` — zählt verwandte DayPlanner-Elemente
+
+Diese Scripts bleiben im Repo als Test-Werkzeuge für die morgige Session.
+
+## Nächste Schritte (morgen)
+
+1. **Time-Box: 30-60 min** für einen gezielten Root-Cause-Fix-Versuch. Wenn nicht gelöst: weiter parken.
+2. **Fix-Richtung:** `useWorkspace.ts:121-200` umbauen — async `run()` in useEffect hat einen Race-Path wo `cancelled=true` den subscription-setup nicht blockt (subscriptions werden nach `cancelled=true` noch assigned). Zu prüfen ob das den Multi-Mount erklärt.
+3. **Alternative Fix-Richtung:** `App.tsx:180` `activeDay` useState initialen Wert stabiler machen — der Lazy-Init `() => days[0] ?? ''` produziert beim first-render ein leeres '', beim re-render dann `days[0]`. Das ist Standard-Pattern aber könnte Cards als Siblings akkumulieren wenn `{dayBriefing && <… key={activeDay} …>}` bei jedem Re-Render ein neues Element mit neuem key erzeugt und React den alten nicht unmountet.
+4. **Key-Hypothese testen:** Log `activeDay` an jeder Stelle im `DayBriefingCard`-useEffect. Wenn die 3-6 Mounts **unterschiedliche** activeDay-Values haben → key-driven Multi-Mount ohne Unmount. Wenn **gleiche** activeDay-Values → anderer Grund.
+5. **Build-Tool-Hypothese:** Vite-Config hat `@vitejs/plugin-react`. Prüfen ob Vite 6+ unter der Haube Rolldown nutzt und StrictMode-Artefakte erzeugt. Test: `npx vite build --mode development` und vergleichen.
+
+## Status Beta/Prod
+
+- **Prod:** Unverändert (Commit `d60b437 docs: mark #167 done` ist Prod-Stand).
+- **Beta:** Stand nach letztem heutigem Deploy = Commit `0f4c4ec` (inkl. Dedup + clearDay-Fix + Prompt-Hardening, OHNE Diagnose-Logs).
+- **Diff Beta vs Prod:** Dedup + clearDay-Fix + Prompt-Hardening — alle unschädlich, keine Regression.
+
+## Lessons Learned (für Memory-Follow-up)
+
+- Bei „Fix greift nicht" niemals blind deployen — **erst tracen wo der gerenderte Wert herkommt**. Ich habe heute 3× den falschen Layer gepatcht (erst Dedup, dann Milestone-Description, dann clearDay), bevor ich die Playwright-Diagnose gemacht habe. Die Diagnose hätte als erstes kommen müssen.
+- Bei Akkumulations-Bugs: **Mount-Log mit eindeutiger ID** in `useEffect(..., [])` direkt einbauen. Das ist in 5 Minuten gemacht und gibt harte Daten statt Hypothesen.
+- Service Worker + PWA verdeckt Fix-Propagation. Bei Visual-Bug-Tests immer: Incognito-Window verwenden ODER SW unregister dokumentieren.
+- `StrictMode`-Kompensation ist ein **Code-Smell**: wenn das Entfernen von StrictMode die App bricht, ist ein Race-Condition da. Das ist nicht akzeptabel und muss unabhängig vom #169-Fix behoben werden.
