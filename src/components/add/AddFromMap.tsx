@@ -3,7 +3,7 @@ import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import { MapPin, Star } from 'lucide-react';
 import type { POI } from '../../data/pois';
 import type { Family } from '../../settings/types';
-import { fetchAiSummary } from '../../lib/placesNewApi';
+import { fetchPlaceEnrichment, type PriceRange } from '../../lib/placesNewApi';
 import { AddPoiFields, type AddPoiFieldsValue } from './AddPoiFields';
 
 interface Props {
@@ -22,6 +22,9 @@ interface EnrichedPlace {
   rating?: number;
   userRatingCount?: number;
   priceLevel?: number;
+  priceRange?: PriceRange;
+  primaryType?: string;
+  primaryTypeDisplayName?: string;
   photoUrl?: string;
   mapsUrl?: string;
   placeId?: string;
@@ -62,7 +65,7 @@ export function AddFromMap({
     if (!pickedPlaceId || !placesLib) return;
     setLoading(true);
     const service = new placesLib.PlacesService(document.createElement('div'));
-    const aiPromise = fetchAiSummary(pickedPlaceId);
+    const enrichmentPromise = fetchPlaceEnrichment(pickedPlaceId);
     service.getDetails(
       {
         placeId: pickedPlaceId,
@@ -84,7 +87,7 @@ export function AddFromMap({
           return;
         }
         const photoUrl = place.photos?.[0]?.getUrl({ maxWidth: 800, maxHeight: 600 });
-        void aiPromise.then((aiSummary) => {
+        void enrichmentPromise.then((enrichment) => {
           setLoading(false);
           setEnriched({
             name: place.name,
@@ -92,11 +95,14 @@ export function AddFromMap({
             rating: place.rating,
             userRatingCount: place.user_ratings_total,
             priceLevel: place.price_level,
+            priceRange: enrichment.priceRange,
+            primaryType: enrichment.primaryType,
+            primaryTypeDisplayName: enrichment.primaryTypeDisplayName,
             photoUrl,
             mapsUrl: place.url,
             placeId: place.place_id,
             openingHours: place.opening_hours?.weekday_text,
-            aiSummary: aiSummary ?? undefined,
+            aiSummary: enrichment.aiSummary,
           });
           if (place.name) setTitle(place.name);
         });
@@ -147,6 +153,9 @@ export function AddFromMap({
       rating: enriched.rating,
       userRatingCount: enriched.userRatingCount,
       priceLevel: enriched.priceLevel,
+      priceRange: enriched.priceRange,
+      primaryType: enriched.primaryType,
+      primaryTypeDisplayName: enriched.primaryTypeDisplayName,
       mapsUrl: enriched.mapsUrl,
       openingHours: enriched.openingHours,
       placeId: enriched.placeId ?? pickedPlaceId ?? undefined,

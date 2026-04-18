@@ -5,7 +5,7 @@ import type { Category, POI } from '../../data/pois';
 import type { Family, Homebase, TripConfig } from '../../settings/types';
 import { getCategoryEmoji } from '../../settings/tripConfig';
 import { generateAiSuggestions, type AiSuggestion } from '../../lib/aiPoiSuggestions';
-import { fetchAiSummary } from '../../lib/placesNewApi';
+import { fetchPlaceEnrichment, type PlaceEnrichment, type PriceRange } from '../../lib/placesNewApi';
 
 const ROME_BIAS: google.maps.LatLngBoundsLiteral = {
   north: 41.99,
@@ -33,6 +33,9 @@ function buildPoiFromSuggestion(
     rating: sug.rating,
     userRatingCount: sug.userRatingCount,
     priceLevel: sug.priceLevel,
+    priceRange: sug.priceRange,
+    primaryType: sug.primaryType,
+    primaryTypeDisplayName: sug.primaryTypeDisplayName,
     mapsUrl: sug.mapsUrl,
     openingHours: sug.openingHours,
     aiSummary: sug.aiSummary,
@@ -47,6 +50,9 @@ interface EnrichedSuggestion extends AiSuggestion {
   rating?: number;
   userRatingCount?: number;
   priceLevel?: number;
+  priceRange?: PriceRange;
+  primaryType?: string;
+  primaryTypeDisplayName?: string;
   address?: string;
   mapsUrl?: string;
   openingHours?: string[];
@@ -111,12 +117,12 @@ export function AiSuggestionsPanel({ pois, homebase, families, myFamilyId, onAdd
             resolve({ ...enriched, unlocated: true });
             return;
           }
-          // Fetch details (url + opening hours) + AI summary in parallel
-          const summaryPromise = enriched.placeId
-            ? fetchAiSummary(enriched.placeId)
-            : Promise.resolve(null);
+          // Fetch details (url + opening hours) + Places-API-(New)-enrichment in parallel
+          const enrichmentPromise: Promise<PlaceEnrichment> = enriched.placeId
+            ? fetchPlaceEnrichment(enriched.placeId)
+            : Promise.resolve({});
           if (!enriched.placeId) {
-            void summaryPromise.then(() => resolve(enriched));
+            void enrichmentPromise.then(() => resolve(enriched));
             return;
           }
           service.getDetails(
@@ -126,8 +132,11 @@ export function AiSuggestionsPanel({ pois, homebase, families, myFamilyId, onAdd
                 enriched.mapsUrl = detail.url;
                 enriched.openingHours = detail.opening_hours?.weekday_text;
               }
-              void summaryPromise.then((summary) => {
-                enriched.aiSummary = summary ?? undefined;
+              void enrichmentPromise.then((e) => {
+                enriched.aiSummary = e.aiSummary;
+                enriched.priceRange = e.priceRange;
+                enriched.primaryType = e.primaryType;
+                enriched.primaryTypeDisplayName = e.primaryTypeDisplayName;
                 resolve(enriched);
               });
             },

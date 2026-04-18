@@ -4,7 +4,7 @@ import { Loader2, MapPin, Sparkles, Star } from 'lucide-react';
 import type { POI } from '../../data/pois';
 import type { Family, TripConfig } from '../../settings/types';
 import { aiNlSearch } from '../../lib/aiNlSearch';
-import { fetchAiSummary } from '../../lib/placesNewApi';
+import { fetchPlaceEnrichment } from '../../lib/placesNewApi';
 import { AddPoiFields, type AddPoiFieldsValue } from './AddPoiFields';
 import type { PlaceResult } from '../instagram/PlacesAutocomplete';
 
@@ -111,12 +111,12 @@ export function AddFromAiSearch({ families, onCancel, onSave, tripConfig }: Prop
 
   const handlePick = (result: SearchResult) => {
     if (!placesServiceRef.current) return;
-    const aiSummaryPromise = fetchAiSummary(result.placeId);
+    const enrichmentPromise = fetchPlaceEnrichment(result.placeId);
     placesServiceRef.current.getDetails(
       { placeId: result.placeId, fields: ['url', 'opening_hours'] },
       (detail, status) => {
         const ok = status === google.maps.places.PlacesServiceStatus.OK;
-        void aiSummaryPromise.then((aiSummary) => {
+        void enrichmentPromise.then((enrichment) => {
           setPlace({
             name: result.name,
             address: result.address,
@@ -128,7 +128,10 @@ export function AddFromAiSearch({ families, onCancel, onSave, tripConfig }: Prop
             priceLevel: result.priceLevel,
             mapsUrl: ok ? detail?.url : undefined,
             openingHours: ok ? detail?.opening_hours?.weekday_text : undefined,
-            aiSummary: aiSummary ?? undefined,
+            aiSummary: enrichment.aiSummary,
+            priceRange: enrichment.priceRange,
+            primaryType: enrichment.primaryType,
+            primaryTypeDisplayName: enrichment.primaryTypeDisplayName,
           });
         });
       },
@@ -152,6 +155,9 @@ export function AddFromAiSearch({ families, onCancel, onSave, tripConfig }: Prop
       rating: place.rating,
       userRatingCount: place.userRatingCount,
       priceLevel: place.priceLevel,
+      priceRange: place.priceRange,
+      primaryType: place.primaryType,
+      primaryTypeDisplayName: place.primaryTypeDisplayName,
       mapsUrl: place.mapsUrl,
       openingHours: place.openingHours,
       aiSummary: place.aiSummary,

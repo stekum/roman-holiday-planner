@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import type { POI, Vote, VisitStatus } from '../../data/pois';
 import { CATEGORY_EMOJI, countVotes } from '../../data/pois';
+import { formatPriceRange } from '../../lib/placesNewApi';
 import type { Family, Homebase } from '../../settings/types';
 import { formatDayLabel } from '../../lib/dates';
 import { haversineKm, formatDistance } from '../../lib/geo';
@@ -70,6 +71,16 @@ function visitStatusLabel(current: VisitStatus | undefined): string {
 function priceLevelSymbols(priceLevel: number | undefined, symbol: string): string {
   if (priceLevel === undefined || priceLevel < 1) return '';
   return symbol.repeat(Math.min(4, priceLevel));
+}
+
+/**
+ * Priorisiert Places-API-(New) priceRange ("€30–€50") ueber price_level-Symbole ("€€€").
+ * Fallback-Reihenfolge: priceRange → priceLevel-Symbole → leer.
+ */
+function formatPriceBadge(poi: POI, currencySymbol: string): string {
+  const range = formatPriceRange(poi.priceRange, currencySymbol);
+  if (range) return range;
+  return priceLevelSymbols(poi.priceLevel, currencySymbol);
 }
 
 function VoteRow({
@@ -196,7 +207,7 @@ function CompactCard({
     homebase?.coords && poi.coords
       ? haversineKm(homebase.coords, poi.coords)
       : null;
-  const priceBadge = priceLevelSymbols(poi.priceLevel, currencySymbol);
+  const priceBadge = formatPriceBadge(poi, currencySymbol);
 
   return (
     <article className="flex items-center gap-3 rounded-2xl bg-white p-2 shadow-sm shadow-ink/5 transition hover:shadow-md">
@@ -349,7 +360,7 @@ function FullCard({
   currencySymbol = '€',
 }: PoiCardProps) {
   const [imgFailed, setImgFailed] = useState(false);
-  const priceBadge = priceLevelSymbols(poi.priceLevel, currencySymbol);
+  const priceBadge = formatPriceBadge(poi, currencySymbol);
   const familyName = family?.name ?? 'Unbekannt';
   const familyColor = family?.color ?? '#94999d';
   const distFromHome =
@@ -492,6 +503,11 @@ function FullCard({
             )}
             {priceBadge && (
               <span className="font-semibold text-ink/60">{priceBadge}</span>
+            )}
+            {poi.primaryTypeDisplayName && (
+              <span className="rounded-full bg-ocker/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-ocker">
+                {poi.primaryTypeDisplayName}
+              </span>
             )}
             {(() => {
               const status = getOpenStatus(poi.openingHours);
