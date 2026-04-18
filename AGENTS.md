@@ -468,7 +468,7 @@ Nach `gh release create`:
      | xargs -I{} gh api -X PATCH repos/stekum/roman-holiday-planner/milestones/{} -f state=closed
    ```
 2. **ROADMAP.md:** Release-Sektion bekommt `✅ Released YYYY-MM-DD` Marker im Heading
-3. **Project Board:** keine Änderung nötig (Release-Feld zeigt Major-Linie — siehe Board/Milestone-Konvention unten)
+3. **Project Board:** prüfen ob die Release-Option für diese Version existiert. Falls ja (Normalfall bei Minor/Patch die wir geplant haben) → alle Items des Milestone auf diese Release-Option setzen. Falls nein → Regen-Prozedur (siehe Board/Milestone-Konvention unten). Merke: Board folgt Milestones 1:1, auch bei Patches.
 4. **Optional:** Release-Announcement für Family & Friends (kurze Zusammenfassung der Highlights, siehe v1.5.0-Vorlage in Release-Notes)
 
 ### Leftover-Issues-Playbook
@@ -523,6 +523,37 @@ npm run deploy
 ```
 
 **Milestone-Handling:** Der Milestone des kaputten Release bleibt offen wenn der Fix noch dazu gehört; Release-Notes dokumentieren den Kontext.
+
+---
+
+## CI/CD — Aktueller Stand
+
+Bewusst minimalistisch, dokumentiert damit's nicht als „wir haben CI vergessen" missverstanden wird. Stand 2026-04-18:
+
+| Stufe | Automatisiert? | Wie heute |
+|---|---|---|
+| Pre-Commit Lint | ❌ | manuell `npm run lint` vor Commit |
+| Pre-Commit Build | ❌ | manuell `npm run build` vor Commit |
+| Pre-Commit Secret-Scan | ✅ (lokal) | Semgrep-Hook aus #116 |
+| PR-CI (Build/Lint) | ❌ | Nicht eingerichtet — Agents machen es pro Commit |
+| Beta-Deploy | ❌ | manuell `npm run deploy:beta` nach Merge in `main` |
+| Beta→Prod Gate | ✅ (menschlich) | Stefan testet auf Beta, gibt ok |
+| Production-Deploy | ❌ | manuell `npm run deploy` |
+| Release-Tag | ❌ | manuell `gh release create ... --generate-notes` |
+| Milestone-Close | ❌ | manuell `gh api ... -X PATCH -f state=closed` |
+| E2E-Tests (Playwright) | ❌ | auf Wunsch vom Entwickler lokal; kein Scheduler |
+
+**Was das heisst:** Die gesamte Disziplin liegt beim jeweiligen Agent (Claude Code / Codex) und Stefan. Keine Automation fängt vergessenes Lint oder ungetesteten Deploy. Die harte Regel „Niemals uncommitted deployen" (siehe `## Deployment-Workflow`) ist deswegen so wichtig.
+
+**Warum so minimalistisch:** Bis v2.0 ist das Projekt eine Familien-App, kein produktiv-kritisches System. Automation-Kosten (Einrichtung, Wartung, false positives) würden die Geschwindigkeit mehr bremsen als sie Qualität gewinnen. Sobald v3.0 Multi-Trip live geht, ist der Moment für Auto-Deploy + CI-Pipeline — dann sind auch Fremd-Workspaces betroffen.
+
+**Parken als Future-Work** (siehe v2.0 Milestone):
+- Issue „CI: GitHub Actions Build+Lint auf PR" (S)
+- Issue „CI: Auto-Deploy Beta bei main-Merge" (M)
+- Issue „CI: Playwright E2E im Pipeline" (L) — baut auf #158 auf
+- Issue „CI: Semantic-Release (auto tag + notes)" (M)
+
+Diese Issues werden angelegt sobald diese Sektion greift. Der Agent soll sie **nicht eigenmächtig umsetzen** — CI-Einführung ist eine bewusste Projekt-Entscheidung die Stefan trifft.
 
 ---
 

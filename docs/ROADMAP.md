@@ -92,8 +92,12 @@
 | #137 | Architektur-Dokumentation aufsetzen (aus v1.5) | M | — |
 | #154 | Docs: CarPlay/Android Auto Handoff via Deep-Links (aus v1.5) | S | — |
 | #167 | ~~Places API (New): priceRange + Cuisine-Tags (Upgrade von #34)~~ | M | ✅ |
+| #170 | CI: GitHub Actions Build+Lint auf PR | S | — |
+| #171 | CI: Auto-Deploy Beta bei main-Merge | M | — |
+| #172 | CI: Playwright E2E im Pipeline | L | — |
+| #173 | CI: Semantic-Release (auto tag + notes) | M | — |
 
-**Fokus:** Reise-Features für den praktischen Einsatz + Multi-Trip Infra beginnen + Auth-Provider-Komplettierung.  
+**Fokus:** Reise-Features für den praktischen Einsatz + Multi-Trip Infra beginnen + Auth-Provider-Komplettierung + CI/CD-Fundament.  
 **Release:** `v2.0.0`
 
 ---
