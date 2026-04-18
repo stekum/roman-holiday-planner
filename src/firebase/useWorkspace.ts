@@ -494,6 +494,8 @@ export function useWorkspace(): WorkspaceAPI {
     async (dayIso: string) => {
       await updateDoc(workspaceDocRef(), {
         [`tripPlan.${dayIso}`]: [],
+        [`dayBriefings.${dayIso}`]: '',
+        [`dayDescriptions.${dayIso}`]: '',
       });
     },
     [workspaceDocRef],
