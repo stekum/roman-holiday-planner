@@ -296,7 +296,7 @@ export function DayPlanner({
         summary={summary}
       />
 
-      {dayDescription && (
+      {selected.length > 0 && dayDescription && (
         <div className="rounded-2xl bg-olive/10 px-4 py-3 text-sm text-olive-dark">
           <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-olive/60">
             AI Tagesplan
@@ -473,13 +473,16 @@ function DayBriefingCard({
 }) {
   const [expanded, setExpanded] = useState(false);
 
-  // #169: If no briefing for the current day, return null here (inside the
-  // component) instead of gating the JSX in the parent. Conditional gating
-  // in the parent caused React to mount new instances without unmounting
-  // old ones when dayBriefing flipped truthy/falsy during tab-switches —
-  // 3-6 ghost cards accumulated. Always rendering the component and letting
-  // it return null keeps the React instance stable across briefing changes.
-  if (!briefing) return null;
+  // #169: If no briefing for the current day OR no stops planned, return null
+  // here (inside the component) instead of gating the JSX in the parent.
+  // Conditional gating in the parent caused React to mount new instances
+  // without unmounting old ones when dayBriefing flipped truthy/falsy during
+  // tab-switches — 3-6 ghost cards accumulated. Always rendering the component
+  // and letting it return null keeps the React instance stable across briefing
+  // changes. The `pois.length === 0` check hides stale briefings when the user
+  // empties a day's plan without clicking "Tagesplan leeren" (the stale
+  // Firestore-stored briefing/description would otherwise still show).
+  if (!briefing || pois.length === 0) return null;
 
   const canCollapse = briefing.length > 320;
   const chips = [
