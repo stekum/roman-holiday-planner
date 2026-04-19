@@ -289,15 +289,12 @@ export function DayPlanner({
         homebase={settings.homebase?.coords}
       />
 
-      {dayBriefing && (
-        <DayBriefingCard
-          key={activeDay}
-          briefing={dayBriefing}
-          weather={weather[activeDay]}
-          pois={selected}
-          summary={summary}
-        />
-      )}
+      <DayBriefingCard
+        briefing={dayBriefing}
+        weather={weather[activeDay]}
+        pois={selected}
+        summary={summary}
+      />
 
       {dayDescription && (
         <div className="rounded-2xl bg-olive/10 px-4 py-3 text-sm text-olive-dark">
@@ -475,6 +472,15 @@ function DayBriefingCard({
   summary: Summary | null;
 }) {
   const [expanded, setExpanded] = useState(false);
+
+  // #169: If no briefing for the current day, return null here (inside the
+  // component) instead of gating the JSX in the parent. Conditional gating
+  // in the parent caused React to mount new instances without unmounting
+  // old ones when dayBriefing flipped truthy/falsy during tab-switches —
+  // 3-6 ghost cards accumulated. Always rendering the component and letting
+  // it return null keeps the React instance stable across briefing changes.
+  if (!briefing) return null;
+
   const canCollapse = briefing.length > 320;
   const chips = [
     weather
