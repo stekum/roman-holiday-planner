@@ -23,7 +23,15 @@ Gemeinsames Briefing-Dokument für Codex CLI und Claude Code. Wird automatisch g
    ```
    Wenn Output NICHT leer: released Option hat Farbe verloren. Stefan sofort sagen, nicht stumm leiten. Fix via `./scripts/finalize-release.sh`.
 8. **UI-Anomalie-Prinzip:** Bei „der Badge/Text/Farbe stimmt nicht" zuerst die Source-of-Truth des sichtbaren Elements tracen (Milestone vs. Project-Field-Option vs. Release-Tag vs. Custom-Field), BEVOR eine Mutation geschickt wird. Trace-first, Patch-second.
-9. **Vor jedem Deploy:** siehe 🚨 HARTE REGEL "Niemals uncommitted deployen".
+9. **Roadmap-Scope-Check** (Anti-Chaos, ab 2026-04-19): aktive Milestones dürfen max 5 Items haben. Dormant/opportunistische Milestones (v2.1, v4.0, v4.5) sind ausgenommen.
+   ```bash
+   for m in "v2.0 — Pre-Multi-Trip Foundation" "v3.0-beta — Multi-Trip Architektur" "v3.0 — Japan-Ready" "v3.1 — Trip Essentials post-Japan" "v3.2 — Multi-Trip-Polish vor Rom"; do
+     c=$(gh issue list --repo stekum/roman-holiday-planner --milestone "$m" --state open --json number --jq 'length')
+     if [ "$c" -gt 5 ]; then echo "⚠ $m: $c Items (>5)"; fi
+   done
+   ```
+   Wenn Warnung: Stefan informieren, Split diskutieren. Niemals eigenmächtig Items hinzufügen/entfernen (Memory: feedback_projectv2_field_options).
+10. **Vor jedem Deploy:** siehe 🚨 HARTE REGEL "Niemals uncommitted deployen".
 
 Dieser Check ist billig (≤60 Sekunden) und verhindert fast alle Klassen von Fehlern die wir bisher hatten.
 

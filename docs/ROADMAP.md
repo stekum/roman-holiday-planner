@@ -1,8 +1,14 @@
-# Roadmap — 6-Wochen-Plan (Apr 14 – Mai 23, 2026)
+# Roadmap — Japan als Nordstern, v4.x als Langfrist-Ziel
 
-> **Ziel:** v3.0 Multi-Trip bis Mitte Mai fertig.  
-> **Releases:** Wöchentlich, jeweils Freitag.  
-> **Source of Truth:** [GitHub Project Board](https://github.com/users/stekum/projects/1) + [Milestones](https://github.com/stekum/roman-holiday-planner/milestones)
+> **Nordstern kurzfristig:** Multi-Trip-fähig + Japan-Ready bis **24. Mai 2026** (Japan-Trip startet 25. Mai).
+> **Langfrist-Ziel:** v4.0 App Stores + v4.5 Go-to-Market — mission-critical nach Rom-Trip.
+> **Source of Truth:** Dieses Dokument. GitHub [Milestones](https://github.com/stekum/roman-holiday-planner/milestones) + [Project Board](https://github.com/users/stekum/projects/1) folgen 1:1.
+
+**Anti-Chaos-Regeln (ab Session 2026-04-19):**
+- **Scope-Lock** nach Planung: Keine nachträglichen Items zu laufenden Milestones
+- **Max 5 Items pro Milestone** — sonst Split in Teil-Releases
+- **Jeder Release hat einen 1-Satz-Zweck** (siehe Überschriften). Items die nicht passen → anderer Release
+- ROADMAP.md hat Vorrang; Milestones + Board folgen 1:1
 
 ---
 
@@ -77,71 +83,157 @@
 
 ---
 
-## v2.0 — Travel Essentials + Polish (Ziel: 2. Mai 2026)
+## v2.0 — Pre-Multi-Trip Foundation (Ziel: 26. April 2026)
 
-| Issue | Titel | Size | Prio |
+**Zweck:** CI-Safety-Net aufbauen BEVOR der riskante Multi-Trip-Refactor (#71) startet.
+
+| Issue | Titel | Size | Est. h |
 |---|---|---|---|
-| #51 | ~~Kommentare / Notizen pro POI~~ | S | ✅ |
-| #48 | ~~Budget pro Tag mit Restbudget-Anzeige~~ | S | ✅ |
-| #38 | ~~Besuchsstatus pro POI (✅ Besucht / ⏭️ Übersprungen)~~ | S | ✅ |
-| #34 | ~~Lokale Währung auf POI-Cards (price_level MVP)~~ | S | ✅ |
-| #46 | Packing List (kategorisiert, pro Person) | M | — |
-| #73 | Stadt-Konfiguration (CityConfig statt ROME_CENTER) | M | — |
-| #117 | Hosting-Migration (weg von GitHub Pages) | M | — |
-| #122 | Multi-Language Support (DE + EN) | L | — |
-| #140 | Facebook Sign-In | M | — |
-| #132 | GitHub + Email/Password Sign-In | M | — |
-| #123 | Google Analytics Usage Tracking (aus v1.5 verschoben) | S | — |
-| #133 | Email-Notification an Admin bei neuer Zugriffsanfrage (aus v1.5) | S | — |
-| #137 | Architektur-Dokumentation aufsetzen (aus v1.5) | M | — |
-| #154 | Docs: CarPlay/Android Auto Handoff via Deep-Links (aus v1.5) | S | — |
-| #167 | ~~Places API (New): priceRange + Cuisine-Tags (Upgrade von #34)~~ | M | ✅ |
-| #170 | CI: GitHub Actions Build+Lint auf PR | S | — |
-| #171 | CI: Auto-Deploy Beta bei main-Merge | M | — |
-| #172 | CI: Playwright E2E im Pipeline | L | — |
-| #173 | CI: Semantic-Release (auto tag + notes) | M | — |
+| #170 | CI: GitHub Actions Build+Lint auf PR | S | 2 |
+| #171 | CI: Auto-Deploy Beta bei main-Merge | M | 5 |
 
-**Fokus:** Reise-Features für den praktischen Einsatz + Multi-Trip Infra beginnen + Auth-Provider-Komplettierung + CI/CD-Fundament.  
-**Release:** `v2.0.0`
+**2 Items, ~7h. 1 Woche entspannt.**
+
+**Bereits shipped ohne eigenes Release** (Commits 2026-04-14 bis -18): #51 Kommentare · #48 Budget · #38 Besuchsstatus · #34 Currency · #167 Places API (New)
+
+**Aus v2.0 verschoben (siehe jeweilige neue Section unten):**
+- #172, #173, #117, #123, #133, #137, #154 → v2.1 (DevOps opportunistisch)
+- #73 → v3.0 (Japan-Ready, Multi-Trip-Foundation)
+- #122 → v3.2 (Multi-Trip-Polish)
+- #46 → v3.1 (Trip-Essentials, post-Japan informiert)
+- #132, #140 → Deferred (nicht Familien-kritisch)
+
+**Release:** `v2.0.0` — 26. Apr 2026.
 
 ---
 
-## v3.0-beta — Multi-Trip Core (Ziel: 9. Mai 2026)
+## v3.0-beta — Multi-Trip Architektur (Ziel: 10. Mai 2026)
 
-| Issue | Titel | Size | Prio |
-|---|---|---|---|
-| #71 | Dynamischer workspaceId (Listener-Switch) | L | **critical** |
-| #70 | Trip-Selector UI (Dropdown/Modal beim App-Start) | M | high |
-| #72 | Trip-Erstellung Wizard | M | high |
+**Zweck:** Architektur von Single-Workspace auf Trip-fähig umstellen. Der kritische Refactor.
 
-**Fokus:** Technisches Fundament für Multi-Trip. #71 ist der kritische Pfad.  
-**Release:** `v3.0.0-beta.1` (Beta-only, nicht Production)
+| Issue | Titel | Size | Est. h | Prio |
+|---|---|---|---|---|
+| #71 | Dynamischer workspaceId (Listener-Switch) | L | 15 | **critical** |
+| #70 | Trip-Selector UI (Basic: Dropdown im Header) | M | 5 | high |
 
----
+**2 Items, ~20h. 2 Wochen.**
 
-## v3.0 — Multi-Trip Complete (Ziel: 16. Mai 2026)
+**Scope-Lock:** #72 Trip-Wizard NICHT hier (Stefan kann manuell via Firestore). Verschoben zu v3.2.
 
-| Issue | Titel | Size | Prio |
-|---|---|---|---|
-| #74 | Mehrere Homebases pro Trip (datums-basiert) | M | high |
-| #78 | Transit-Tage (Reisetage zwischen Städten) | M | — |
-| #79 | Trip-Archivierung (erledigte Trips ausblenden) | S | — |
+**Safety-Net:** Durch v2.0-CI wird jeder PR automatisch gebaut+gelintet. Refactor läuft nicht „blind".
 
-**Fokus:** Multi-Trip Feature-Complete. Intensives Testen.  
-**Release:** `v3.0.0` → **Production-Deploy Freitag 16. Mai**
+**Release:** `v3.0.0-beta.1` — 10. Mai 2026. Beta-only, nicht Production.
 
 ---
 
-## Buffer + Polish (19.–23. Mai, reserved)
+## v3.0 — Japan-Ready (Ziel: 24. Mai 2026)
 
-| Issue | Titel | Size | Prio |
+**Zweck:** Features die Japan-Trip (25.-31. Mai) technisch ermöglichen.
+
+| Issue | Titel | Size | Est. h |
 |---|---|---|---|
-| — | Slipped Items aus Woche 4/5 | — | high |
-| #45 | Dokumente-Tresor (Reisepass, Buchungen) | M | — |
-| #50 | Aktivitäts-Feed (wer hat was geändert) | M | — |
+| #73 | Stadt-Konfiguration (CityConfig statt ROME_CENTER) | M | 6 |
+| #74 | Multi-Homebase pro Trip (datumsbasiert) | M | 6 |
+| #78 | Transit-Tage (Reisetage zwischen Städten) | M | 6 |
+| #113 | Auth: User-Profil + Workspace-Zuordnung (Multi-Trip-Access) | M | 6 |
 
-**Fokus:** Buffer für verschobene Multi-Trip Items. Wenn v3.0 steht → Polish-Features.  
-**Release:** `v3.0.1` oder `v3.1.0`
+**4 Items, ~24h. 2 Wochen + Buffer.**
+
+**Japan-Use-Case:** Tokyo/Kyoto/Osaka als 3 Homebases, Shinkansen-Tage als Transit zwischen Cities, POI-Suchen pro Stadt statt Rom-zentriert.
+
+**Scope-Lock:** #79 Archivierung verschoben zu v3.2 (nicht Japan-kritisch bei nur 2 Trips).
+
+**Release:** `v3.0.0` — 24. Mai 2026. **Production-Deploy, 1 Tag vor Japan-Abreise.**
+
+---
+
+## Japan-Trip — Real-World-Test (25.–31. Mai 2026)
+
+Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unter realen Bedingungen auftauchen. Erkenntnisse informieren v3.1.
+
+---
+
+## v3.1 — Trip Essentials post-Japan (Ziel: 1. August 2026)
+
+**Zweck:** Reise-Essentials bauen — informiert durch Japan-Erfahrung, nicht aus Blind-Planung.
+
+| Issue | Titel | Size | Herkunft |
+|---|---|---|---|
+| #46 | Packing List (kategorisiert, pro Person) | M | verschoben aus v2.0 |
+| #44 | Notfall-Dashboard | M | aus Deferred |
+| #45 | Dokumente-Tresor (Reisepass, Buchungen) | M | aus Buffer |
+| #50 | Aktivitäts-Feed (wer hat was geändert) | M | aus Buffer |
+
+**4 Items.** Scope vor Phase-Start ggf. nochmal mit Japan-Learnings angepasst.
+
+**Release:** `v3.1.0` — 1. Aug 2026.
+
+---
+
+## v3.2 — Multi-Trip-Polish vor Rom (Ziel: 30. September 2026)
+
+**Zweck:** Quality-of-Life für etablierte Multi-Trip-Nutzer + Rom-Prep.
+
+| Issue | Titel | Size | Herkunft |
+|---|---|---|---|
+| #79 | Trip-Archivierung | S | aus v3.0 |
+| #72 | Trip-Erstellungs-Wizard | M | aus v3.0-beta |
+| #122 | Multi-Language Support (DE + EN + evtl. JP) | L | aus v2.0 |
+
+**3 Items, bis ~25h.**
+
+**Release:** `v3.2.0` — 30. Sep 2026.
+
+---
+
+## Rom-Trip (Herbst 2026)
+
+Zweiter Multi-Trip auf gereifter Architektur. App-Stand: v3.2. Bugs während Rom-Trip → `v3.2.x`-Patches.
+
+---
+
+## v4.0 — App Stores & Native Platforms (Ziel: Q1 2027)
+
+**Zweck:** Aus der PWA eine native iOS/Android-App machen. Voraussetzung für Monetarisierung + breiteren Launch.
+
+**Kern-Umbau:** Capacitor wrapping, Native Plugins, Store-Listings, Push-Notifications, Datenschutz.
+
+| Issue | Titel | Size | Kategorie |
+|---|---|---|---|
+| #80 | Capacitor Integration (iOS + Android Wrapping) | L | Infra |
+| #81 | iOS Build + TestFlight Setup | M | Infra |
+| #82 | Android Build + Play Console Setup | M | Infra |
+| #83 | Native Plugins: Camera, Share, Geolocation | M | Native |
+| #84 | Native Push Notifications | M | Native |
+| #85 | Offline-Mode + Background-Sync | L | Native |
+| #86 | App-Icon + Splash-Screen (iOS + Android) | S | Assets |
+| #87 | In-App-Purchase-Setup (Placeholder für #143) | M | Monetization Prep |
+| #88 | App-Store-Review-Prep (Privacy, Screenshots) | M | Launch |
+| #89 | Datenschutzerklärung + AGB (Legal für Stores) | M | Legal |
+| #114 | Apple Sign-In (Apple-Pflicht für iOS-Release) | M | Auth |
+| #155 | Native CarPlay + Android Auto Itinerary Viewer | L | Native |
+
+**Abhängigkeiten:** Apple Developer Account ($99/Jahr), Google Play Developer ($25 einmalig).
+
+**Release:** `v4.0.0` — Q1 2027. Meilenstein vor v4.5 GTM.
+
+---
+
+## v2.1 — DevOps + Ops (opportunistisch, ohne Deadline)
+
+**Zweck:** DevOps-Items die nicht Japan-kritisch sind. Parallel zu v3.x wenn Zeit.
+
+| Issue | Titel | Size |
+|---|---|---|
+| #172 | CI: Playwright E2E im Pipeline | L |
+| #173 | CI: Semantic-Release (auto tag + notes) | M |
+| #117 | Hosting-Migration (weg von GitHub Pages) | M |
+| #123 | Google Analytics Usage Tracking (Pre-GTM Baseline) | S |
+| #133 | Email-Notification bei Zugriffsanfrage | S |
+| #137 | Architektur-Dokumentation | M |
+| #154 | Docs: CarPlay/Android Auto Handoff | S |
+
+**Release:** `v2.1.x` — flexibel, Stücke als Patches.
 
 ---
 
@@ -166,24 +258,23 @@ Bündelt alle Issues rund um Monetarisierung, Marketing und professionellen Laun
 
 ---
 
-## Deferred (nach der Reise)
+## Deferred (kleinere nicht-zeitkritische Items)
 
-| Issue | Titel | Milestone |
+| Issue | Titel | Einsatzkontext |
 |---|---|---|
-| #42 | ~~AI NL-Suche mit Kontext~~ → **Kontext-Erweiterung, geschlossen als Duplicate von #13** | — |
-| #16 | Smarter Instagram-Import | v1.5 |
-| #43 | AI: Was wir verpasst haben (Post-Trip) | v1.5 |
-| #47 | Expense Tracker | v2.0 |
-| #49 | Familien-Split | v2.0 |
-| #132 | Auth: GitHub + Email/Password Sign-In | v2.0 |
-| #140 | Auth: Facebook Sign-In | v2.0 |
-| #44 | Notfall-Dashboard | v2.0 |
-| #39 | Reise-Statistik | v2.0 |
-| #40 | GPS-Tracking | v2.0 |
-| #114 | Apple Sign-In (braucht Apple Developer Account $99/Jahr) | v4.0 |
-| #80–#89 | App Stores (Capacitor) | v4.0 |
-| #155 | Native CarPlay + Android Auto Itinerary Viewer (depends on Capacitor + CarPlay Entitlement) | v4.0 |
-| #142-#150 | Go-to-Market (Pricing, Marketing, Launch) | v4.5 |
+| #42 | ~~AI NL-Suche mit Kontext~~ → geschlossen als Duplicate von #13 | — |
+| #132 | Auth: GitHub + Email/Password Sign-In | Wenn User ausserhalb Google/Microsoft-Ökosystem kommen |
+| #140 | Auth: Facebook Sign-In | Wenn public Launch das erfordert |
+| #47 | Expense Tracker | Post-Japan zu bewerten |
+| #49 | Familien-Split | Post-Japan zu bewerten |
+| #39 | Reise-Statistik | Post-Rom |
+| #40 | GPS-Tracking | Post-Rom |
+
+**Nicht mehr hier gelistet** (haben jetzt eigene Section, siehe oben):
+- #16, #43, #169 → v1.5.1 (AI Follow-ups Patch)
+- #44 Notfall · #45 Docs-Tresor · #46 Packing · #50 Activity-Feed → v3.1
+- #80–#89, #114, #155 → v4.0 (App Stores & Native)
+- #142–#150 → v4.5 (Go-to-Market)
 
 ---
 
@@ -191,6 +282,11 @@ Bündelt alle Issues rund um Monetarisierung, Marketing und professionellen Laun
 
 | Risiko | Impact | Mitigation |
 |---|---|---|
-| #71 (dynamischer workspaceId) dauert länger als geplant | v3.0 verzögert sich | Woche 6 als Buffer; notfalls #78 + #79 nach v3.0.1 verschieben |
-| Google Places API Quota-Limits bei AI-Features | AI-Suche funktioniert nicht zuverlässig | Rate-Limiting + Caching implementieren |
-| Firebase Security Rules bei Multi-Workspace | Datenleck zwischen Workspaces | Security Rules vor v3.0-beta Review mit Stefan |
+| **#71 (L) slippt → v3.0-beta spät** | v3.0 nicht rechtzeitig für Japan | v2.0-CI früh fertig → fokussiertes Arbeiten. Fallback: #71 mit hardcoded-fallback, Trip-Selector minimal |
+| **v3.0 slippt → Japan ohne Multi-Trip** | Japan mit Single-Workspace-Workaround | Plan B: einzelner Tokyo-Workspace mit #73 + #74 als Single-Trip-Clone |
+| **#169 (Multi-Mount-Bug) bleibt open** | AI-Briefing unbenutzbar während Japan | Time-boxed Fix-Attempt. Notfalls Feature bis nach Japan deaktivieren |
+| **CI #170/#171 braucht länger** | v2.0 slippt → v3.0-beta verschoben | S+M-size, realistisch in 1 Woche |
+| Firebase Security Rules bei Multi-Trip | Datenleck zwischen Trips | Rules Review vor v3.0-beta Beta-Deploy |
+| Google Places API Quota bei Multi-Trip | Mehr POI-Suchen als vorher | Rate-Limit + Caching vorhanden, für Japan nochmal validieren |
+| v4.0 App Store Review Delays | Native Launch verzögert | 4-6 Wochen Puffer nach v4.0-Submit |
+| v4.5 GTM startet ohne Datenbasis | Pricing/Marketing-Hypothesen nicht evidence-based | #123 Analytics aus v2.1 sammelt 6+ Monate Baseline bis v4.5 aktiv |
