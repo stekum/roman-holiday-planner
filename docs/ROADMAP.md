@@ -71,28 +71,30 @@
 
 ---
 
-## v1.5.1 — AI Follow-ups (Patch, TBD)
+## v1.5.1 — AI Briefing Ghost-Mount Fix ✅ Released 2026-04-19
 
-| Issue | Titel | Size | Prio |
+| Issue | Titel | Size | Status |
 |---|---|---|---|
-| #16 | Smarter Instagram-Import: extrahiert Ortsnamen aus Captions | M | — |
-| #43 | AI: Was wir verpasst haben (Post-Trip-Analyse) | M | — |
-| #169 | Bug: AI Tages-Briefing rendert mehrfach + falscher Tag-Content | S | — |
+| #169 | ~~Bug: AI Tages-Briefing rendert mehrfach + falscher Tag-Content~~ | S | ✅ |
+| #16 | Smarter Instagram-Import: extrahiert Ortsnamen aus Captions | L | → v2.0 verschoben |
+| #43 | AI: Was wir verpasst haben (Post-Trip-Analyse) | M | → v2.0 verschoben |
 
-**Fokus:** Nachgezogene AI-Features aus v1.5 + Bugfix. Kleines Patch-Release ohne Deadline — wird eingeplant wenn zwischen v2.0-Features Zeit ist.
+**Release:** [`v1.5.1`](https://github.com/stekum/roman-holiday-planner/releases/tag/v1.5.1) — 19. Apr 2026. Enthielt primär den #169-Fix (Ghost-Mount-Bug in DayBriefingCard). #16 + #43 nach v2.0 verschoben — beides L-/M-Features die mehr Scope brauchen als ein Patch-Release hergibt.
 
 ---
 
-## v2.0 — Pre-Multi-Trip Foundation (Ziel: 26. April 2026)
+## v2.0 — Pre-Multi-Trip Foundation + AI Follow-ups (Ziel: 26. April 2026)
 
-**Zweck:** CI-Safety-Net aufbauen BEVOR der riskante Multi-Trip-Refactor (#71) startet.
+**Zweck:** CI-Safety-Net aufbauen BEVOR der riskante Multi-Trip-Refactor (#71) startet + nachgezogene AI-Features aus v1.5 die zu gross für v1.5.1-Patch waren.
 
 | Issue | Titel | Size | Est. h |
 |---|---|---|---|
 | #170 | CI: GitHub Actions Build+Lint auf PR | S | 2 |
 | #171 | CI: Auto-Deploy Beta bei main-Merge | M | 5 |
+| #16 | Smarter Instagram-Import (Gemini Ortsnamen-Extraktion aus Captions) | L | 8 |
+| #43 | AI: Was wir verpasst haben (Post-Trip-Analyse) | M | 5 |
 
-**2 Items, ~7h. 1 Woche entspannt.**
+**4 Items, ~20h. 1-1.5 Wochen.**
 
 **Bereits shipped ohne eigenes Release** (Commits 2026-04-14 bis -18): #51 Kommentare · #48 Budget · #38 Besuchsstatus · #34 Currency · #167 Places API (New)
 

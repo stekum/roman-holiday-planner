@@ -248,7 +248,7 @@ fi
 echo ""
 echo "→ Assertion: verifiziere target-Option state…"
 VERIFY=$(gh api graphql -f query="{ node(id: \"$RELEASE_FIELD_ID\") { ... on ProjectV2SingleSelectField { options { name color description } } } }" \
-  --jq --arg v "$VERSION" '.data.node.options[] | select(.name == $v) | "\(.color)|\(.description)"')
+  | jq -r --arg v "$VERSION" '.data.node.options[] | select(.name == $v) | "\(.color)|\(.description)"')
 
 V_COLOR="${VERIFY%%|*}"
 V_DESC="${VERIFY#*|}"
