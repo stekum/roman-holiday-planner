@@ -29,6 +29,7 @@ interface WorkspaceDoc {
   dayDescriptions: Record<string, string>; // ISO date → AI-generated overview text
   dayBriefings: Record<string, string>; // ISO date → AI-generated day briefing
   dayBudgets: Record<string, DayBudget>; // ISO date → {budget, spent} (#48)
+  postTripAnalysis: string; // AI-generated summary von was beim naechsten Trip zu tun ist (#43)
 }
 
 export interface WorkspaceAPI {
@@ -77,6 +78,8 @@ export interface WorkspaceAPI {
   getDayBriefing: (dayIso: string) => string;
   setDayBudget: (dayIso: string, budget: DayBudget) => Promise<void>;
   getDayBudget: (dayIso: string) => DayBudget | undefined;
+  setPostTripAnalysis: (analysis: string) => Promise<void>;
+  postTripAnalysis: string;
   clearDay: (dayIso: string) => Promise<void>;
   removePoiFromAll: (poiId: string) => Promise<void>;
 
@@ -115,6 +118,7 @@ export function useWorkspace(): WorkspaceAPI {
     dayDescriptions: {},
     dayBriefings: {},
     dayBudgets: {},
+    postTripAnalysis: '',
   });
 
   // --- Subscribe on mount ---
@@ -143,6 +147,7 @@ export function useWorkspace(): WorkspaceAPI {
                 dayDescriptions: {},
                 dayBriefings: {},
                 dayBudgets: {},
+                postTripAnalysis: '',
                 createdAt: Date.now(),
               });
               return;
@@ -154,6 +159,7 @@ export function useWorkspace(): WorkspaceAPI {
               dayDescriptions: data.dayDescriptions ?? {},
               dayBriefings: data.dayBriefings ?? {},
               dayBudgets: data.dayBudgets ?? {},
+              postTripAnalysis: data.postTripAnalysis ?? '',
             });
             setStatus('ready');
           },
@@ -490,6 +496,15 @@ export function useWorkspace(): WorkspaceAPI {
     [doc_.dayBudgets],
   );
 
+  const setPostTripAnalysis = useCallback(
+    async (analysis: string) => {
+      await updateDoc(workspaceDocRef(), {
+        postTripAnalysis: analysis,
+      });
+    },
+    [workspaceDocRef],
+  );
+
   const clearDay = useCallback(
     async (dayIso: string) => {
       await updateDoc(workspaceDocRef(), {
@@ -570,6 +585,8 @@ export function useWorkspace(): WorkspaceAPI {
     getDayBriefing,
     setDayBudget,
     getDayBudget,
+    setPostTripAnalysis,
+    postTripAnalysis: doc_.postTripAnalysis,
     clearDay,
     removePoiFromAll,
     migrateFromLocal,
