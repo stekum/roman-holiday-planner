@@ -11,6 +11,7 @@ import { DayTabs } from './DayTabs';
 import { RouteSummary } from './RouteSummary';
 import { AiDayPlannerModal } from './AiDayPlannerModal';
 import { AiKidFriendlyPanel } from './AiKidFriendlyPanel';
+import { AiPostTripPanel } from './AiPostTripPanel';
 import { DayBudgetCard } from './DayBudgetCard';
 import { getTripConfig, currencyFromCountry } from '../../settings/tripConfig';
 import type { DayBudget } from '../../firebase/useWorkspace';
@@ -52,6 +53,9 @@ interface Props {
   dayBudget?: DayBudget;
   /** Tages-Budget setzen/aktualisieren. */
   onSetDayBudget: (dayIso: string, b: DayBudget) => void;
+  /** Post-Trip-Analyse (#43) — trip-weit, nicht pro Tag. */
+  postTripAnalysis: string;
+  onSavePostTripAnalysis: (analysis: string) => void | Promise<void>;
 }
 
 export function DayPlanner({
@@ -79,6 +83,8 @@ export function DayPlanner({
   onAddPoi,
   dayBudget,
   onSetDayBudget,
+  postTripAnalysis,
+  onSavePostTripAnalysis,
 }: Props) {
   const routesLib = useMapsLibrary('routes');
   const [optimizing, setOptimizing] = useState(false);
@@ -413,6 +419,14 @@ export function DayPlanner({
           })}
         </ol>
       )}
+
+      <AiPostTripPanel
+        pois={pois}
+        families={settings.families}
+        settings={settings}
+        analysis={postTripAnalysis}
+        onSave={onSavePostTripAnalysis}
+      />
 
       <AiDayPlannerModal
         open={aiModalOpen}

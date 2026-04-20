@@ -128,6 +128,8 @@ function AppInner({ user }: AppInnerProps) {
     getDayBriefing,
     setDayBudget,
     getDayBudget,
+    setPostTripAnalysis,
+    postTripAnalysis,
     clearDay,
     removePoiFromAll,
   } = workspace;
@@ -478,6 +480,8 @@ function AppInner({ user }: AppInnerProps) {
               onAddPoi={handleAddPoi}
               dayBudget={activeDay ? getDayBudget(activeDay) : undefined}
               onSetDayBudget={(dayIso, b) => void setDayBudget(dayIso, b)}
+              postTripAnalysis={postTripAnalysis}
+              onSavePostTripAnalysis={(text) => void setPostTripAnalysis(text)}
             />
           )}
           {tab === 'settings' && (
