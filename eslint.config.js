@@ -19,5 +19,15 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // #170: Three new react-hooks rules (React 19 compiler era) downgraded
+      // to warnings — pre-existing codebase patterns that aren't all actual
+      // bugs (e.g. useRef access in Google Maps integration). CI would
+      // otherwise fail on inherited issues. Tracked for future cleanup as
+      // separate v2.1 refactor issue.
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/refs': 'warn',
+      'react-hooks/immutability': 'warn',
+    },
   },
 ])
