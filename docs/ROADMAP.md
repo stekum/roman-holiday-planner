@@ -271,6 +271,10 @@ Bündelt alle Issues rund um Monetarisierung, Marketing und professionellen Laun
 | #49 | Familien-Split | Post-Japan zu bewerten |
 | #39 | Reise-Statistik | Post-Rom |
 | #40 | GPS-Tracking | Post-Rom |
+| #20 | Kid-Friendly-Score pro POI | parked 2026-04-20 — nicht sicher ob gewollt |
+| #21 | Alters-Filter für POI-Liste | parked 2026-04-20 — pick-up-bei-Langeweile |
+| #22 | Pausen-Planer: automatische Downtime-Slots | parked 2026-04-20 — pick-up-bei-Langeweile |
+| #24 | Schatzsuche-Modus (Gamification für Kinder) | parked 2026-04-20 — nicht sicher ob gewollt |
 
 **Nicht mehr hier gelistet** (haben jetzt eigene Section, siehe oben):
 - #16, #43, #169 → v1.5.1 (AI Follow-ups Patch)
