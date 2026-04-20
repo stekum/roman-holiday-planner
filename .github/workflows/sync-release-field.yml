@@ -1,0 +1,99 @@
+name: Sync Release Field
+
+on:
+  issues:
+    types: [opened, milestoned, demilestoned]
+
+concurrency:
+  group: sync-release-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    name: Sync milestone to Project Release field
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Sync
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_SYNC_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ACTION: ${{ github.event.action }}
+          MILESTONE_TITLE: ${{ github.event.issue.milestone.title }}
+          REPO: ${{ github.repository }}
+          PROJECT_ID: PVT_kwHOALePRc4BUPjL
+        run: |
+          set -euo pipefail
+
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "::error::PROJECT_SYNC_TOKEN secret not configured. Create a fine-grained PAT with Projects:read+write and add it as a repo secret."
+            exit 1
+          fi
+
+          VERSION=""
+          if [ "$ACTION" != "demilestoned" ] && [ -n "${MILESTONE_TITLE:-}" ]; then
+            VERSION=$(printf '%s' "$MILESTONE_TITLE" | grep -oE '^v[0-9]+(\.[0-9]+)+(-[a-z]+)?' || true)
+            if [ -z "$VERSION" ]; then
+              echo "::warning::Could not extract version from milestone — skipping"
+              exit 0
+            fi
+          fi
+
+          ISSUE_NODE=$(gh api "repos/$REPO/issues/$ISSUE_NUMBER" --jq '.node_id')
+
+          FIELDS=$(gh api graphql -f query='
+            query($p: ID!) {
+              node(id: $p) {
+                ... on ProjectV2 {
+                  fields(first: 30) {
+                    nodes {
+                      ... on ProjectV2SingleSelectField {
+                        id name options { id name }
+                      }
+                    }
+                  }
+                }
+              }
+            }' -f p="$PROJECT_ID")
+
+          FIELD_ID=$(printf '%s' "$FIELDS" | jq -r '.data.node.fields.nodes[] | select(.name=="Release") | .id')
+          if [ -z "$FIELD_ID" ] || [ "$FIELD_ID" = "null" ]; then
+            echo "::error::Release field not found on project $PROJECT_ID"
+            exit 1
+          fi
+
+          ITEM_ID=$(gh api graphql -f query='
+            mutation($p: ID!, $c: ID!) {
+              addProjectV2ItemById(input: {projectId: $p, contentId: $c}) {
+                item { id }
+              }
+            }' -f p="$PROJECT_ID" -f c="$ISSUE_NODE" --jq '.data.addProjectV2ItemById.item.id')
+
+          echo "Issue #$ISSUE_NUMBER → item $ITEM_ID (action: $ACTION)"
+
+          if [ "$ACTION" = "demilestoned" ] || [ -z "$VERSION" ]; then
+            gh api graphql -f query='
+              mutation($p: ID!, $i: ID!, $f: ID!) {
+                clearProjectV2ItemFieldValue(input: {projectId: $p, itemId: $i, fieldId: $f}) {
+                  projectV2Item { id }
+                }
+              }' -f p="$PROJECT_ID" -f i="$ITEM_ID" -f f="$FIELD_ID" >/dev/null
+            echo "Cleared Release on item $ITEM_ID"
+          else
+            OPTION_ID=$(printf '%s' "$FIELDS" | jq -r --arg v "$VERSION" '.data.node.fields.nodes[] | select(.name=="Release") | .options[] | select(.name==$v) | .id')
+            if [ -z "$OPTION_ID" ] || [ "$OPTION_ID" = "null" ]; then
+              echo "::warning::No Release option matches version — skipping field update (issue still added to board)"
+              exit 0
+            fi
+            gh api graphql -f query='
+              mutation($p: ID!, $i: ID!, $f: ID!, $o: String!) {
+                updateProjectV2ItemFieldValue(input: {projectId: $p, itemId: $i, fieldId: $f, value: {singleSelectOptionId: $o}}) {
+                  projectV2Item { id }
+                }
+              }' -f p="$PROJECT_ID" -f i="$ITEM_ID" -f f="$FIELD_ID" -f o="$OPTION_ID" >/dev/null
+            echo "Set Release on item $ITEM_ID"
+          fi
