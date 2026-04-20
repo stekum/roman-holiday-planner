@@ -24,6 +24,7 @@
     "e2e:issue-34": "node e2e/issue-34-local-currency.e2e.js",
     "e2e:issue-167": "node e2e/issue-167-places-enrichment.e2e.js",
     "e2e:issue-43": "node e2e/issue-43-post-trip-analysis.e2e.js",
+    "e2e:issue-16": "node e2e/issue-16-instagram-ai-locations.e2e.js",
     "test:briefing-dedup": "npx tsx scripts/test-briefing-dedup.ts",
     "prepare": "husky"
   },

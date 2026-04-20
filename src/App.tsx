@@ -505,6 +505,7 @@ function AppInner({ user }: AppInnerProps) {
         <AddPoiMenu
           families={settings.families}
           tripConfig={getTripConfig(settings)}
+          homebaseCoords={settings.homebase?.coords}
           mode={addMode}
           setMode={(m) => {
             setAddMode(m);
