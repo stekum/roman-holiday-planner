@@ -161,12 +161,13 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 
 | Issue | Titel | Size | Herkunft |
 |---|---|---|---|
+| #33 | Zeitzonen-Awareness (lokale + Heimatzeit) | M | aus v2.0, WIP-Stash vorhanden |
 | #46 | Packing List (kategorisiert, pro Person) | M | verschoben aus v2.0 |
 | #44 | Notfall-Dashboard | M | aus Deferred |
 | #45 | Dokumente-Tresor (Reisepass, Buchungen) | M | aus Buffer |
 | #50 | Aktivitäts-Feed (wer hat was geändert) | M | aus Buffer |
 
-**4 Items.** Scope vor Phase-Start ggf. nochmal mit Japan-Learnings angepasst.
+**5 Items.** Scope vor Phase-Start ggf. nochmal mit Japan-Learnings angepasst.
 
 **Release:** `v3.1.0` — 1. Aug 2026.
 
