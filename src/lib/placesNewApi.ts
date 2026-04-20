@@ -51,12 +51,30 @@ function parsePriceMoney(money: ApiPriceMoney | undefined): { amount?: number; c
   };
 }
 
+// #178: Session-level cache — gleicher placeId wird nie doppelt gefetched,
+// auch bei parallelen Calls (gemeinsames Promise).
+const ENRICHMENT_CACHE = new Map<string, Promise<PlaceEnrichment>>();
+
 export async function fetchPlaceEnrichment(placeId: string): Promise<PlaceEnrichment> {
+  if (!placeId) return {};
+
+  const cached = ENRICHMENT_CACHE.get(placeId);
+  if (cached) return cached;
+
   const apiKey = (
     import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined
   )?.trim();
-  if (!apiKey || !placeId) return {};
+  if (!apiKey) return {};
 
+  const promise = fetchPlaceEnrichmentUncached(placeId, apiKey);
+  ENRICHMENT_CACHE.set(placeId, promise);
+  return promise;
+}
+
+async function fetchPlaceEnrichmentUncached(
+  placeId: string,
+  apiKey: string,
+): Promise<PlaceEnrichment> {
   try {
     const res = await fetch(
       `https://places.googleapis.com/v1/places/${placeId}`,
