@@ -235,6 +235,7 @@ Zweiter Multi-Trip auf gereifter Architektur. App-Stand: v3.2. Bugs während Rom
 | #133 | Email-Notification bei Zugriffsanfrage | S |
 | #137 | Architektur-Dokumentation | M |
 | #154 | Docs: CarPlay/Android Auto Handoff | S |
+| #178 | perf: API-Call-Caching (fetchPlaceEnrichment + RoutePolyline) — ~€20/Monat Ersparnis | S |
 
 **Release:** `v2.1.x` — flexibel, Stücke als Patches.
 
