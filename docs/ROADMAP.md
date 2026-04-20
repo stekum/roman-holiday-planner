@@ -92,7 +92,7 @@
 | #170 | ~~CI: GitHub Actions Build+Lint auf PR~~ | S | ✅ |
 | #171 | CI: Auto-Deploy Beta bei main-Merge | M | 5 |
 | #16 | Smarter Instagram-Import (Gemini Ortsnamen-Extraktion aus Captions) | L | 8 |
-| #43 | AI: Was wir verpasst haben (Post-Trip-Analyse) | M | 5 |
+| #43 | ~~AI: Was wir verpasst haben (Post-Trip-Analyse)~~ | M | ✅ |
 
 **4 Items, ~20h. 1-1.5 Wochen.**
 
