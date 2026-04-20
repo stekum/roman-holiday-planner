@@ -1,0 +1,45 @@
+name: Deploy Beta
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Only one beta-deploy at a time; a newer push replaces an in-flight deploy
+concurrency:
+  group: deploy-beta
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    name: Build + Publish to gh-pages/beta
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Build (beta base path)
+        run: npm run build:beta
+
+      - name: Publish to gh-pages /beta
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./dist
+          destination_dir: beta
+          keep_files: false
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'deploy: beta from ${{ github.sha }}'
