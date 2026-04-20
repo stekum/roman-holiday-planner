@@ -83,18 +83,18 @@
 
 ---
 
-## v2.0 — Pre-Multi-Trip Foundation + AI Follow-ups (Ziel: 26. April 2026)
+## v2.0 — Pre-Multi-Trip Foundation + AI Follow-ups ✅ Released 2026-04-20
 
 **Zweck:** CI-Safety-Net aufbauen BEVOR der riskante Multi-Trip-Refactor (#71) startet + nachgezogene AI-Features aus v1.5 die zu gross für v1.5.1-Patch waren.
 
-| Issue | Titel | Size | Est. h |
+| Issue | Titel | Size | Status |
 |---|---|---|---|
 | #170 | ~~CI: GitHub Actions Build+Lint auf PR~~ | S | ✅ |
 | #171 | ~~CI: Auto-Deploy Beta bei main-Merge~~ | M | ✅ |
-| #16 | Smarter Instagram-Import (Gemini Ortsnamen-Extraktion aus Captions) | L | 8 |
+| #16 | ~~Smarter Instagram-Import (Gemini Ortsnamen-Extraktion aus Captions)~~ | L | ✅ |
 | #43 | ~~AI: Was wir verpasst haben (Post-Trip-Analyse)~~ | M | ✅ |
 
-**4 Items, ~20h. 1-1.5 Wochen.**
+**Release:** [`v2.0.0`](https://github.com/stekum/roman-holiday-planner/releases/tag/v2.0.0) — 20. Apr 2026. 4/4 Items geshippt in 1 Tag (statt ursprünglich geplanten 6 Tagen).
 
 **Bereits shipped ohne eigenes Release** (Commits 2026-04-14 bis -18): #51 Kommentare · #48 Budget · #38 Besuchsstatus · #34 Currency · #167 Places API (New)
 
