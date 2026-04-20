@@ -41,13 +41,20 @@ jobs:
           VITE_GEMINI_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}
           VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
         run: |
-          for var in VITE_FIREBASE_API_KEY VITE_FIREBASE_AUTH_DOMAIN \
-                     VITE_FIREBASE_PROJECT_ID VITE_FIREBASE_STORAGE_BUCKET \
-                     VITE_FIREBASE_MESSAGING_SENDER_ID VITE_FIREBASE_APP_ID \
-                     VITE_FIREBASE_WORKSPACE_ID VITE_GEMINI_API_KEY \
-                     VITE_GOOGLE_MAPS_API_KEY; do
-            printf '%s=%s\n' "$var" "${!var}" >> .env.local
-          done
+          cat > .env.local <<ENVFILE
+          VITE_FIREBASE_API_KEY=$VITE_FIREBASE_API_KEY
+          VITE_FIREBASE_AUTH_DOMAIN=$VITE_FIREBASE_AUTH_DOMAIN
+          VITE_FIREBASE_PROJECT_ID=$VITE_FIREBASE_PROJECT_ID
+          VITE_FIREBASE_STORAGE_BUCKET=$VITE_FIREBASE_STORAGE_BUCKET
+          VITE_FIREBASE_MESSAGING_SENDER_ID=$VITE_FIREBASE_MESSAGING_SENDER_ID
+          VITE_FIREBASE_APP_ID=$VITE_FIREBASE_APP_ID
+          VITE_FIREBASE_WORKSPACE_ID=$VITE_FIREBASE_WORKSPACE_ID
+          VITE_GEMINI_API_KEY=$VITE_GEMINI_API_KEY
+          VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY
+          ENVFILE
+          echo "Wrote $(wc -l < .env.local) lines, $(wc -c < .env.local) bytes"
+          echo "Key names: $(cut -d= -f1 .env.local | tr '\n' ' ')"
+          awk -F= '{ if (length($2) < 5) { print "FAIL: " $1 " value too short"; exit 1 } } END { print "All " NR " values are non-trivial length" }' .env.local
 
       - name: Build (beta base path)
         env:
