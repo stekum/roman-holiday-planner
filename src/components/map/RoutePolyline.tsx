@@ -23,6 +23,46 @@ interface Props {
   onSummary?: (s: RouteSummary | null) => void;
 }
 
+// #178: LRU-Cache für DirectionsService-Calls — verhindert redundante
+// API-Calls bei gleichen Stop-Kombis (recalcs, HMR, Tab-Switches).
+const DIRECTIONS_CACHE = new Map<string, google.maps.DirectionsResult>();
+const DIRECTIONS_CACHE_MAX = 20;
+
+function directionsKey(req: google.maps.DirectionsRequest): string {
+  const round = (n: number) => n.toFixed(6);
+  const o = req.origin as google.maps.LatLngLiteral;
+  const d = req.destination as google.maps.LatLngLiteral;
+  const wps = (req.waypoints ?? [])
+    .map((w) => {
+      const loc = w.location as google.maps.LatLngLiteral;
+      return `${round(loc.lat)},${round(loc.lng)}`;
+    })
+    .join('|');
+  const opt = req.optimizeWaypoints ? '+opt' : '';
+  return `${round(o.lat)},${round(o.lng)}→${round(d.lat)},${round(d.lng)}[${wps}]${req.travelMode}${opt}`;
+}
+
+async function cachedRoute(
+  service: google.maps.DirectionsService,
+  req: google.maps.DirectionsRequest,
+): Promise<google.maps.DirectionsResult> {
+  const key = directionsKey(req);
+  const cached = DIRECTIONS_CACHE.get(key);
+  if (cached) {
+    // LRU touch
+    DIRECTIONS_CACHE.delete(key);
+    DIRECTIONS_CACHE.set(key, cached);
+    return cached;
+  }
+  const result = await service.route(req);
+  if (DIRECTIONS_CACHE.size >= DIRECTIONS_CACHE_MAX) {
+    const oldest = DIRECTIONS_CACHE.keys().next().value;
+    if (oldest) DIRECTIONS_CACHE.delete(oldest);
+  }
+  DIRECTIONS_CACHE.set(key, result);
+  return result;
+}
+
 function coordsKey(
   pois: POIWithCoords[],
   homebase?: { lat: number; lng: number },
@@ -85,14 +125,13 @@ export function RoutePolyline({ pois, homebase, onSummary }: Props) {
 
     let cancelled = false;
 
-    const mainRequest = service
-      .route({
-        origin,
-        destination,
-        waypoints,
-        travelMode: google.maps.TravelMode.WALKING,
-        optimizeWaypoints: false,
-      })
+    const mainRequest = cachedRoute(service, {
+      origin,
+      destination,
+      waypoints,
+      travelMode: google.maps.TravelMode.WALKING,
+      optimizeWaypoints: false,
+    })
       .then((res) => {
         if (cancelled) return null;
         const route = res.routes[0];
@@ -117,12 +156,11 @@ export function RoutePolyline({ pois, homebase, onSummary }: Props) {
     const homeLegsRequest =
       hb
         ? Promise.all([
-            service
-              .route({
-                origin: hb,
-                destination: current[0].coords,
-                travelMode: google.maps.TravelMode.WALKING,
-              })
+            cachedRoute(service, {
+              origin: hb,
+              destination: current[0].coords,
+              travelMode: google.maps.TravelMode.WALKING,
+            })
               .then((res) => {
                 if (cancelled) return;
                 const r = res.routes[0];
@@ -139,12 +177,11 @@ export function RoutePolyline({ pois, homebase, onSummary }: Props) {
                 if (cancelled) return;
                 setHomeLegStart([hb, current[0].coords]);
               }),
-            service
-              .route({
-                origin: current[current.length - 1].coords,
-                destination: hb,
-                travelMode: google.maps.TravelMode.WALKING,
-              })
+            cachedRoute(service, {
+              origin: current[current.length - 1].coords,
+              destination: hb,
+              travelMode: google.maps.TravelMode.WALKING,
+            })
               .then((res) => {
                 if (cancelled) return;
                 const r = res.routes[0];
