@@ -31,7 +31,22 @@ Gemeinsames Briefing-Dokument für Codex CLI und Claude Code. Wird automatisch g
    done
    ```
    Wenn Warnung: Stefan informieren, Split diskutieren. Niemals eigenmächtig Items hinzufügen/entfernen (Memory: feedback_projectv2_field_options).
-10. **Vor jedem Deploy:** siehe 🚨 HARTE REGEL "Niemals uncommitted deployen".
+
+10. **Board↔ROADMAP-Sync-Check** (harte Regel, ab 2026-04-20 — Memory: feedback_board_roadmap_sync): Stefan schaut primär auf den Project-Board Release-View. Board + ROADMAP müssen IMMER synchron sein. Jede Milestone-/Scope-Änderung ist ATOMIC über drei Stellen: GitHub-Milestone, Project-Board Release-Field, `docs/ROADMAP.md`.
+    ```bash
+    # Drift-Check: Issues mit Board-Release aber nicht in ROADMAP-Release-Sections (oder umgekehrt)
+    for rel in v2.0 v2.1 v3.0-beta v3.0 v3.1 v3.2 v4.0 v4.5; do
+      board_count=$(gh api graphql -f query='{ node(id: "PVT_kwHOALePRc4BUPjL") { ... on ProjectV2 { items(first:100) { nodes { content { ... on Issue { number state } } fieldValues(first:20) { nodes { ... on ProjectV2ItemFieldSingleSelectValue { name field { ... on ProjectV2SingleSelectField { name } } } } } } } } } }' \
+        --jq --arg r "$rel" '[.data.node.items.nodes[] | select(.content.state == "OPEN") | select([.fieldValues.nodes[] | select(.field.name == "Release") | .name] | contains([$r]))] | length')
+      roadmap_count=$(awk -v r="$rel" '/^## /{in_sec = ($0 ~ r "\\b")} /^\| #[0-9]+/ && in_sec {n++} END{print n+0}' docs/ROADMAP.md)
+      if [ "$board_count" -ne "$roadmap_count" ]; then
+        echo "⚠ DRIFT $rel: board=$board_count roadmap=$roadmap_count"
+      fi
+    done
+    ```
+    Wenn Drift: Stefan informieren. Niemals eigenmächtig auflösen ohne Bestätigung welche Seite richtig ist.
+
+11. **Vor jedem Deploy:** siehe 🚨 HARTE REGEL "Niemals uncommitted deployen".
 
 Dieser Check ist billig (≤60 Sekunden) und verhindert fast alle Klassen von Fehlern die wir bisher hatten.
 

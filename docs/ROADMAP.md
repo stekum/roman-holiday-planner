@@ -275,6 +275,11 @@ Bündelt alle Issues rund um Monetarisierung, Marketing und professionellen Laun
 | #21 | Alters-Filter für POI-Liste | parked 2026-04-20 — pick-up-bei-Langeweile |
 | #22 | Pausen-Planer: automatische Downtime-Slots | parked 2026-04-20 — pick-up-bei-Langeweile |
 | #24 | Schatzsuche-Modus (Gamification für Kinder) | parked 2026-04-20 — nicht sicher ob gewollt |
+| #26 | Familien-Radar: Live-Location aller Mitreisenden | parked — nicht sicher ob gewollt |
+| #28 | AR Walking View via Google Maps Live View Deep-Link | parked — nice-to-have, nicht trip-kritisch |
+| #35 | Offline Map Tiles (Kartenausschnitt vorab cachen) | parked — nice-to-have, Offline via PWA reicht meist |
+| #36 | Offline-Reiseführer: PDF/HTML-Export pro Tag | parked — nice-to-have |
+| #37 | Foto-Tagebuch: Bilder pro POI hochladen | parked — nach Japan/Rom zu bewerten |
 
 **Nicht mehr hier gelistet** (haben jetzt eigene Section, siehe oben):
 - #16, #43, #169 → v1.5.1 (AI Follow-ups Patch)
