@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Loader2, MapPin, Sparkles } from 'lucide-react';
+import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import type { POI } from '../../data/pois';
-import type { Family } from '../../settings/types';
+import type { Family, TripConfig } from '../../settings/types';
 import {
   fetchIgMetadata,
   isInstagramUrl,
@@ -12,12 +13,23 @@ import {
   type PlaceResult,
 } from '../instagram/PlacesAutocomplete';
 import { AddPoiFields, type AddPoiFieldsValue } from './AddPoiFields';
+import { extractLocationsFromCaption } from '../../lib/aiInstagramLocationExtractor';
+import { DEFAULT_TRIP_CONFIG } from '../../settings/tripConfig';
+import { isGeminiConfigured } from '../../lib/gemini';
 
 interface Props {
   families: Family[];
+  tripConfig?: TripConfig;
+  homebaseCoords?: { lat: number; lng: number };
   onCancel: () => void;
   onSave: (poi: POI) => void;
 }
+
+type AiState =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'done'; candidates: PlaceResult[]; extractedNames: string[] }
+  | { status: 'error'; message: string };
 
 type FetchState =
   | { status: 'idle' }
@@ -25,13 +37,15 @@ type FetchState =
   | { status: 'success'; meta: IgMetadata }
   | { status: 'error'; message: string };
 
-export function AddFromInstagram({ families, onCancel, onSave }: Props) {
+export function AddFromInstagram({ families, tripConfig, homebaseCoords, onCancel, onSave }: Props) {
+  const placesLib = useMapsLibrary('places');
   const [url, setUrl] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [fetchState, setFetchState] = useState<FetchState>({ status: 'idle' });
   const [place, setPlace] = useState<PlaceResult | null>(null);
+  const [aiState, setAiState] = useState<AiState>({ status: 'idle' });
   const [fields, setFields] = useState<AddPoiFieldsValue>({
     familyId: families[0]?.id ?? '',
     category: 'Instagram',
@@ -44,6 +58,7 @@ export function AddFromInstagram({ families, onCancel, onSave }: Props) {
   const handleFetchMeta = async () => {
     if (!isIg) return;
     setFetchState({ status: 'loading' });
+    setAiState({ status: 'idle' });
     const result = await fetchIgMetadata(url.trim());
     if (result.ok && result.meta) {
       setFetchState({ status: 'success', meta: result.meta });
@@ -51,10 +66,83 @@ export function AddFromInstagram({ families, onCancel, onSave }: Props) {
       if (result.meta.title && !title) setTitle(result.meta.title);
       if (result.meta.description && !description)
         setDescription(result.meta.description);
+
+      // #16: AI-Extraktion + Places-Search (nur wenn Gemini konfiguriert + Maps geladen)
+      if (isGeminiConfigured && placesLib) {
+        void runAiExtraction(result.meta);
+      }
     } else {
       setFetchState({
         status: 'error',
         message: result.error ?? 'Unbekannter Fehler.',
+      });
+    }
+  };
+
+  const runAiExtraction = async (meta: IgMetadata) => {
+    if (!placesLib) return;
+    setAiState({ status: 'loading' });
+    try {
+      const effectiveConfig = tripConfig ?? DEFAULT_TRIP_CONFIG;
+      const names = await extractLocationsFromCaption({
+        caption: meta.description ?? '',
+        title: meta.title ?? '',
+        tripConfig: effectiveConfig,
+      });
+
+      if (names.length === 0) {
+        setAiState({ status: 'done', candidates: [], extractedNames: [] });
+        return;
+      }
+
+      // Places Text-Search mit Bias auf Stadt-Zentrum (Homebase-Coords aus prop)
+      const bias = homebaseCoords;
+      const div = document.createElement('div');
+      const service = new placesLib.PlacesService(div);
+      const candidates: PlaceResult[] = [];
+
+      for (const name of names) {
+        const query = `${name}, ${effectiveConfig.city}`;
+        const results = await new Promise<google.maps.places.PlaceResult[]>((resolve) => {
+          service.textSearch(
+            {
+              query,
+              ...(bias ? { location: bias, radius: 30000 } : {}),
+            },
+            (results, status) => {
+              if (status === placesLib.PlacesServiceStatus.OK && results) {
+                resolve(results);
+              } else {
+                resolve([]);
+              }
+            },
+          );
+        });
+
+        const top = results[0];
+        if (top?.geometry?.location && top.place_id) {
+          candidates.push({
+            name: top.name ?? name,
+            address: top.formatted_address ?? '',
+            coords: {
+              lat: top.geometry.location.lat(),
+              lng: top.geometry.location.lng(),
+            },
+            placeId: top.place_id,
+            photoUrl: top.photos?.[0]?.getUrl({ maxWidth: 400, maxHeight: 300 }),
+            rating: top.rating,
+            userRatingCount: top.user_ratings_total,
+            mapsUrl: `https://www.google.com/maps/place/?q=place_id:${top.place_id}`,
+            priceLevel: top.price_level,
+          });
+        }
+      }
+
+      setAiState({ status: 'done', candidates, extractedNames: names });
+    } catch (err) {
+      setAiState({
+        status: 'error',
+        message: err instanceof Error ? err.message : 'AI-Extraktion fehlgeschlagen.',
       });
     }
   };
@@ -206,6 +294,67 @@ export function AddFromInstagram({ families, onCancel, onSave }: Props) {
         <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-ink/60">
           Ort (optional — sonst landet der Eintrag in der Inbox)
         </span>
+
+        {aiState.status === 'loading' && (
+          <div className="mb-2 flex items-center gap-2 rounded-2xl bg-terracotta/10 px-3 py-2 text-xs text-terracotta">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>AI analysiert Caption + sucht passende Orte…</span>
+          </div>
+        )}
+
+        {aiState.status === 'done' && aiState.candidates.length > 0 && !place && (
+          <div className="mb-2 space-y-2">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-terracotta">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>AI-Vorschläge aus der Caption</span>
+            </div>
+            {aiState.candidates.map((candidate) => (
+              <button
+                key={candidate.placeId}
+                type="button"
+                onClick={() => setPlace(candidate)}
+                className="flex w-full items-start gap-3 rounded-2xl bg-white px-3 py-2 text-left shadow-sm transition hover:bg-cream"
+              >
+                {candidate.photoUrl ? (
+                  <img
+                    src={candidate.photoUrl}
+                    alt=""
+                    className="h-12 w-12 flex-shrink-0 rounded-xl object-cover"
+                  />
+                ) : (
+                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-cream-dark">
+                    <MapPin className="h-5 w-5 text-ink/40" />
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-semibold text-ink">
+                    {candidate.name}
+                  </div>
+                  <div className="truncate text-xs text-ink/60">{candidate.address}</div>
+                  {candidate.rating !== undefined && (
+                    <div className="text-[11px] text-ink/50">
+                      ⭐ {candidate.rating.toFixed(1)}
+                      {candidate.userRatingCount ? ` (${candidate.userRatingCount})` : ''}
+                    </div>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {aiState.status === 'done' && aiState.candidates.length === 0 && aiState.extractedNames.length === 0 && (
+          <div className="mb-2 rounded-2xl bg-cream-dark px-3 py-2 text-xs text-ink/60">
+            Keine Orte in der Caption erkannt. Bitte unten manuell suchen.
+          </div>
+        )}
+
+        {aiState.status === 'done' && aiState.candidates.length === 0 && aiState.extractedNames.length > 0 && (
+          <div className="mb-2 rounded-2xl bg-cream-dark px-3 py-2 text-xs text-ink/60">
+            Aus der Caption extrahiert: <strong>{aiState.extractedNames.join(', ')}</strong>. Places-Suche brachte aber keine Treffer — bitte unten manuell suchen.
+          </div>
+        )}
+
         <PlacesAutocomplete onSelect={setPlace} />
         {place && (
           <div className="mt-2 rounded-2xl bg-olive/10 px-3 py-2 text-sm text-olive-dark">

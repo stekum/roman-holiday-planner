@@ -24,6 +24,8 @@ interface Props {
   onClearPicked: () => void;
   /** Trip-Kontext fuer Vibes-Suche (AddFromAiSearch). */
   tripConfig?: TripConfig;
+  /** Homebase coords fuer Places-Search-Bias (#16). */
+  homebaseCoords?: { lat: number; lng: number };
 }
 
 const TILES: {
@@ -73,6 +75,7 @@ export function AddPoiMenu({
   setMode,
   onClearPicked,
   tripConfig,
+  homebaseCoords,
 }: Props) {
   const open = mode !== null;
   const showSheet = mode === 'menu' || mode === 'search' || mode === 'ai-search' || mode === 'manual' || mode === 'instagram' || (mode === 'map' && pickedMapCoords !== null);
@@ -205,6 +208,8 @@ export function AddPoiMenu({
             {mode === 'instagram' && (
               <AddFromInstagram
                 families={families}
+                tripConfig={tripConfig}
+                homebaseCoords={homebaseCoords}
                 onCancel={close}
                 onSave={handleSave}
               />
