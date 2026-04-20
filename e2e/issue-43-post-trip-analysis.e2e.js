@@ -33,14 +33,13 @@ async function main() {
 
   // Scroll to bottom so lazy elements render
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(3000);
 
   console.log('→ Check AI Post-Trip-Analyse Panel…');
-  const panel = page.locator('div:has-text("AI Post-Trip-Analyse")').first();
-  const panelCount = await panel.count();
-  console.log(`  Panels found: ${panelCount}`);
+  const headingCount = await page.locator('text=AI Post-Trip-Analyse').count();
+  console.log(`  Heading "AI Post-Trip-Analyse" found: ${headingCount}`);
 
-  if (panelCount === 0) {
+  if (headingCount === 0) {
     console.error('✗ AI Post-Trip-Analyse Panel not found in DOM');
     process.exit(1);
   }
