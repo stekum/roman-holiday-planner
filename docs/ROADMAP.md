@@ -213,6 +213,7 @@ Zweiter Multi-Trip auf gereifter Architektur. App-Stand: v3.2. Bugs während Rom
 | #87 | In-App-Purchase-Setup (Placeholder für #143) | M | Monetization Prep |
 | #88 | App-Store-Review-Prep (Privacy, Screenshots) | M | Launch |
 | #89 | Datenschutzerklärung + AGB (Legal für Stores) | M | Legal |
+| #182 | ops: User-Quota-Schutz gegen API-Abuse (pre-public-launch) | M | Security |
 | #114 | Apple Sign-In (Apple-Pflicht für iOS-Release) | M | Auth |
 | #155 | Native CarPlay + Android Auto Itinerary Viewer | L | Native |
 
@@ -236,6 +237,9 @@ Zweiter Multi-Trip auf gereifter Architektur. App-Stand: v3.2. Bugs während Rom
 | #137 | Architektur-Dokumentation | M |
 | #154 | Docs: CarPlay/Android Auto Handoff | S |
 | #178 | perf: API-Call-Caching (fetchPlaceEnrichment + RoutePolyline) — ~€20/Monat Ersparnis | S |
+| #179 | perf: Firestore-Enrichment als Cache-SoT (statt re-fetch) | M |
+| #180 | perf: Dev-Mode-Flags für expensive APIs (Directions, Places) | S |
+| #181 | refactor: Places API Legacy → New Migration (Deprecation-Pflicht) | L |
 
 **Release:** `v2.1.x` — flexibel, Stücke als Patches.
 
