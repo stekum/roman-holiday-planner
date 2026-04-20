@@ -577,7 +577,7 @@ Bewusst minimalistisch, dokumentiert damit's nicht als „wir haben CI vergessen
 | Pre-Commit Build | ❌ | manuell `npm run build` vor Commit |
 | Pre-Commit Secret-Scan | ✅ (lokal) | Semgrep-Hook aus #116 |
 | PR-CI (Build/Lint) | ❌ | Nicht eingerichtet — Agents machen es pro Commit |
-| Beta-Deploy | ❌ | manuell `npm run deploy:beta` nach Merge in `main` |
+| Beta-Deploy | ✅ (auto, #171) | automatisch via `.github/workflows/deploy-beta.yml` bei Push auf `main`. Fallback: `npm run deploy:beta` manuell. |
 | Beta→Prod Gate | ✅ (menschlich) | Stefan testet auf Beta, gibt ok |
 | Production-Deploy | ❌ | manuell `npm run deploy` |
 | Release-Tag | ❌ | manuell `gh release create ... --generate-notes` |
