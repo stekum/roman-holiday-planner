@@ -1,20 +1,28 @@
 /**
- * Cloud Function: persistPoiPhoto
- *
- * Triggered when a POI document is created or updated in Firestore.
- * If the POI has an image URL pointing to Google (not yet persisted
- * to Firebase Storage), downloads the image server-side (no CORS
- * restrictions on the server), uploads it to Firebase Storage, and
- * writes the permanent download URL back to the POI document.
+ * Cloud Functions for Roman Holiday Planner:
+ *  - persistPoiPhoto: persist Google Places photos to Firebase Storage
+ *  - notifyAccessRequest (#133): email admin when a new user signs up
+ *    with status='pending' and waits for approval.
  */
 
 const { onDocumentWritten } = require("firebase-functions/v2/firestore");
+const { defineSecret, defineString } = require("firebase-functions/params");
 const { getStorage } = require("firebase-admin/storage");
 const { getFirestore } = require("firebase-admin/firestore");
 const { initializeApp } = require("firebase-admin/app");
 const fetch = require("node-fetch");
 
 initializeApp();
+
+// #133 params — set via Firebase console / CLI. API key is secret, from/to
+// can be public (overridable per deploy).
+const RESEND_API_KEY = defineSecret("RESEND_API_KEY");
+const NOTIFY_FROM_EMAIL = defineString("NOTIFY_FROM_EMAIL", {
+  default: "onboarding@resend.dev",
+});
+const NOTIFY_TO_EMAIL = defineString("NOTIFY_TO_EMAIL", {
+  default: "stefan.kummert@gmail.com",
+});
 
 const BUCKET = getStorage().bucket();
 const db = getFirestore();
@@ -109,6 +117,89 @@ exports.persistPoiPhoto = onDocumentWritten(
       console.error(`[persistPoiPhoto] Failed for ${poiId}:`, err.message);
       // Don't throw — we don't want the function to retry on transient errors
       // The photo will still display from the Google URL until it expires
+    }
+  }
+);
+
+/**
+ * #133: notifyAccessRequest
+ *
+ * Fires when a new user document appears with status='pending' — either
+ * freshly created via auth gate, or transitioned from another state.
+ * Sends one email per transition to NOTIFY_TO_EMAIL via Resend API.
+ *
+ * Setup (one-time, Stefan):
+ *   1. Create Resend account + API key → https://resend.com
+ *   2. firebase functions:secrets:set RESEND_API_KEY
+ *   3. (optional) firebase functions:config override NOTIFY_FROM_EMAIL
+ *      and NOTIFY_TO_EMAIL via deploy-time env
+ *
+ * Graceful fallback: if RESEND_API_KEY is missing, logs a warning and
+ * returns — never blocks user signup.
+ */
+exports.notifyAccessRequest = onDocumentWritten(
+  {
+    document: "users/{uid}",
+    region: "europe-west1",
+    secrets: [RESEND_API_KEY],
+  },
+  async (event) => {
+    const before = event.data?.before?.data();
+    const after = event.data?.after?.data();
+    if (!after) return; // deleted — nothing to notify about
+
+    const wasPendingBefore = before?.status === "pending";
+    const isPendingNow = after.status === "pending";
+    if (!isPendingNow || wasPendingBefore) return;
+
+    const uid = event.params.uid;
+    const email = after.email || "(unbekannt)";
+    const displayName = after.displayName || "Unbekannt";
+
+    const apiKey = RESEND_API_KEY.value();
+    if (!apiKey) {
+      console.warn(
+        "[notifyAccessRequest] RESEND_API_KEY not set — skipping email for",
+        uid
+      );
+      return;
+    }
+
+    const from = NOTIFY_FROM_EMAIL.value();
+    const to = NOTIFY_TO_EMAIL.value();
+
+    try {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: `Roman Holiday Planner <${from}>`,
+          to,
+          subject: `Zugriffsanfrage: ${displayName}`,
+          html: `
+            <h2>Neue Zugriffsanfrage</h2>
+            <p><strong>${displayName}</strong> (${email}) möchte Zugang zur App.</p>
+            <p>UID: <code>${uid}</code></p>
+            <p>Admin-UI öffnen und Zugriff freigeben:<br>
+               <a href="https://stekum.github.io/roman-holiday-planner/">stekum.github.io/roman-holiday-planner/</a></p>
+          `,
+        }),
+      });
+
+      if (!res.ok) {
+        const body = await res.text();
+        console.error(
+          `[notifyAccessRequest] Resend HTTP ${res.status} for ${uid}:`,
+          body.slice(0, 300)
+        );
+        return;
+      }
+      console.log(`[notifyAccessRequest] ✓ email sent for ${uid}`);
+    } catch (err) {
+      console.error(`[notifyAccessRequest] failed for ${uid}:`, err.message);
     }
   }
 );
