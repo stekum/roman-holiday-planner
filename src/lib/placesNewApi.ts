@@ -55,6 +55,24 @@ function parsePriceMoney(money: ApiPriceMoney | undefined): { amount?: number; c
 // auch bei parallelen Calls (gemeinsames Promise).
 const ENRICHMENT_CACHE = new Map<string, Promise<PlaceEnrichment>>();
 
+/**
+ * #179: Primt den Cache aus Firestore-gespeicherten Enrichment-Feldern.
+ * Aufgerufen von useWorkspace wenn POIs aus Firestore geladen werden.
+ * Spart die initiale Places-API-Roundtrip fuer bereits enriched Orte
+ * auch ueber Session-Grenzen hinweg.
+ *
+ * Nur gepriment wenn wenigstens EIN substantielles Feld vorhanden ist —
+ * sonst würden leere Cache-Entries spätere Fetches blockieren.
+ */
+export function primeEnrichmentCache(
+  placeId: string | undefined,
+  data: PlaceEnrichment,
+): void {
+  if (!placeId) return;
+  if (!data.aiSummary && !data.priceRange && !data.primaryType) return;
+  ENRICHMENT_CACHE.set(placeId, Promise.resolve(data));
+}
+
 export async function fetchPlaceEnrichment(placeId: string): Promise<PlaceEnrichment> {
   if (!placeId) return {};
 
