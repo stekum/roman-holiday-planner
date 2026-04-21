@@ -21,6 +21,7 @@ Claude Code bevorzugen für:
 - **PR-Reviews:** Codex-PRs gegenlesen bevor Stefan merged
 - **Refactoring:** Wenn Änderungen viele Dateien gleichzeitig betreffen
 - **Firebase Security Rules:** Änderungen an `firestore.rules` / `storage.rules`
+- **Agentisches Browser-Testing via Chrome DevTools MCP** (#190) — wenn eine Aufgabe Live-Chrome-Inspektion braucht: `./scripts/chrome-agent.sh` starten, dann Tools unter `chrome-devtools:*`. Setup-Details siehe AGENTS.md-Abschnitt „Agentisches Testing".
 
 ---
 

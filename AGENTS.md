@@ -348,6 +348,69 @@ Wenn Dev-Workflow-Regeln geändert werden: **immer in AGENTS.md**, nicht in CLAU
 
 ---
 
+## Agentisches Testing — Chrome DevTools MCP (#190)
+
+Ab Chrome 147 steht der [Chrome DevTools MCP Server](https://github.com/ChromeDevTools/chrome-devtools-mcp) bereit. Er erlaubt Agents, eine laufende Chrome-Instanz per DevTools-Protokoll zu inspizieren: Network-Requests, Console-Logs, Performance-Traces, Lighthouse-Audits, Memory-Snapshots — also alles was du sonst manuell in DevTools öffnen würdest, nur programmatisch.
+
+**Wozu wir ihn nutzen:**
+- Post-Deploy-Smoke-Checks auf Beta (bootet die App, gibt's Console-Errors, sind API-Calls im erwarteten Rahmen)
+- Cache-Verifikation bei Performance-Issues (Directions/Places-Requests zählen)
+- Lighthouse-Audit vor Releases (CWV, Accessibility, Best Practices)
+- Live-Debugging wenn ein User ein reproduzierbares Problem beschreibt
+
+**Wozu nicht:**
+- Reproducible CI — dafür bleibt Playwright (siehe `e2e/*.e2e.js`). MCP braucht eine laufende Chrome-Instanz auf der Entwickler-Maschine, kein Headless-CI.
+- Manuelle Akzeptanztests — dafür bleiben die `e2e/manual/*.md` Test-Scripts.
+
+### Setup (einmalig)
+
+**1. Chrome mit separatem Agent-Profil starten:**
+
+```bash
+./scripts/chrome-agent.sh              # öffnet Beta
+./scripts/chrome-agent.sh https://...  # öffnet beliebige URL
+```
+
+Das Script verwendet ein isoliertes Profil unter `/tmp/chrome-agent-profile` — **nicht** dein persönliches Chrome-Profil. Dadurch sieht der Agent keine Cookies/Logins deiner Alltagsbrowser-Session.
+
+Port ist Standard `9222` (override: `CHROME_AGENT_PORT=9223 ./scripts/chrome-agent.sh`).
+
+**2. MCP-Server in Claude Code registrieren** (lokal, `.claude/settings.local.json` — NICHT committed):
+
+```json
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest", "--browser-url=http://127.0.0.1:9222"]
+    }
+  }
+}
+```
+
+Alternativ das offizielle Plugin:
+
+```
+/plugin marketplace add ChromeDevTools/chrome-devtools-mcp
+/plugin install chrome-devtools-mcp
+```
+
+**3. Claude Code neu starten** → Tools sollten als `chrome-devtools:*` auftauchen.
+
+### Nutzung im Alltag
+
+Beispiel-Prompt nach einem Beta-Deploy:
+
+> Starte Chrome Agent (`./scripts/chrome-agent.sh`), navigiere zur Beta, prüfe: (1) keine Console-Errors, (2) Directions-API ≤3 Calls beim ersten Tag-Öffnen, (3) LCP unter 2.5s. Report-Format: Grün/Gelb/Rot pro Punkt, Details nur bei Problem.
+
+### Sicherheit
+
+- **Port 9222 ist lokal erreichbar von allem was auf deiner Maschine läuft.** Browser-Session abschließen wenn fertig.
+- **Agent-Profil ist nicht dein persönliches Profil** — Logins die du in diesem Fenster machst bleiben im Agent-Profil (also ok für E2E-Test-Account, aber vermeide Prod-Admin-Logins dort).
+- **`--browser-url=`-Modus** (oben) verhindert dass MCP neue Chrome-Instanzen spawnt — Agent bindet sich nur an die bestehende.
+
+---
+
 ## Lessons Learned (Past Incidents)
 
 Kurze Einträge. Regel → was war passiert → wie es vermieden wird.
