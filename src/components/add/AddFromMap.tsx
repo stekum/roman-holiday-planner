@@ -4,6 +4,7 @@ import { MapPin, Star } from 'lucide-react';
 import type { POI } from '../../data/pois';
 import type { Family } from '../../settings/types';
 import { fetchPlaceEnrichment, type PriceRange } from '../../lib/placesNewApi';
+import { isDevSkipMapsApi, logDevSkip } from '../../lib/devFlags';
 import { AddPoiFields, type AddPoiFieldsValue } from './AddPoiFields';
 
 interface Props {
@@ -63,6 +64,13 @@ export function AddFromMap({
   // Fetch place details if placeId is known (user clicked a Google POI)
   useEffect(() => {
     if (!pickedPlaceId || !placesLib) return;
+    // #180: in dev skip real Places-Details; pre-fill minimal data so UI is usable.
+    if (isDevSkipMapsApi()) {
+      logDevSkip('AddFromMap (Places getDetails)');
+      setEnriched({ name: 'Dev Place', address: 'Dev Mode' });
+      setTitle('Dev Place');
+      return;
+    }
     setLoading(true);
     const service = new placesLib.PlacesService(document.createElement('div'));
     const enrichmentPromise = fetchPlaceEnrichment(pickedPlaceId);

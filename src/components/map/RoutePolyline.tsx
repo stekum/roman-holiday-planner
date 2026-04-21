@@ -1,6 +1,7 @@
 import { Polyline, useMapsLibrary } from '@vis.gl/react-google-maps';
 import { useEffect, useRef, useState } from 'react';
 import type { POI } from '../../data/pois';
+import { isDevSkipMapsApi, logDevSkip } from '../../lib/devFlags';
 
 export interface RouteLeg {
   distanceMeters: number;
@@ -109,6 +110,17 @@ export function RoutePolyline({ pois, homebase, onSummary }: Props) {
       setMainPath((prev) => (prev.length === 0 ? prev : []));
       setHomeLegStart([]);
       setHomeLegEnd([]);
+      notifySummary(null);
+      return;
+    }
+
+    // #180: skip real Directions calls in dev unless DEBUG_MAPS=1.
+    // Renders straight lines between stops + null summary so UI degrades gracefully.
+    if (isDevSkipMapsApi()) {
+      logDevSkip('RoutePolyline (Directions)');
+      setMainPath(current.map((p) => p.coords));
+      setHomeLegStart(hb ? [hb, current[0].coords] : []);
+      setHomeLegEnd(hb ? [current[current.length - 1].coords, hb] : []);
       notifySummary(null);
       return;
     }
