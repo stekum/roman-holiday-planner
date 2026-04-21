@@ -9,6 +9,7 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 import { getFirebase } from './firebase';
+import { primeEnrichmentCache } from '../lib/placesNewApi';
 import { type POI, SEED_POIS, type Vote, type Comment, type VisitStatus } from '../data/pois';
 import { DEFAULT_SETTINGS } from '../settings/defaults';
 import type { Family, Homebase, Settings, TripConfig } from '../settings/types';
@@ -177,7 +178,16 @@ export function useWorkspace(): WorkspaceAPI {
             if (cancelled) return;
             const list: POI[] = [];
             snap.forEach((d) => {
-              list.push({ id: d.id, ...(d.data() as Omit<POI, 'id'>) });
+              const poi = { id: d.id, ...(d.data() as Omit<POI, 'id'>) };
+              list.push(poi);
+              // #179: Firestore-enrichment als Session-Cache primen,
+              // damit Components nicht ueber die Places-API re-fetchen.
+              primeEnrichmentCache(poi.placeId, {
+                aiSummary: poi.aiSummary,
+                priceRange: poi.priceRange,
+                primaryType: poi.primaryType,
+                primaryTypeDisplayName: poi.primaryTypeDisplayName,
+              });
             });
             setPois(list);
           },
