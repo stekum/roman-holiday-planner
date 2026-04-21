@@ -17,6 +17,7 @@ import { useWeather } from './hooks/useWeather';
 import { useMyFamily } from './hooks/useMyFamily';
 import { useMyLocation } from './hooks/useMyLocation';
 import { isFirebaseConfigured } from './firebase/firebase';
+import { initAnalytics, track } from './lib/analytics';
 import type { POI, Category } from './data/pois';
 import { eachDayInRange } from './lib/dates';
 import { generateDayBriefing } from './lib/aiDayBriefing';
@@ -94,6 +95,11 @@ function AppInner({ user }: AppInnerProps) {
   const apiKey = (import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined)?.trim();
   const hasKey = !!apiKey;
   const isAdmin = user.email === ADMIN_EMAIL;
+
+  // #123: GA4 via Firebase Analytics — no-op without VITE_GA_MEASUREMENT_ID.
+  useEffect(() => {
+    void initAnalytics();
+  }, []);
 
   const workspace = useWorkspace();
   const {
@@ -251,6 +257,11 @@ function AppInner({ user }: AppInnerProps) {
     void addPoi(poi);
     // Cloud Function `persistPoiPhoto` will automatically detect the
     // Google photo URL and persist it to Firebase Storage.
+  };
+
+  const handleLikePoi = (id: string) => {
+    track('poi_liked');
+    return likePoi(id);
   };
 
   const handleRemove = (id: string) => {
@@ -413,7 +424,7 @@ function AppInner({ user }: AppInnerProps) {
               families={settings.families}
               myFamilyId={myFamilyId}
               getFamily={getFamily}
-              onLike={likePoi}
+              onLike={handleLikePoi}
               onVote={(id, vote) => void votePoi(id, myFamilyId, vote)}
               onToggleSelect={(id) => activeDay && togglePoi(activeDay, id)}
               onRemove={handleRemove}

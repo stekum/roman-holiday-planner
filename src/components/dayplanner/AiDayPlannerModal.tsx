@@ -6,6 +6,7 @@ import {
   type AiDayPlanResult,
 } from '../../lib/aiDayPlanner';
 import { isGeminiConfigured } from '../../lib/gemini';
+import { track } from '../../lib/analytics';
 import type { POI, Category } from '../../data/pois';
 import type { Settings } from '../../settings/types';
 import { getTripConfig } from '../../settings/tripConfig';
@@ -90,6 +91,7 @@ export function AiDayPlannerModal({
         tripConfig: getTripConfig(settings),
       });
       setResult(plan);
+      track('ai_plan_generated', { scope: 'day' });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'AI-Generierung fehlgeschlagen.');
     } finally {
@@ -261,6 +263,7 @@ export function AiDayPlannerModal({
       }
 
       const order = pois.map((p) => p.id);
+      track('ai_plan_accepted', { scope: 'day' });
       onAccept(pois, order, result.overview);
       onClose();
     } catch (err) {

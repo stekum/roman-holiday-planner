@@ -7,6 +7,7 @@ import type { Family, Settings } from '../../settings/types';
 import type { RouteSummary as Summary } from '../map/RoutePolyline';
 import type { DayWeather } from '../../lib/weather';
 import { isGeminiConfigured } from '../../lib/gemini';
+import { track } from '../../lib/analytics';
 import { DayTabs } from './DayTabs';
 import { RouteSummary } from './RouteSummary';
 import { AiDayPlannerModal } from './AiDayPlannerModal';
@@ -160,6 +161,7 @@ export function DayPlanner({
         return;
       }
 
+      track('route_optimized');
       onReorder(newOrder);
 
       // Calculate saved distance
