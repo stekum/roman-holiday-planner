@@ -533,22 +533,40 @@ Vor `gh release create`:
 5. **ROADMAP.md synchron:** alle fertigen Issues des Releases sind mit `✅` markiert, das Release-Heading hat den Status-Marker vorbereitet
 6. **USER-GUIDE.md aktualisiert** für alle user-facing Features dieses Releases
 
-### Release-Ablauf
+### Release-Ablauf (ab #173 — release-please-gesteuert)
 
-1. **Fix/Feature** landet via PR auf `main`
-2. **Beta-Deploy:** `npm run deploy:beta`
-3. **Validierung:** Playwright-Smoke (size:M+) + manueller Test auf Beta-URL
-4. **Production-Deploy:** `npm run deploy`
-5. **Pre-Release-Checkliste** abhaken (siehe oben)
-6. **Release erstellen:**
-   ```bash
-   # Aktuelle Version ermitteln
-   gh release list --limit 1
+1. **Fix/Feature** landet via PR auf `main` mit Conventional-Commit-Titel
+   (`feat(#N):`, `fix(#N):`, `perf(#N):`, `docs:`, `refactor:`, `ci:`, …)
+2. **Beta-Deploy** läuft automatisch (siehe #171)
+3. **release-please-Action** aktualisiert / erstellt automatisch einen offenen
+   **„Release PR"** auf `main` mit:
+   - Version-Bump in `package.json` + `.release-please-manifest.json`
+   - `CHANGELOG.md`-Eintrag aus den Commits seit letztem Tag (gruppiert nach
+     `feat` / `fix` / `perf` / etc.)
+   - PR-Body enthält Release-Notes in Markdown
+4. **Validierung:** Playwright-Smoke + manueller Test auf Beta-URL
+5. **Release-PR reviewen:**
+   - Stimmt der vorgeschlagene Version-Bump? (`feat:` → minor, `fix:` → patch,
+     `BREAKING CHANGE:` im Body → major)
+   - Fehlt ein Eintrag? → Commit-Title fixen (neuer fixup-Commit oder amend + Re-Push)
+6. **Release-PR mergen** → release-please setzt automatisch den Git-Tag,
+   erstellt das GitHub-Release mit den Release-Notes, und markiert es als
+   „Latest"
+7. **Production-Deploy:** `npm run deploy` (bleibt manuell, siehe #173 non-goals)
+8. **Post-Release-Checkliste** (siehe unten)
 
-   # Neues Release mit auto-generiertem Changelog aus PR-Titeln
-   gh release create v1.x.y --target main --generate-notes --title "v1.x.y — Kurzbeschreibung"
-   ```
-7. **Post-Release-Checkliste** (siehe unten)
+**Commit-Type Cheatsheet für release-please:**
+
+| Prefix | Bump | Wann |
+|---|---|---|
+| `feat(#N):` | Minor | Neues Feature / neue Funktionalität |
+| `fix(#N):` | Patch | Bugfix |
+| `perf(#N):` | Patch | Performance-Optimierung |
+| `docs:` | Patch | Nur Doku |
+| `refactor:` | Patch | Refactoring ohne neue Funktion |
+| `ci:` / `devops:` | Patch | CI / Infrastruktur |
+| `chore:` | (ignoriert) | Interne Kleinigkeiten |
+| `BREAKING CHANGE:` im Body | **Major** | Nur bewusst setzen (z.B. v3.0 Multi-Trip) |
 
 ### Post-Release-Checkliste
 

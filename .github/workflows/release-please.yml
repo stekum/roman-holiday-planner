@@ -1,0 +1,24 @@
+name: Release Please
+
+# Auf jedem push auf main läuft release-please und aktualisiert bzw. erstellt
+# einen offenen „Release PR". Merge des Release-PRs setzt dann den Tag und
+# erzeugt das GitHub-Release (inkl. generierter Release-Notes aus den seit
+# letztem Tag gemergten feat/fix/perf/… Commits).
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
