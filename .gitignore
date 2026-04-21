@@ -15,6 +15,9 @@ dist-ssr
 # Environment (explicit — don't rely on *.local alone)
 .env.local
 .env.*.local
+# Firebase Cloud Functions param-file (created by `firebase deploy`) —
+# stores project-scoped param values and may contain endpoints / addresses
+functions/.env.*
 
 # Editor directories and files
 .vscode/*
