@@ -262,6 +262,23 @@ Alle Methoden bieten: **Familie-Auswahl** (farbige Pill-Buttons) + **Kategorie-A
 - Wird für keine Berechnung genutzt — nur visuelle Orientierung
 - Permission-Verweigerung wird still ignoriert
 
+### Im Auto navigieren — CarPlay & Android Auto (#154)
+
+Die App unterstützt **CarPlay (iOS)** und **Android Auto** ohne eigenen nativen Code. Der „Navigieren"-Button übergibt die Route per Deep-Link an die Navigations-App des Phones — wenn das Phone mit dem Auto-Display verbunden ist, startet die Navigation automatisch auch auf dem CarPlay-/Android-Auto-Bildschirm.
+
+**So geht's unterwegs:**
+1. Phone per Kabel oder Wireless mit Auto verbinden (CarPlay/Android Auto aktiv)
+2. In der PWA einen POI öffnen → **„Navigieren"** tappen
+3. Google Maps (oder Apple Maps) öffnet sich mit der Route
+4. **Route erscheint automatisch auf dem Auto-Display** — Fahrer muss das Phone nicht entsperren oder in die Hand nehmen
+
+**Kompatibilität:**
+- **iOS:** CarPlay + Apple Maps oder Google Maps (je nach Default-Navigations-App in iOS-Settings)
+- **Android:** Android Auto + Google Maps oder Waze
+
+**Einschränkung:**
+Der erste Button-Tap muss am Phone passieren — die PWA selbst erscheint nicht im CarPlay-Bildschirm (das würde eine native App-Scene erfordern, Follow-up für spätere Release). Für die Passagierin/den Passagier im Beifahrersitz ist das kein Problem: kurz am Phone tappen, ab dann läuft alles auf dem Auto-Display.
+
 ### Passwort-Schutz
 
 - Optionaler SHA-256 Passwort-Check beim Öffnen der App
