@@ -105,7 +105,6 @@ export function AiDayPlannerModal({
     setError(null);
 
     try {
-      const service = new placesLib.PlacesService(document.createElement('div'));
       const pois: POI[] = [];
 
       const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -127,102 +126,64 @@ export function AiDayPlannerModal({
           cityHint ? `${stop.name}, ${cityHint}` : `${stop.name}`,
           stop.name,
         ];
-        // Deduplicate
         const uniqueQueries = [...new Set(queries)];
 
-        let match: google.maps.places.PlaceResult | null = null;
+        // #181: Places API (New) — Place.searchByText liefert alle relevanten
+        // Felder in einem Call (früher: textSearch + getDetails für photo).
+        let match: google.maps.places.Place | null = null;
 
         for (const query of uniqueQueries) {
-          const places = await new Promise<google.maps.places.PlaceResult[]>(
-            (resolve) => {
-              service.textSearch(
-                {
-                  query,
-                  ...(settings.homebase?.coords
-                    ? {
-                        location: settings.homebase.coords,
-                        radius: 30000, // 30km around homebase
-                      }
-                    : {}),
-                },
-                (results, status) => {
-                  console.log(`[AI Planner] textSearch "${query}" → ${status} (${results?.length ?? 0} results)`);
-                  if (status === placesLib.PlacesServiceStatus.OK && results) {
-                    resolve(results);
-                  } else {
-                    resolve([]);
+          try {
+            const { places } = await placesLib.Place.searchByText({
+              textQuery: query,
+              fields: [
+                'id',
+                'displayName',
+                'formattedAddress',
+                'location',
+                'rating',
+                'userRatingCount',
+                'photos',
+                'googleMapsURI',
+              ],
+              maxResultCount: 1,
+              ...(settings.homebase?.coords
+                ? {
+                    locationBias: {
+                      center: settings.homebase.coords,
+                      radius: 30000, // 30km around homebase
+                    },
                   }
-                },
-              );
-            },
-          );
-
-          if (places.length > 0 && places[0].geometry?.location) {
-            match = places[0];
-            break;
+                : {}),
+            });
+            console.log(`[AI Planner] searchByText "${query}" → ${places?.length ?? 0} results`);
+            if (places && places.length > 0 && places[0].location) {
+              match = places[0];
+              break;
+            }
+          } catch (err) {
+            console.warn(`[AI Planner] searchByText "${query}" failed`, err);
           }
-          // Small delay before retry with different query
           await delay(150);
         }
 
-        // If we found a match but no photo, try getDetails for the photo
         let photoUrl = '';
-        if (match?.place_id) {
-          if (match.photos?.[0]) {
-            try {
-              photoUrl = match.photos[0].getUrl({ maxWidth: 800, maxHeight: 600 });
-            } catch {
-              // getUrl can fail silently
-            }
-          }
-          // If still no photo, try getDetails
-          if (!photoUrl) {
-            await delay(150);
-            const details = await new Promise<google.maps.places.PlaceResult | null>(
-              (resolve) => {
-                service.getDetails(
-                  {
-                    placeId: match!.place_id!,
-                    fields: ['photos', 'formatted_address', 'rating', 'user_ratings_total', 'url'],
-                  },
-                  (place, status) => {
-                    if (status === placesLib.PlacesServiceStatus.OK && place) {
-                      resolve(place);
-                    } else {
-                      resolve(null);
-                    }
-                  },
-                );
-              },
-            );
-            if (details?.photos?.[0]) {
-              try {
-                photoUrl = details.photos[0].getUrl({ maxWidth: 800, maxHeight: 600 });
-              } catch {
-                // ignore
-              }
-            }
-            // Enrich with details data if available
-            if (details) {
-              match = {
-                ...match,
-                formatted_address: details.formatted_address ?? match?.formatted_address,
-                rating: details.rating ?? match?.rating,
-                user_ratings_total: details.user_ratings_total ?? match?.user_ratings_total,
-                url: details.url ?? (match as google.maps.places.PlaceResult & { url?: string })?.url,
-              } as google.maps.places.PlaceResult;
-            }
+        if (match?.photos?.[0]) {
+          try {
+            photoUrl = match.photos[0].getURI({ maxWidth: 800, maxHeight: 600 }) ?? '';
+          } catch {
+            /* ignore */
           }
         }
 
-        console.log(`[AI Planner] Stop "${stop.name}" → match: ${match?.name ?? 'NONE'}, coords: ${match?.geometry?.location ? 'YES' : 'NO'}, photo: ${photoUrl ? 'YES' : 'NO'}`);
+        console.log(`[AI Planner] Stop "${stop.name}" → match: ${match?.displayName ?? 'NONE'}, coords: ${match?.location ? 'YES' : 'NO'}, photo: ${photoUrl ? 'YES' : 'NO'}`);
 
         // Skip stops that resolve to the homebase (avoid duplicate POI entries)
-        if (match?.place_id && settings.homebase?.placeId && match.place_id === settings.homebase.placeId) {
+        if (match?.id && settings.homebase?.placeId && match.id === settings.homebase.placeId) {
           console.log(`[AI Planner] Skipping "${stop.name}" — matches homebase placeId`);
           continue;
         }
-        const normalizedMatch = (match?.name ?? stop.name).toLowerCase().trim();
+        const normalizedMatch = (match?.displayName ?? stop.name).toLowerCase().trim();
         const normalizedHomebase = settings.homebase?.name?.toLowerCase().trim() ?? '';
         if (normalizedHomebase && normalizedMatch === normalizedHomebase) {
           console.log(`[AI Planner] Skipping "${stop.name}" — matches homebase name`);
@@ -234,7 +195,7 @@ export function AiDayPlannerModal({
 
         const poi: POI = {
           id: `ai-${Date.now().toString(36)}-${stop.order}`,
-          title: match?.name ?? stop.name,
+          title: match?.displayName ?? stop.name,
           category,
           familyId: selectedFamilyId || settings.families[0]?.id || 'default-a',
           description: [
@@ -242,20 +203,17 @@ export function AiDayPlannerModal({
             stop.estimatedTime ? `⏰ ${stop.estimatedTime}` : '',
             stop.reason ? `💡 ${stop.reason}` : '',
           ].filter(Boolean).join(' — '),
-          coords: match?.geometry?.location
-            ? {
-                lat: match.geometry.location.lat(),
-                lng: match.geometry.location.lng(),
-              }
+          coords: match?.location
+            ? { lat: match.location.lat(), lng: match.location.lng() }
             : undefined,
           image: photoUrl,
           likes: 0,
-          address: match?.formatted_address,
-          rating: match?.rating,
-          userRatingCount: match?.user_ratings_total,
-          placeId: match?.place_id,
-          mapsUrl: (match as google.maps.places.PlaceResult & { url?: string })?.url,
-          needsLocation: !match?.geometry?.location,
+          address: match?.formattedAddress ?? undefined,
+          rating: match?.rating ?? undefined,
+          userRatingCount: match?.userRatingCount ?? undefined,
+          placeId: match?.id,
+          mapsUrl: match?.googleMapsURI ?? undefined,
+          needsLocation: !match?.location,
           createdAt: Date.now() + stop.order,
         };
 

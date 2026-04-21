@@ -51,6 +51,25 @@ function parsePriceMoney(money: ApiPriceMoney | undefined): { amount?: number; c
   };
 }
 
+/**
+ * #181: Legacy `price_level` war number 0-4, New API `priceLevel` ist ein
+ * String-Enum. Gemeinsamer Mapper damit PoiCard-Fallback-Logik weiter
+ * funktioniert.
+ */
+export function mapPriceLevel(
+  p: google.maps.places.PriceLevel | null | undefined,
+): number | undefined {
+  if (!p) return undefined;
+  const map: Record<string, number> = {
+    FREE: 0,
+    INEXPENSIVE: 1,
+    MODERATE: 2,
+    EXPENSIVE: 3,
+    VERY_EXPENSIVE: 4,
+  };
+  return map[p as unknown as string];
+}
+
 // #178: Session-level cache — gleicher placeId wird nie doppelt gefetched,
 // auch bei parallelen Calls (gemeinsames Promise).
 const ENRICHMENT_CACHE = new Map<string, Promise<PlaceEnrichment>>();

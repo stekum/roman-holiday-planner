@@ -1,11 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import { ChevronDown, ChevronUp, Loader2, MapPin, Plus, Sparkles, Star } from 'lucide-react';
 import type { Category, POI } from '../../data/pois';
 import type { Family, Homebase, TripConfig } from '../../settings/types';
 import { getCategoryEmoji } from '../../settings/tripConfig';
 import { generateAiSuggestions, type AiSuggestion } from '../../lib/aiPoiSuggestions';
-import { fetchPlaceEnrichment, type PlaceEnrichment, type PriceRange } from '../../lib/placesNewApi';
+import {
+  fetchPlaceEnrichment,
+  mapPriceLevel,
+  type PriceRange,
+} from '../../lib/placesNewApi';
 
 const ROME_BIAS: google.maps.LatLngBoundsLiteral = {
   north: 41.99,
@@ -78,72 +82,57 @@ type State =
 
 export function AiSuggestionsPanel({ pois, homebase, families, myFamilyId, onAddPoi, tripConfig }: Props) {
   const placesLib = useMapsLibrary('places');
-  const serviceRef = useRef<google.maps.places.PlacesService | null>(null);
   const [state, setState] = useState<State>({ kind: 'idle' });
   const [expanded, setExpanded] = useState(false);
 
-  useEffect(() => {
-    if (!placesLib) return;
-    serviceRef.current = new placesLib.PlacesService(document.createElement('div'));
-  }, [placesLib]);
-
-  const enrichOne = (sug: AiSuggestion): Promise<EnrichedSuggestion> => {
-    return new Promise((resolve) => {
-      const service = serviceRef.current;
-      if (!service) {
-        resolve({ ...sug, unlocated: true });
-        return;
+  // #181: Places API (New) — Place.searchByText liefert alle benötigten
+  // Felder in einem Call (früher: textSearch + getDetails).
+  const enrichOne = async (sug: AiSuggestion): Promise<EnrichedSuggestion> => {
+    if (!placesLib) return { ...sug, unlocated: true };
+    try {
+      const { places } = await placesLib.Place.searchByText({
+        textQuery: `${sug.name} Rome`,
+        locationBias: ROME_BIAS,
+        fields: [
+          'id',
+          'displayName',
+          'formattedAddress',
+          'location',
+          'rating',
+          'userRatingCount',
+          'priceLevel',
+          'photos',
+          'googleMapsURI',
+          'regularOpeningHours',
+        ],
+        maxResultCount: 1,
+      });
+      const r = places?.[0];
+      if (!r || !r.location) return { ...sug, unlocated: true };
+      const enriched: EnrichedSuggestion = {
+        ...sug,
+        placeId: r.id,
+        coords: { lat: r.location.lat(), lng: r.location.lng() },
+        photoUrl: r.photos?.[0]?.getURI({ maxWidth: 600, maxHeight: 400 }),
+        rating: r.rating ?? undefined,
+        userRatingCount: r.userRatingCount ?? undefined,
+        priceLevel: mapPriceLevel(r.priceLevel),
+        address: r.formattedAddress ?? undefined,
+        mapsUrl: r.googleMapsURI ?? undefined,
+        openingHours: r.regularOpeningHours?.weekdayDescriptions,
+      };
+      // Parallel-Enrichment via REST-Endpoint (Cache gibts schon #178)
+      if (r.id) {
+        const e = await fetchPlaceEnrichment(r.id);
+        enriched.aiSummary = e.aiSummary;
+        enriched.priceRange = e.priceRange;
+        enriched.primaryType = e.primaryType;
+        enriched.primaryTypeDisplayName = e.primaryTypeDisplayName;
       }
-      service.textSearch(
-        { query: `${sug.name} Rome`, bounds: ROME_BIAS },
-        (results, status) => {
-          if (status !== google.maps.places.PlacesServiceStatus.OK || !results?.[0]) {
-            resolve({ ...sug, unlocated: true });
-            return;
-          }
-          const r = results[0];
-          const loc = r.geometry?.location;
-          const enriched: EnrichedSuggestion = {
-            ...sug,
-            placeId: r.place_id ?? undefined,
-            coords: loc ? { lat: loc.lat(), lng: loc.lng() } : undefined,
-            photoUrl: r.photos?.[0]?.getUrl({ maxWidth: 600, maxHeight: 400 }),
-            rating: r.rating,
-            userRatingCount: r.user_ratings_total,
-            priceLevel: r.price_level,
-            address: r.formatted_address ?? r.vicinity ?? undefined,
-          };
-          if (!enriched.coords) {
-            resolve({ ...enriched, unlocated: true });
-            return;
-          }
-          // Fetch details (url + opening hours) + Places-API-(New)-enrichment in parallel
-          const enrichmentPromise: Promise<PlaceEnrichment> = enriched.placeId
-            ? fetchPlaceEnrichment(enriched.placeId)
-            : Promise.resolve({});
-          if (!enriched.placeId) {
-            void enrichmentPromise.then(() => resolve(enriched));
-            return;
-          }
-          service.getDetails(
-            { placeId: enriched.placeId, fields: ['url', 'opening_hours'] },
-            (detail, dStatus) => {
-              if (dStatus === google.maps.places.PlacesServiceStatus.OK && detail) {
-                enriched.mapsUrl = detail.url;
-                enriched.openingHours = detail.opening_hours?.weekday_text;
-              }
-              void enrichmentPromise.then((e) => {
-                enriched.aiSummary = e.aiSummary;
-                enriched.priceRange = e.priceRange;
-                enriched.primaryType = e.primaryType;
-                enriched.primaryTypeDisplayName = e.primaryTypeDisplayName;
-                resolve(enriched);
-              });
-            },
-          );
-        },
-      );
-    });
+      return enriched;
+    } catch {
+      return { ...sug, unlocated: true };
+    }
   };
 
   const runSuggest = async () => {
