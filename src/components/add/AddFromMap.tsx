@@ -7,6 +7,23 @@ import { fetchPlaceEnrichment, type PriceRange } from '../../lib/placesNewApi';
 import { isDevSkipMapsApi, logDevSkip } from '../../lib/devFlags';
 import { AddPoiFields, type AddPoiFieldsValue } from './AddPoiFields';
 
+// #181: Legacy price_level war number 0-4, New API priceLevel ist ein
+// String-Enum. Map auf die gleiche 0-4 Semantik damit PoiCard-Fallback
+// weiter funktioniert. Modul-Scope → stable reference für useEffect-Deps.
+function mapPriceLevel(
+  p: google.maps.places.PriceLevel | null | undefined,
+): number | undefined {
+  if (!p) return undefined;
+  const map: Record<string, number> = {
+    FREE: 0,
+    INEXPENSIVE: 1,
+    MODERATE: 2,
+    EXPENSIVE: 3,
+    VERY_EXPENSIVE: 4,
+  };
+  return map[p as unknown as string];
+}
+
 interface Props {
   families: Family[];
   /** Coordinates coming in from a map click on the parent. Null while waiting. */
@@ -72,50 +89,49 @@ export function AddFromMap({
       return;
     }
     setLoading(true);
-    const service = new placesLib.PlacesService(document.createElement('div'));
+    // #181: Places API (New) — Place.fetchFields statt Legacy getDetails
+    const place = new placesLib.Place({ id: pickedPlaceId });
     const enrichmentPromise = fetchPlaceEnrichment(pickedPlaceId);
-    service.getDetails(
-      {
-        placeId: pickedPlaceId,
+    place
+      .fetchFields({
         fields: [
-          'name',
-          'formatted_address',
+          'displayName',
+          'formattedAddress',
           'rating',
-          'user_ratings_total',
+          'userRatingCount',
           'photos',
-          'url',
-          'place_id',
+          'googleMapsURI',
+          'id',
           'types',
-          'opening_hours',
+          'regularOpeningHours',
+          'priceLevel',
         ],
-      },
-      (place, status) => {
-        if (status !== placesLib.PlacesServiceStatus.OK || !place) {
-          setLoading(false);
-          return;
-        }
-        const photoUrl = place.photos?.[0]?.getUrl({ maxWidth: 800, maxHeight: 600 });
-        void enrichmentPromise.then((enrichment) => {
-          setLoading(false);
-          setEnriched({
-            name: place.name,
-            address: place.formatted_address,
-            rating: place.rating,
-            userRatingCount: place.user_ratings_total,
-            priceLevel: place.price_level,
-            priceRange: enrichment.priceRange,
-            primaryType: enrichment.primaryType,
-            primaryTypeDisplayName: enrichment.primaryTypeDisplayName,
-            photoUrl,
-            mapsUrl: place.url,
-            placeId: place.place_id,
-            openingHours: place.opening_hours?.weekday_text,
-            aiSummary: enrichment.aiSummary,
-          });
-          if (place.name) setTitle(place.name);
+      })
+      .then(async () => {
+        const photo = place.photos?.[0];
+        const photoUrl = photo?.getURI({ maxWidth: 800, maxHeight: 600 });
+        const enrichment = await enrichmentPromise;
+        setLoading(false);
+        setEnriched({
+          name: place.displayName ?? undefined,
+          address: place.formattedAddress ?? undefined,
+          rating: place.rating ?? undefined,
+          userRatingCount: place.userRatingCount ?? undefined,
+          priceLevel: mapPriceLevel(place.priceLevel),
+          priceRange: enrichment.priceRange,
+          primaryType: enrichment.primaryType,
+          primaryTypeDisplayName: enrichment.primaryTypeDisplayName,
+          photoUrl,
+          mapsUrl: place.googleMapsURI ?? undefined,
+          placeId: place.id,
+          openingHours: place.regularOpeningHours?.weekdayDescriptions,
+          aiSummary: enrichment.aiSummary,
         });
-      },
-    );
+        if (place.displayName) setTitle(place.displayName);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
   }, [pickedPlaceId, placesLib]);
 
   // Fallback reverse-geocoding only when clicking blank area (no placeId)
