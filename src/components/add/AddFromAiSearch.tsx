@@ -5,6 +5,7 @@ import type { POI } from '../../data/pois';
 import type { Family, TripConfig } from '../../settings/types';
 import { aiNlSearch } from '../../lib/aiNlSearch';
 import { fetchPlaceEnrichment } from '../../lib/placesNewApi';
+import { isDevSkipMapsApi, logDevSkip } from '../../lib/devFlags';
 import { AddPoiFields, type AddPoiFieldsValue } from './AddPoiFields';
 import type { PlaceResult } from '../instagram/PlacesAutocomplete';
 
@@ -69,6 +70,13 @@ export function AddFromAiSearch({ families, onCancel, onSave, tripConfig }: Prop
       const ai = await aiNlSearch(trimmed, tripConfig);
       setCriteria(ai.criteria);
       setTranslatedQuery(ai.placesQuery);
+      // #180: in dev skip real Places textSearch — show empty results with a hint.
+      if (isDevSkipMapsApi()) {
+        logDevSkip('AddFromAiSearch (Places textSearch)');
+        setLoading(false);
+        setError('Dev-Mode: Places-Search geskippt. localStorage.DEBUG_MAPS=\'1\' + reload um echt zu suchen.');
+        return;
+      }
       placesServiceRef.current.textSearch(
         { query: ai.placesQuery, bounds: ROME_BIAS },
         (places, status) => {
