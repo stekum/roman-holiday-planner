@@ -46,20 +46,23 @@ function HomebasePhotoSync({
     if (fetchedRef.current === homebase.placeId) return;
     fetchedRef.current = homebase.placeId;
 
-    const service = new placesLib.PlacesService(document.createElement('div'));
-    service.getDetails(
-      { placeId: homebase.placeId, fields: ['photos'] },
-      (place, status) => {
-        if (status === placesLib.PlacesServiceStatus.OK && place?.photos?.[0]) {
-          try {
-            const photoUrl = place.photos[0].getUrl({ maxWidth: 800, maxHeight: 600 });
-            if (photoUrl) onUpdate({ ...homebase, image: photoUrl });
-          } catch {
-            /* ignore */
-          }
+    // #181: Places API (New) — Place.fetchFields statt Legacy PlacesService.getDetails
+    const place = new placesLib.Place({ id: homebase.placeId });
+    place
+      .fetchFields({ fields: ['photos'] })
+      .then(() => {
+        const photo = place.photos?.[0];
+        if (!photo) return;
+        try {
+          const photoUrl = photo.getURI({ maxWidth: 800, maxHeight: 600 });
+          if (photoUrl) onUpdate({ ...homebase, image: photoUrl });
+        } catch {
+          /* ignore */
         }
-      },
-    );
+      })
+      .catch(() => {
+        /* ignore — photo is nice-to-have */
+      });
   }, [placesLib, homebase, onUpdate]);
 
   return null;
