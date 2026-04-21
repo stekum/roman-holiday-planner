@@ -25,10 +25,10 @@ export function Header({ tab, onTabChange, user }: Props) {
             className="truncate text-2xl leading-none text-ink"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            Roman Holiday
+            Holiday Planner
           </h1>
           <p className="truncate text-xs uppercase tracking-widest text-olive">
-            Planner · Autunno
+            Autunno
           </p>
         </div>
         <div className="flex items-center gap-2">
