@@ -34,7 +34,8 @@ jobs:
             echo "::error::GOOGLE_SERVICE_ACCOUNT_JSON secret not configured."
             exit 1
           fi
-          printf '%s' "$SA_B64" | base64 -d > service-account.json
+          # Strip any whitespace (macOS `base64` wraps at 76 chars by default)
+          printf '%s' "$SA_B64" | tr -d ' \n\r\t' | base64 -d > service-account.json
           node -e "const j = JSON.parse(require('fs').readFileSync('service-account.json','utf8')); if (!j.project_id) { console.error('FAIL: project_id missing'); process.exit(1); } console.log('service-account.json valid for', j.project_id);"
 
       - name: Mint E2E auth token
