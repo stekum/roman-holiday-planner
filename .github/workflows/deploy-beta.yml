@@ -40,6 +40,7 @@ jobs:
           VITE_FIREBASE_WORKSPACE_ID: ${{ secrets.VITE_FIREBASE_WORKSPACE_ID }}
           VITE_GEMINI_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}
           VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
+          VITE_GA_MEASUREMENT_ID: ${{ secrets.VITE_GA_MEASUREMENT_ID }}
         run: |
           cat > .env.local <<ENVFILE
           VITE_FIREBASE_API_KEY=$VITE_FIREBASE_API_KEY
@@ -52,6 +53,10 @@ jobs:
           VITE_GEMINI_API_KEY=$VITE_GEMINI_API_KEY
           VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY
           ENVFILE
+          # Optional secrets: only append when set, so sanity check stays strict
+          if [ -n "${VITE_GA_MEASUREMENT_ID:-}" ]; then
+            echo "VITE_GA_MEASUREMENT_ID=$VITE_GA_MEASUREMENT_ID" >> .env.local
+          fi
           echo "Wrote $(wc -l < .env.local) lines, $(wc -c < .env.local) bytes"
           echo "Key names: $(cut -d= -f1 .env.local | tr '\n' ' ')"
           awk -F= '{ if (length($2) < 5) { print "FAIL: " $1 " value too short"; exit 1 } } END { print "All " NR " values are non-trivial length" }' .env.local

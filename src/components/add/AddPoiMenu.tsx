@@ -7,6 +7,7 @@ import { AddFromAiSearch } from './AddFromAiSearch';
 import { AddFromMap } from './AddFromMap';
 import { AddManual } from './AddManual';
 import { AddFromInstagram } from './AddFromInstagram';
+import { track, type AddPoiMethod } from '../../lib/analytics';
 
 export type AddMode = null | 'menu' | 'search' | 'ai-search' | 'map' | 'manual' | 'instagram';
 
@@ -92,6 +93,9 @@ export function AddPoiMenu({
   };
 
   const handleSave = (poi: POI) => {
+    if (mode && mode !== 'menu') {
+      track('add_poi', { method: mode as AddPoiMethod });
+    }
     onAdd(poi);
     close();
   };
