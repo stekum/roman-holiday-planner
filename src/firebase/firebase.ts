@@ -48,6 +48,9 @@ export function getFirebase(): FirebaseBundle {
     storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET as string,
     messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID as string,
     appId: env.VITE_FIREBASE_APP_ID as string,
+    // #123: required for Firebase Analytics getAnalytics() to work client-side.
+    // Missing here was why no GA events came through despite init succeeding.
+    measurementId: env.VITE_GA_MEASUREMENT_ID as string | undefined,
   });
   const db = getFirestore(app);
 
