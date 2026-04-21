@@ -29,6 +29,7 @@ Mobile-first PWA für die gemeinsame Planung einer Rom-Reise zweier Familien. Ko
 | Dokument | Inhalt |
 |---|---|
 | [Benutzerhandbuch](docs/USER-GUIDE.md) | Alle Features, Workflows, Known Issues |
+| [Architektur](docs/ARCHITECTURE.md) | System-Overview, Subsystem-Docs (Auth, Data-Model, Deploy, Components, AI) |
 | [Developer Guide](AGENTS.md) | Tech Stack, Setup, Code-Konventionen, Deployment, Testing |
 | [Releases](https://github.com/stekum/roman-holiday-planner/releases) | Versionierte Release-Notes |
 | [Project Board](https://github.com/users/stekum/projects/1) | Issues, Milestones, Roadmap |
