@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import { Loader2, MapPin, Sparkles, Star } from 'lucide-react';
 import type { POI } from '../../data/pois';
 import type { Family, TripConfig } from '../../settings/types';
 import { aiNlSearch } from '../../lib/aiNlSearch';
-import { fetchPlaceEnrichment } from '../../lib/placesNewApi';
+import { fetchPlaceEnrichment, mapPriceLevel } from '../../lib/placesNewApi';
 import { isDevSkipMapsApi, logDevSkip } from '../../lib/devFlags';
 import { AddPoiFields, type AddPoiFieldsValue } from './AddPoiFields';
 import type { PlaceResult } from '../instagram/PlacesAutocomplete';
@@ -36,7 +36,6 @@ interface Props {
 
 export function AddFromAiSearch({ families, onCancel, onSave, tripConfig }: Props) {
   const placesLib = useMapsLibrary('places');
-  const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
 
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -51,15 +50,9 @@ export function AddFromAiSearch({ families, onCancel, onSave, tripConfig }: Prop
     note: '',
   });
 
-  useEffect(() => {
-    if (!placesLib) return;
-    const div = document.createElement('div');
-    placesServiceRef.current = new placesLib.PlacesService(div);
-  }, [placesLib]);
-
   const runSearch = async () => {
     const trimmed = query.trim();
-    if (!trimmed || !placesServiceRef.current) return;
+    if (!trimmed || !placesLib) return;
     setLoading(true);
     setError(null);
     setResults([]);
@@ -72,44 +65,47 @@ export function AddFromAiSearch({ families, onCancel, onSave, tripConfig }: Prop
       setTranslatedQuery(ai.placesQuery);
       // #180: in dev skip real Places textSearch — show empty results with a hint.
       if (isDevSkipMapsApi()) {
-        logDevSkip('AddFromAiSearch (Places textSearch)');
+        logDevSkip('AddFromAiSearch (Places searchByText)');
         setLoading(false);
         setError('Dev-Mode: Places-Search geskippt. localStorage.DEBUG_MAPS=\'1\' + reload um echt zu suchen.');
         return;
       }
-      placesServiceRef.current.textSearch(
-        { query: ai.placesQuery, bounds: ROME_BIAS },
-        (places, status) => {
-          setLoading(false);
-          if (
-            status === google.maps.places.PlacesServiceStatus.OK ||
-            status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS
-          ) {
-            const mapped: SearchResult[] = (places ?? [])
-              .slice(0, 8)
-              .filter((p) => p.geometry?.location)
-              .map((p) => ({
-                placeId: p.place_id ?? '',
-                name: p.name ?? '',
-                address: p.formatted_address ?? p.vicinity ?? '',
-                coords: {
-                  lat: p.geometry!.location!.lat(),
-                  lng: p.geometry!.location!.lng(),
-                },
-                photoUrl: p.photos?.[0]?.getUrl({ maxWidth: 600, maxHeight: 400 }),
-                rating: p.rating,
-                userRatingCount: p.user_ratings_total,
-                priceLevel: p.price_level,
-              }));
-            setResults(mapped);
-            if (mapped.length === 0) {
-              setError(`Keine Treffer für „${ai.placesQuery}". Andere Formulierung probieren?`);
-            }
-          } else {
-            setError(`Places API Fehler: ${status}`);
-          }
-        },
-      );
+      // #181: Places API (New) — searchByText mit expliziten fields
+      const { places } = await placesLib.Place.searchByText({
+        textQuery: ai.placesQuery,
+        locationBias: ROME_BIAS,
+        fields: [
+          'id',
+          'displayName',
+          'formattedAddress',
+          'location',
+          'rating',
+          'userRatingCount',
+          'priceLevel',
+          'photos',
+        ],
+        maxResultCount: 8,
+      });
+      setLoading(false);
+      const mapped: SearchResult[] = (places ?? [])
+        .flatMap((p) => {
+          const loc = p.location;
+          if (!loc) return [];
+          return [{
+            placeId: p.id ?? '',
+            name: p.displayName ?? '',
+            address: p.formattedAddress ?? '',
+            coords: { lat: loc.lat(), lng: loc.lng() },
+            photoUrl: p.photos?.[0]?.getURI({ maxWidth: 600, maxHeight: 400 }),
+            rating: p.rating ?? undefined,
+            userRatingCount: p.userRatingCount ?? undefined,
+            priceLevel: mapPriceLevel(p.priceLevel),
+          }];
+        });
+      setResults(mapped);
+      if (mapped.length === 0) {
+        setError(`Keine Treffer für „${ai.placesQuery}". Andere Formulierung probieren?`);
+      }
     } catch (e) {
       setLoading(false);
       const msg = e instanceof Error ? e.message : String(e);
@@ -118,29 +114,47 @@ export function AddFromAiSearch({ families, onCancel, onSave, tripConfig }: Prop
   };
 
   const handlePick = (result: SearchResult) => {
-    if (!placesServiceRef.current) return;
+    if (!placesLib) return;
     const enrichmentPromise = fetchPlaceEnrichment(result.placeId);
-    placesServiceRef.current.getDetails(
-      { placeId: result.placeId, fields: ['url', 'opening_hours'] },
-      (detail, status) => {
-        const ok = status === google.maps.places.PlacesServiceStatus.OK;
-        void enrichmentPromise.then((enrichment) => {
-          setPlace({
-            name: result.name,
-            address: result.address,
-            coords: result.coords,
-            placeId: result.placeId,
-            photoUrl: result.photoUrl,
-            rating: result.rating,
-            userRatingCount: result.userRatingCount,
-            priceLevel: result.priceLevel,
-            mapsUrl: ok ? detail?.url : undefined,
-            openingHours: ok ? detail?.opening_hours?.weekday_text : undefined,
-            aiSummary: enrichment.aiSummary,
-            priceRange: enrichment.priceRange,
-            primaryType: enrichment.primaryType,
-            primaryTypeDisplayName: enrichment.primaryTypeDisplayName,
-          });
+    // #181: Place.fetchFields für url + opening_hours
+    const detailPlace = new placesLib.Place({ id: result.placeId });
+    detailPlace
+      .fetchFields({ fields: ['googleMapsURI', 'regularOpeningHours'] })
+      .then(async () => {
+        const enrichment = await enrichmentPromise;
+        setPlace({
+          name: result.name,
+          address: result.address,
+          coords: result.coords,
+          placeId: result.placeId,
+          photoUrl: result.photoUrl,
+          rating: result.rating,
+          userRatingCount: result.userRatingCount,
+          priceLevel: result.priceLevel,
+          mapsUrl: detailPlace.googleMapsURI ?? undefined,
+          openingHours: detailPlace.regularOpeningHours?.weekdayDescriptions,
+          aiSummary: enrichment.aiSummary,
+          priceRange: enrichment.priceRange,
+          primaryType: enrichment.primaryType,
+          primaryTypeDisplayName: enrichment.primaryTypeDisplayName,
+        });
+      })
+      .catch(async () => {
+        // Fetch-Fields-Fehler → trotzdem ohne url/opening_hours anzeigen
+        const enrichment = await enrichmentPromise;
+        setPlace({
+          name: result.name,
+          address: result.address,
+          coords: result.coords,
+          placeId: result.placeId,
+          photoUrl: result.photoUrl,
+          rating: result.rating,
+          userRatingCount: result.userRatingCount,
+          priceLevel: result.priceLevel,
+          aiSummary: enrichment.aiSummary,
+          priceRange: enrichment.priceRange,
+          primaryType: enrichment.primaryType,
+          primaryTypeDisplayName: enrichment.primaryTypeDisplayName,
         });
       },
     );

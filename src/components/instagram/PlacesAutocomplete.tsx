@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import { Loader2, MapPin, Search, Star } from 'lucide-react';
-import { fetchPlaceEnrichment, type PriceRange } from '../../lib/placesNewApi';
+import { fetchPlaceEnrichment, mapPriceLevel, type PriceRange } from '../../lib/placesNewApi';
 
 export interface PlaceResult {
   name: string;
@@ -53,101 +53,107 @@ export function PlacesAutocomplete({ onSelect }: Props) {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorStatus, setErrorStatus] = useState<string | null>(null);
-  const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
-
-  useEffect(() => {
-    if (!placesLib) return;
-    const div = document.createElement('div');
-    placesServiceRef.current = new placesLib.PlacesService(div);
-  }, [placesLib]);
 
   useEffect(() => {
     const trimmed = query.trim();
-    if (!placesServiceRef.current || trimmed.length < 3) {
+    if (!placesLib || trimmed.length < 3) {
       setResults([]);
       setErrorStatus(null);
       setLoading(false);
       return;
     }
     setLoading(true);
-    const handle = setTimeout(() => {
-      placesServiceRef.current!.textSearch(
-        {
-          query: trimmed,
-          bounds: ROME_BIAS,
-        },
-        (places, status) => {
-          setLoading(false);
-          if (
-            status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS ||
-            status === google.maps.places.PlacesServiceStatus.OK
-          ) {
-            setErrorStatus(null);
-            const mapped: SearchResult[] = (places ?? [])
-              .slice(0, 8)
-              .filter((p) => p.geometry?.location)
-              .map((p) => ({
-                placeId: p.place_id ?? '',
-                name: p.name ?? '',
-                address: p.formatted_address ?? p.vicinity ?? '',
-                coords: {
-                  lat: p.geometry!.location!.lat(),
-                  lng: p.geometry!.location!.lng(),
-                },
-                photoUrl: p.photos?.[0]?.getUrl({ maxWidth: 600, maxHeight: 400 }),
-                rating: p.rating,
-                userRatingCount: p.user_ratings_total,
-                priceLevel: p.price_level,
-                icon: p.icon,
-              }));
-            setResults(mapped);
-          } else {
-            setResults([]);
-            setErrorStatus(String(status));
-            console.error('[PlacesAutocomplete] textSearch failed:', status);
-          }
-        },
-      );
+    let cancelled = false;
+    const handle = setTimeout(async () => {
+      try {
+        // #181: Places API (New) — Place.searchByText
+        const { places } = await placesLib.Place.searchByText({
+          textQuery: trimmed,
+          locationBias: ROME_BIAS,
+          fields: [
+            'id',
+            'displayName',
+            'formattedAddress',
+            'location',
+            'rating',
+            'userRatingCount',
+            'priceLevel',
+            'photos',
+          ],
+          maxResultCount: 8,
+        });
+        if (cancelled) return;
+        setLoading(false);
+        setErrorStatus(null);
+        const mapped: SearchResult[] = (places ?? [])
+          .flatMap((p) => {
+            const loc = p.location;
+            if (!loc) return [];
+            return [{
+              placeId: p.id ?? '',
+              name: p.displayName ?? '',
+              address: p.formattedAddress ?? '',
+              coords: { lat: loc.lat(), lng: loc.lng() },
+              photoUrl: p.photos?.[0]?.getURI({ maxWidth: 600, maxHeight: 400 }),
+              rating: p.rating ?? undefined,
+              userRatingCount: p.userRatingCount ?? undefined,
+              priceLevel: mapPriceLevel(p.priceLevel),
+            }];
+          });
+        setResults(mapped);
+      } catch (err) {
+        if (cancelled) return;
+        setLoading(false);
+        setResults([]);
+        const msg = err instanceof Error ? err.message : String(err);
+        setErrorStatus(msg);
+        console.error('[PlacesAutocomplete] searchByText failed:', err);
+      }
     }, 350);
-    return () => clearTimeout(handle);
-  }, [query]);
+    return () => {
+      cancelled = true;
+      clearTimeout(handle);
+    };
+  }, [query, placesLib]);
 
   const handlePick = (result: SearchResult) => {
-    if (!placesServiceRef.current) return;
-    // Fetch `url` (Google Maps link) via details — textSearch doesn't include it.
-    // Also fetch AI summary from Places API (New) in parallel.
+    if (!placesLib) return;
+    // #181: Place.fetchFields für url + opening_hours. Parallel enrichment via REST.
     const enrichmentPromise = fetchPlaceEnrichment(result.placeId);
-    placesServiceRef.current.getDetails(
-      {
-        placeId: result.placeId,
-        fields: ['url', 'opening_hours'],
-      },
-      (place, status) => {
-        const ok = status === google.maps.places.PlacesServiceStatus.OK;
-        const mapsUrl = ok ? place?.url : undefined;
-        const openingHours = ok ? place?.opening_hours?.weekday_text : undefined;
-        void enrichmentPromise.then((enrichment) => {
-          onSelect({
-            name: result.name,
-            address: result.address,
-            coords: result.coords,
-            placeId: result.placeId,
-            photoUrl: result.photoUrl,
-            rating: result.rating,
-            userRatingCount: result.userRatingCount,
-            priceLevel: result.priceLevel,
-            mapsUrl,
-            openingHours,
-            aiSummary: enrichment.aiSummary,
-            priceRange: enrichment.priceRange,
-            primaryType: enrichment.primaryType,
-            primaryTypeDisplayName: enrichment.primaryTypeDisplayName,
-          });
-          setQuery('');
-          setResults([]);
+    const detailPlace = new placesLib.Place({ id: result.placeId });
+    const finalize = (mapsUrl: string | undefined, openingHours: string[] | undefined) => {
+      void enrichmentPromise.then((enrichment) => {
+        onSelect({
+          name: result.name,
+          address: result.address,
+          coords: result.coords,
+          placeId: result.placeId,
+          photoUrl: result.photoUrl,
+          rating: result.rating,
+          userRatingCount: result.userRatingCount,
+          priceLevel: result.priceLevel,
+          mapsUrl,
+          openingHours,
+          aiSummary: enrichment.aiSummary,
+          priceRange: enrichment.priceRange,
+          primaryType: enrichment.primaryType,
+          primaryTypeDisplayName: enrichment.primaryTypeDisplayName,
         });
-      },
-    );
+        setQuery('');
+        setResults([]);
+      });
+    };
+    detailPlace
+      .fetchFields({ fields: ['googleMapsURI', 'regularOpeningHours'] })
+      .then(() => {
+        finalize(
+          detailPlace.googleMapsURI ?? undefined,
+          detailPlace.regularOpeningHours?.weekdayDescriptions,
+        );
+      })
+      .catch(() => {
+        finalize(undefined, undefined);
+      });
   };
 
   return (

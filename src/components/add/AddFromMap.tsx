@@ -3,26 +3,9 @@ import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import { MapPin, Star } from 'lucide-react';
 import type { POI } from '../../data/pois';
 import type { Family } from '../../settings/types';
-import { fetchPlaceEnrichment, type PriceRange } from '../../lib/placesNewApi';
+import { fetchPlaceEnrichment, mapPriceLevel, type PriceRange } from '../../lib/placesNewApi';
 import { isDevSkipMapsApi, logDevSkip } from '../../lib/devFlags';
 import { AddPoiFields, type AddPoiFieldsValue } from './AddPoiFields';
-
-// #181: Legacy price_level war number 0-4, New API priceLevel ist ein
-// String-Enum. Map auf die gleiche 0-4 Semantik damit PoiCard-Fallback
-// weiter funktioniert. Modul-Scope → stable reference für useEffect-Deps.
-function mapPriceLevel(
-  p: google.maps.places.PriceLevel | null | undefined,
-): number | undefined {
-  if (!p) return undefined;
-  const map: Record<string, number> = {
-    FREE: 0,
-    INEXPENSIVE: 1,
-    MODERATE: 2,
-    EXPENSIVE: 3,
-    VERY_EXPENSIVE: 4,
-  };
-  return map[p as unknown as string];
-}
 
 interface Props {
   families: Family[];

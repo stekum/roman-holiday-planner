@@ -16,6 +16,7 @@ import { AddPoiFields, type AddPoiFieldsValue } from './AddPoiFields';
 import { extractLocationsFromCaption } from '../../lib/aiInstagramLocationExtractor';
 import { DEFAULT_TRIP_CONFIG } from '../../settings/tripConfig';
 import { isGeminiConfigured } from '../../lib/gemini';
+import { mapPriceLevel } from '../../lib/placesNewApi';
 
 interface Props {
   families: Family[];
@@ -95,46 +96,46 @@ export function AddFromInstagram({ families, tripConfig, homebaseCoords, onCance
         return;
       }
 
-      // Places Text-Search mit Bias auf Stadt-Zentrum (Homebase-Coords aus prop)
+      // #181: Places API (New) — Place.searchByText statt Legacy PlacesService
       const bias = homebaseCoords;
-      const div = document.createElement('div');
-      const service = new placesLib.PlacesService(div);
       const candidates: PlaceResult[] = [];
 
       for (const name of names) {
         const query = `${name}, ${effectiveConfig.city}`;
-        const results = await new Promise<google.maps.places.PlaceResult[]>((resolve) => {
-          service.textSearch(
-            {
-              query,
-              ...(bias ? { location: bias, radius: 30000 } : {}),
-            },
-            (results, status) => {
-              if (status === placesLib.PlacesServiceStatus.OK && results) {
-                resolve(results);
-              } else {
-                resolve([]);
-              }
-            },
-          );
-        });
-
-        const top = results[0];
-        if (top?.geometry?.location && top.place_id) {
-          candidates.push({
-            name: top.name ?? name,
-            address: top.formatted_address ?? '',
-            coords: {
-              lat: top.geometry.location.lat(),
-              lng: top.geometry.location.lng(),
-            },
-            placeId: top.place_id,
-            photoUrl: top.photos?.[0]?.getUrl({ maxWidth: 400, maxHeight: 300 }),
-            rating: top.rating,
-            userRatingCount: top.user_ratings_total,
-            mapsUrl: `https://www.google.com/maps/place/?q=place_id:${top.place_id}`,
-            priceLevel: top.price_level,
+        try {
+          const { places } = await placesLib.Place.searchByText({
+            textQuery: query,
+            fields: [
+              'id',
+              'displayName',
+              'formattedAddress',
+              'location',
+              'rating',
+              'userRatingCount',
+              'priceLevel',
+              'photos',
+            ],
+            maxResultCount: 1,
+            ...(bias
+              ? { locationBias: { center: bias, radius: 30000 } }
+              : {}),
           });
+          const top = places?.[0];
+          if (top?.location && top.id) {
+            candidates.push({
+              name: top.displayName ?? name,
+              address: top.formattedAddress ?? '',
+              coords: { lat: top.location.lat(), lng: top.location.lng() },
+              placeId: top.id,
+              photoUrl: top.photos?.[0]?.getURI({ maxWidth: 400, maxHeight: 300 }),
+              rating: top.rating ?? undefined,
+              userRatingCount: top.userRatingCount ?? undefined,
+              mapsUrl: `https://www.google.com/maps/place/?q=place_id:${top.id}`,
+              priceLevel: mapPriceLevel(top.priceLevel),
+            });
+          }
+        } catch (err) {
+          console.warn(`[AddFromInstagram] searchByText "${query}" failed`, err);
         }
       }
 
