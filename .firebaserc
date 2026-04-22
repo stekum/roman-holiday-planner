@@ -1,0 +1,13 @@
+{
+  "projects": {
+    "default": "roman-holiday-planner-6ac48"
+  },
+  "targets": {
+    "roman-holiday-planner-6ac48": {
+      "hosting": {
+        "prod": ["holiday-planner"],
+        "beta": ["holiday-planner-beta"]
+      }
+    }
+  }
+}

@@ -1,0 +1,98 @@
+name: Deploy Firebase Beta
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-firebase-beta
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Build + Deploy to Firebase Hosting (beta site)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Write .env.local from secrets
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_FIREBASE_WORKSPACE_ID: ${{ secrets.VITE_FIREBASE_WORKSPACE_ID }}
+          VITE_GEMINI_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}
+          VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
+          VITE_GA_MEASUREMENT_ID: ${{ secrets.VITE_GA_MEASUREMENT_ID }}
+        run: |
+          cat > .env.local <<ENVFILE
+          VITE_FIREBASE_API_KEY=$VITE_FIREBASE_API_KEY
+          VITE_FIREBASE_AUTH_DOMAIN=$VITE_FIREBASE_AUTH_DOMAIN
+          VITE_FIREBASE_PROJECT_ID=$VITE_FIREBASE_PROJECT_ID
+          VITE_FIREBASE_STORAGE_BUCKET=$VITE_FIREBASE_STORAGE_BUCKET
+          VITE_FIREBASE_MESSAGING_SENDER_ID=$VITE_FIREBASE_MESSAGING_SENDER_ID
+          VITE_FIREBASE_APP_ID=$VITE_FIREBASE_APP_ID
+          VITE_FIREBASE_WORKSPACE_ID=$VITE_FIREBASE_WORKSPACE_ID
+          VITE_GEMINI_API_KEY=$VITE_GEMINI_API_KEY
+          VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY
+          ENVFILE
+          if [ -n "${VITE_GA_MEASUREMENT_ID:-}" ]; then
+            echo "VITE_GA_MEASUREMENT_ID=$VITE_GA_MEASUREMENT_ID" >> .env.local
+          fi
+          awk -F= '{ if (length($2) < 5) { print "FAIL: " $1; exit 1 } }' .env.local
+          echo "env.local OK ($(wc -l < .env.local) lines)"
+
+      - name: Build (root-based for Firebase)
+        env:
+          VITE_BASE: /
+        run: npm run build
+
+      - name: Write service-account.json from split secrets
+        env:
+          SA_PROJECT_ID: ${{ secrets.FIREBASE_SA_PROJECT_ID }}
+          SA_CLIENT_EMAIL: ${{ secrets.FIREBASE_SA_CLIENT_EMAIL }}
+          SA_PRIVATE_KEY: ${{ secrets.FIREBASE_SA_PRIVATE_KEY }}
+        run: |
+          for var in SA_PROJECT_ID SA_CLIENT_EMAIL SA_PRIVATE_KEY; do
+            if [ -z "${!var:-}" ]; then
+              echo "::error::$var secret not configured."
+              exit 1
+            fi
+          done
+          node -e "
+            const fs = require('fs');
+            const sa = {
+              type: 'service_account',
+              project_id: process.env.SA_PROJECT_ID,
+              private_key: process.env.SA_PRIVATE_KEY,
+              client_email: process.env.SA_CLIENT_EMAIL,
+              token_uri: 'https://oauth2.googleapis.com/token',
+            };
+            fs.writeFileSync('/tmp/sa.json', JSON.stringify(sa));
+            console.log('service-account built for', sa.project_id);
+          "
+
+      - name: Deploy to Firebase Hosting (target=beta)
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/sa.json
+        run: npx firebase-tools@latest deploy --only hosting:beta --project roman-holiday-planner-6ac48 --non-interactive
+
+      - name: Clean up service-account
+        if: always()
+        run: rm -f /tmp/sa.json
