@@ -242,6 +242,7 @@ Zweiter Multi-Trip auf gereifter Architektur. App-Stand: v3.2. Bugs während Rom
 | #181 | refactor: Places API Legacy → New Migration (Deprecation-Pflicht) | L |
 | #183 | CI: Auto-Sync Issue-Milestone → Project-Board + Release-Field | S |
 | #190 | DevOps: Chrome DevTools MCP Server für agentisches Testing | S |
+| #213 | cleanup: Sunset GH-Pages + alten Maps-API-Key löschen (post-#117, frühestens ab 2026-05-06) | S |
 
 **Release:** `v2.1.x` — flexibel, Stücke als Patches.
 
