@@ -19,7 +19,7 @@
 import { chromium } from 'playwright';
 import { getAuthenticatedContext } from './auth-helper.js';
 
-const BETA_URL = 'https://stekum.github.io/roman-holiday-planner/beta/';
+const BETA_URL = 'https://holiday-planner-beta.web.app/';
 const QUERY = 'Romantisches Restaurant mit Terrasse in Trastevere';
 
 async function main() {

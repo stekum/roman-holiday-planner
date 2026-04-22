@@ -20,7 +20,7 @@ import { getAuthenticatedContext } from './auth-helper.js';
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const BETA_URL = 'https://stekum.github.io/roman-holiday-planner/beta/';
+const BETA_URL = 'https://holiday-planner-beta.web.app/';
 const OUT_DIR = resolve('.playwright-results');
 
 async function main() {

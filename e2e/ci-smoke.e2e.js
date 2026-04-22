@@ -18,7 +18,7 @@ import { chromium } from 'playwright';
 import { mkdirSync } from 'node:fs';
 import { getAuthenticatedContext } from './auth-helper.js';
 
-const BETA_URL = 'https://stekum.github.io/roman-holiday-planner/beta/';
+const BETA_URL = 'https://holiday-planner-beta.web.app/';
 const ART_DIR = '.playwright-results/ci-smoke';
 
 const results = [];

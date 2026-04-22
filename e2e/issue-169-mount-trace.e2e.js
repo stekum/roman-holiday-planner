@@ -17,7 +17,7 @@ async function main() {
   });
 
   const t0 = Date.now();
-  await page.goto('https://stekum.github.io/roman-holiday-planner/beta/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.goto('https://holiday-planner-beta.web.app/', { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForSelector('button[aria-label="Ort hinzufügen"]', { timeout: 30000 });
   console.log(`nav+ready: ${Date.now() - t0}ms`);
   await page.click('button[aria-label="Reise"]');
