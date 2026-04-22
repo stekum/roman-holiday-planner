@@ -15,7 +15,7 @@
  *   const browser = await chromium.launch();
  *   const ctx = await getAuthenticatedContext(browser, { width: 390, height: 844 });
  *   const page = await ctx.newPage();
- *   await page.goto('https://stekum.github.io/roman-holiday-planner/beta/');
+ *   await page.goto('https://holiday-planner-beta.web.app/');
  *   // page is signed in as the E2E test user
  */
 

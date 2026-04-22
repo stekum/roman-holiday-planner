@@ -56,10 +56,12 @@ Dieser Check ist billig (≤60 Sekunden) und verhindert fast alle Klassen von Fe
 
 Eine **mobile-first kollaborative Trip-Planing-PWA** für eine gemeinsame Rom-Reise von zwei Familien. Solo entwickelt von Stefan Kummert — kein öffentliches Produkt.
 
-- **Live:** https://stekum.github.io/roman-holiday-planner/
-- **Beta:** https://stekum.github.io/roman-holiday-planner/beta/
+- **Live (Prod):** https://holiday-planner.web.app/
+- **Beta:** https://holiday-planner-beta.web.app/
 - **Repo:** https://github.com/stekum/roman-holiday-planner
 - **Sprache:** UI und Prompts auf Deutsch
+
+> **Hosting-Transition aktiv (seit 2026-04-22, #117):** Firebase Hosting ist primär. GH-Pages (`stekum.github.io/roman-holiday-planner/beta/`) läuft parallel als Fallback bis ~2026-05-06 und wird dann via #213 abgeschaltet. Agents MÜSSEN gegen Firebase-URLs testen, nicht gegen die alte GH-Pages-URL.
 
 ---
 
@@ -221,14 +223,16 @@ npm run deploy       # Build + Deploy nach / (Production — nur nach Beta-Valid
 
 ## Deployment-Workflow (Beta → Production)
 
-**Stefan testet auf GitHub Pages, nicht auf localhost.** Lokales Testen (z.B. Playwright) ist ok, muss aber klar kommuniziert werden.
+**Stefan testet auf der deployten Beta, nicht auf localhost.** Lokales Testen (z.B. Playwright) ist ok, muss aber klar kommuniziert werden.
 
-### Zwei Stufen
+### Zwei Stufen (Firebase Hosting, primär)
 
-| Stufe | URL | Script | Zweck |
+| Stufe | URL | Trigger | Zweck |
 |---|---|---|---|
-| **Beta** | `https://stekum.github.io/roman-holiday-planner/beta/` | `npm run deploy:beta` | Testen nach jedem Fix |
-| **Production** | `https://stekum.github.io/roman-holiday-planner/` | `npm run deploy` | Stabile Version für alle Nutzer |
+| **Beta** | `https://holiday-planner-beta.web.app/` | Automatisch bei push auf `main` (`deploy-firebase-beta.yml`) | Testen nach jedem Fix |
+| **Production** | `https://holiday-planner.web.app/` | Manuell via `gh workflow run deploy-firebase-prod.yml -f confirm=deploy-prod` | Stabile Version für alle Nutzer |
+
+**Fallback bis ~2026-05-06:** GH-Pages-Beta läuft parallel unter `https://stekum.github.io/roman-holiday-planner/beta/` — NICHT primär verwenden, nur als Notfall-Backup bis #213 abgeschlossen ist.
 
 ### Dev Workflow — drei Stufen nach T-Shirt-Size
 
@@ -701,7 +705,7 @@ const { chromium } = require('playwright');
   const ctx = await browser.newContext({ viewport: { width: 800, height: 900 } });
   await ctx.addInitScript(() => { sessionStorage.setItem('rhp:unlocked', '1'); });
   const page = await ctx.newPage();
-  await page.goto('https://stekum.github.io/roman-holiday-planner/beta/', { waitUntil: 'domcontentloaded' });
+  await page.goto('https://holiday-planner-beta.web.app/', { waitUntil: 'domcontentloaded' });
   // ... Test-Logik + Screenshot ...
   await browser.close();
 })();

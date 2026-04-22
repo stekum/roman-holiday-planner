@@ -10,7 +10,7 @@ async function main() {
   const ctx = await getAuthenticatedContext(browser, { width: 390, height: 3000 });
   const page = await ctx.newPage();
 
-  await page.goto('https://stekum.github.io/roman-holiday-planner/beta/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.goto('https://holiday-planner-beta.web.app/', { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForSelector('button[aria-label="Ort hinzufügen"]', { timeout: 30000 });
   await page.click('button[aria-label="Reise"]');
   await page.waitForTimeout(1500);

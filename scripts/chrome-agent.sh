@@ -21,7 +21,7 @@ set -euo pipefail
 
 PORT="${CHROME_AGENT_PORT:-9222}"
 PROFILE="${CHROME_AGENT_PROFILE:-/tmp/chrome-agent-profile}"
-URL="${1:-https://stekum.github.io/roman-holiday-planner/beta/}"
+URL="${1:-https://holiday-planner-beta.web.app/}"
 
 case "$(uname -s)" in
   Darwin)
