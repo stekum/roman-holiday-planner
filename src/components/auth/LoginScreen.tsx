@@ -34,7 +34,7 @@ export function LoginScreen() {
           className="mb-2 text-center text-3xl text-ink"
           style={{ fontFamily: 'var(--font-display)' }}
         >
-          Roman Holiday Planner
+          Holiday Planner
         </h1>
         <p className="mb-8 text-center text-sm text-ink/60">
           Nur für unsere beiden Familien{' '}

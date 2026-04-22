@@ -12,8 +12,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icon.svg'],
       manifest: {
-        name: 'Roman Holiday Planner',
-        short_name: 'RHP',
+        name: 'Holiday Planner',
+        short_name: 'Holiday',
         description: 'Kollaborativer Reiseplaner für Familien mit Karte, Tagestouren und AI-Unterstützung.',
         theme_color: '#FBF7F0',
         background_color: '#FBF7F0',
