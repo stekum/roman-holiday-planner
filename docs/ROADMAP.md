@@ -117,8 +117,9 @@
 |---|---|---|---|---|
 | #71 | Dynamischer workspaceId (Listener-Switch) | L | 15 | **critical** |
 | #70 | Trip-Selector UI (Basic: Dropdown im Header) | M | 5 | high |
+| #213 | cleanup: Sunset GH-Pages + alten Maps-API-Key (post-#117, frühestens 2026-05-06) | S | 1 | low |
 
-**2 Items, ~20h. 2 Wochen.**
+**3 Items, ~21h. 2 Wochen.**
 
 **Scope-Lock:** #72 Trip-Wizard NICHT hier (Stefan kann manuell via Firestore). Verschoben zu v3.2.
 
@@ -236,13 +237,12 @@ Zweiter Multi-Trip auf gereifter Architektur. App-Stand: v3.2. Bugs während Rom
 | #133 | Email-Notification bei Zugriffsanfrage | S |
 | #137 | Architektur-Dokumentation | M |
 | #154 | Docs: CarPlay/Android Auto Handoff | S |
-| #178 | perf: API-Call-Caching (fetchPlaceEnrichment + RoutePolyline) — ~€20/Monat Ersparnis | S |
+| #178 | ~~perf: API-Call-Caching (fetchPlaceEnrichment + RoutePolyline) — ~€20/Monat Ersparnis~~ | S | ✅ |
 | #179 | perf: Firestore-Enrichment als Cache-SoT (statt re-fetch) | M |
 | #180 | perf: Dev-Mode-Flags für expensive APIs (Directions, Places) | S |
 | #181 | refactor: Places API Legacy → New Migration (Deprecation-Pflicht) | L |
-| #183 | CI: Auto-Sync Issue-Milestone → Project-Board + Release-Field | S |
+| #183 | ~~CI: Auto-Sync Issue-Milestone → Project-Board + Release-Field~~ | S | ✅ |
 | #190 | DevOps: Chrome DevTools MCP Server für agentisches Testing | S |
-| #213 | cleanup: Sunset GH-Pages + alten Maps-API-Key löschen (post-#117, frühestens ab 2026-05-06) | S |
 
 **Release:** `v2.1.x` — flexibel, Stücke als Patches.
 
