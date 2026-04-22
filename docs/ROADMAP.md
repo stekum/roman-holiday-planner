@@ -231,7 +231,7 @@ Zweiter Multi-Trip auf gereifter Architektur. App-Stand: v3.2. Bugs während Rom
 |---|---|---|
 | #172 | CI: Playwright E2E im Pipeline | L |
 | #173 | CI: Semantic-Release (auto tag + notes) | M |
-| #117 | Hosting-Migration (weg von GitHub Pages) | M |
+| #117 | ~~Hosting-Migration (weg von GitHub Pages)~~ | M | ✅ |
 | #123 | Google Analytics Usage Tracking (Pre-GTM Baseline) | S |
 | #133 | Email-Notification bei Zugriffsanfrage | S |
 | #137 | Architektur-Dokumentation | M |
