@@ -96,3 +96,19 @@ export function forgetWorkspace(id: string): void {
   const list = readRaw().filter((e) => e.id !== id);
   writeRaw(list);
 }
+
+/**
+ * Updates just the display name without bumping {@link KnownWorkspace.lastOpened}.
+ * Empty string clears the name. Silently no-ops if the id is not known.
+ */
+export function renameWorkspace(id: string, displayName: string): void {
+  const list = readRaw();
+  const idx = list.findIndex((e) => e.id === id);
+  if (idx < 0) return;
+  const trimmed = displayName.trim();
+  list[idx] = {
+    ...list[idx],
+    displayName: trimmed.length > 0 ? trimmed : undefined,
+  };
+  writeRaw(list);
+}
