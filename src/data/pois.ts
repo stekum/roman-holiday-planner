@@ -99,8 +99,6 @@ export const CATEGORIES: Category[] = [
   'Sonstiges',
 ];
 
-export const ROME_CENTER = { lat: 41.8925, lng: 12.4853 };
-
 /**
  * Emoji-Lookup fuer Rom-Default-Kategorien. Fuer custom-Kategorien
  * (z.B. Ramen in einem Tokyo-Trip) bitte `getCategoryEmoji` aus

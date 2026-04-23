@@ -8,8 +8,9 @@ import {
   useMap,
 } from '@vis.gl/react-google-maps';
 import { Eye, Navigation } from 'lucide-react';
-import { CATEGORY_EMOJI, ROME_CENTER, type POI } from '../../data/pois';
-import type { Family, Homebase } from '../../settings/types';
+import { CATEGORY_EMOJI, type POI } from '../../data/pois';
+import type { Family, Homebase, TripConfig } from '../../settings/types';
+import { DEFAULT_CENTER, DEFAULT_ZOOM } from '../../settings/tripConfig';
 import { RoutePolyline, type RouteSummary } from './RoutePolyline';
 
 const CATEGORY_GRADIENT: Record<POI['category'], string> = {
@@ -32,6 +33,8 @@ interface Props {
   planOrder?: string[];
   families: Family[];
   homebase?: Homebase;
+  /** Active trip — provides per-trip map center + default zoom (#73). */
+  tripConfig?: TripConfig;
   myLocation?: { lat: number; lng: number; accuracy: number } | null;
   /** External selection — app-controlled. Pans map and shows InfoWindow. */
   highlightedPoiId?: string | null;
@@ -206,6 +209,7 @@ export function RomeMap({
   planOrder = [],
   families,
   homebase,
+  tripConfig,
   myLocation,
   highlightedPoiId,
   streetViewPosition = null,
@@ -253,8 +257,8 @@ export function RomeMap({
   return (
     <GMap
       mapId="rhp-main"
-      defaultCenter={homebase?.coords ?? ROME_CENTER}
-      defaultZoom={14}
+      defaultCenter={homebase?.coords ?? tripConfig?.center ?? DEFAULT_CENTER}
+      defaultZoom={tripConfig?.defaultZoom ?? DEFAULT_ZOOM}
       gestureHandling="greedy"
       disableDefaultUI={false}
       className={`h-full w-full ${pickMode ? 'cursor-crosshair' : ''}`}

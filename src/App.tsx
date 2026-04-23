@@ -12,7 +12,7 @@ import { AddPoiMenu, type AddMode } from './components/add/AddPoiMenu';
 import { LocatePoiModal } from './components/inbox/LocatePoiModal';
 import { EditPoiModal } from './components/poi/EditPoiModal';
 import { useWorkspace } from './firebase/useWorkspace';
-import { getTripConfig, currencyFromCountry } from './settings/tripConfig';
+import { getTripConfig, currencySymbolFromCode } from './settings/tripConfig';
 import { useWeather } from './hooks/useWeather';
 import { useMyFamily } from './hooks/useMyFamily';
 import { useMyLocation } from './hooks/useMyLocation';
@@ -380,6 +380,7 @@ function AppInner({ user }: AppInnerProps) {
                 planOrder={activeDayOrder}
                 families={settings.families}
                 homebase={settings.homebase}
+                tripConfig={getTripConfig(settings)}
                 myLocation={myLocation}
                 highlightedPoiId={highlightedPoiId}
                 streetViewPosition={streetViewCoords}
@@ -456,7 +457,7 @@ function AppInner({ user }: AppInnerProps) {
               }}
               categories={getTripConfig(settings).categories}
               onSetVisitStatus={(id, status) => void setVisitStatus(id, status)}
-              currencySymbol={currencyFromCountry(getTripConfig(settings).country)}
+              currencySymbol={currencySymbolFromCode(getTripConfig(settings).currency)}
             />
             </>
           )}
