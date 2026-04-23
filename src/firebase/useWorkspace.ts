@@ -9,6 +9,7 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 import { getFirebase } from './firebase';
+import { useActiveWorkspaceId } from './workspaceContext';
 import { primeEnrichmentCache } from '../lib/placesNewApi';
 import { type POI, SEED_POIS, type Vote, type Comment, type VisitStatus } from '../data/pois';
 import { DEFAULT_SETTINGS } from '../settings/defaults';
@@ -101,37 +102,50 @@ function stripUndefined<T extends Record<string, unknown>>(obj: T): T {
   return out;
 }
 
+const EMPTY_DOC: WorkspaceDoc = {
+  settings: DEFAULT_SETTINGS,
+  tripPlan: {},
+  dayDescriptions: {},
+  dayBriefings: {},
+  dayBudgets: {},
+  postTripAnalysis: '',
+};
+
 /**
- * Realtime workspace hook — reads/writes a single shared Firestore doc
- * (settings + tripPlan) and a subcollection for POIs.
+ * Realtime workspace hook — reads/writes the active workspace's Firestore doc
+ * (settings + tripPlan) and its POI subcollection.
  *
- * Every device connects to the same workspace via VITE_FIREBASE_WORKSPACE_ID.
+ * The active workspaceId comes from {@link useActiveWorkspaceId}. When it
+ * changes (trip-switch via #70), all listeners are torn down, local state is
+ * reset, and new listeners attach to the new workspace's paths.
+ *
  * Writes are fire-and-forget: optimistic via Firestore's local cache, then
  * synced to the server. Realtime listeners stream changes back to all peers.
  */
 export function useWorkspace(): WorkspaceAPI {
+  const workspaceId = useActiveWorkspaceId();
   const [status, setStatus] = useState<ConnectionStatus>('connecting');
   const [error, setError] = useState<string | null>(null);
   const [pois, setPois] = useState<POI[]>([]);
-  const [doc_, setDoc_] = useState<WorkspaceDoc>({
-    settings: DEFAULT_SETTINGS,
-    tripPlan: {},
-    dayDescriptions: {},
-    dayBriefings: {},
-    dayBudgets: {},
-    postTripAnalysis: '',
-  });
+  const [doc_, setDoc_] = useState<WorkspaceDoc>(EMPTY_DOC);
 
-  // --- Subscribe on mount ---
+  // --- Subscribe on workspace change ---
   useEffect(() => {
     let cancelled = false;
     let unsubDoc: Unsubscribe | null = null;
     let unsubPois: Unsubscribe | null = null;
 
+    // Reset state synchronously so consumers don't see stale data from the
+    // previous workspace while the new listeners warm up.
+    setStatus('connecting');
+    setError(null);
+    setPois([]);
+    setDoc_(EMPTY_DOC);
+
     const run = async () => {
       try {
         // Auth is guaranteed to be ready by AuthGate before this hook mounts.
-        const { db, workspaceId } = getFirebase();
+        const { db } = getFirebase();
         if (cancelled) return;
         const workspaceRef = doc(db, 'workspaces', workspaceId);
         const poisRef = collection(db, 'workspaces', workspaceId, 'pois');
@@ -213,18 +227,21 @@ export function useWorkspace(): WorkspaceAPI {
       unsubDoc?.();
       unsubPois?.();
     };
-  }, []);
+  }, [workspaceId]);
 
   // --- Write helpers ---
   const workspaceDocRef = useCallback(() => {
-    const { db, workspaceId } = getFirebase();
+    const { db } = getFirebase();
     return doc(db, 'workspaces', workspaceId);
-  }, []);
+  }, [workspaceId]);
 
-  const poiDocRef = useCallback((id: string) => {
-    const { db, workspaceId } = getFirebase();
-    return doc(db, 'workspaces', workspaceId, 'pois', id);
-  }, []);
+  const poiDocRef = useCallback(
+    (id: string) => {
+      const { db } = getFirebase();
+      return doc(db, 'workspaces', workspaceId, 'pois', id);
+    },
+    [workspaceId],
+  );
 
   // --- POI operations ---
   const addPoi = useCallback(
