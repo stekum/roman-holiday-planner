@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronDown, Check, Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, Check, Pencil, Plus, Trash2 } from 'lucide-react';
 import {
   forgetWorkspace,
   getKnownWorkspaces,
   isValidWorkspaceId,
   rememberWorkspace,
+  renameWorkspace,
   type KnownWorkspace,
 } from '../../firebase/knownWorkspaces';
 import {
@@ -22,14 +23,17 @@ export function TripSwitcher() {
   const setActiveId = useSetActiveWorkspaceId();
   const [open, setOpen] = useState(false);
   const [list, setList] = useState<KnownWorkspace[]>(() => getKnownWorkspaces());
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameDraft, setRenameDraft] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
+  const renameInputRef = useRef<HTMLInputElement>(null);
 
   // Refresh from localStorage whenever the menu opens — covers the case that
-  // another tab added a workspace (or `rememberWorkspace` ran on the activeId
-  // change since the component mounted).
+  // another tab added a workspace, or `rememberWorkspace` ran while the menu
+  // was closed.
   useEffect(() => {
     if (open) setList(getKnownWorkspaces());
-  }, [open, activeId]);
+  }, [open]);
 
   // Outside-click closes the dropdown.
   useEffect(() => {
@@ -71,6 +75,26 @@ export function TripSwitcher() {
     setOpen(false);
   }
 
+  function startRename(entry: KnownWorkspace) {
+    setRenamingId(entry.id);
+    setRenameDraft(entry.displayName ?? '');
+    // Focus the input after it mounts.
+    requestAnimationFrame(() => renameInputRef.current?.focus());
+  }
+
+  function cancelRename() {
+    setRenamingId(null);
+    setRenameDraft('');
+  }
+
+  function commitRename() {
+    if (renamingId) {
+      renameWorkspace(renamingId, renameDraft);
+      setList(getKnownWorkspaces());
+    }
+    cancelRename();
+  }
+
   return (
     <div ref={containerRef} className="relative">
       <button
@@ -96,46 +120,88 @@ export function TripSwitcher() {
           <ul className="space-y-0.5">
             {list.map((entry) => (
               <li key={entry.id}>
-                <div className="group flex items-center rounded-xl hover:bg-cream">
-                  <button
-                    type="button"
-                    role="menuitemradio"
-                    aria-checked={entry.id === activeId}
-                    onClick={() => handleSelect(entry.id)}
-                    className="flex min-w-0 flex-1 items-center gap-2 px-3 py-2 text-left"
-                  >
-                    <span
-                      className={`flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full ${
-                        entry.id === activeId
-                          ? 'bg-olive text-white'
-                          : 'border border-ink/20'
-                      }`}
-                    >
-                      {entry.id === activeId && <Check className="h-3 w-3" />}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm text-ink">
-                        {entry.displayName || entry.id}
-                      </span>
-                      {entry.displayName && (
-                        <span className="block truncate text-[10px] text-ink/40">
-                          {entry.id}
-                        </span>
-                      )}
-                    </span>
-                  </button>
-                  {entry.id !== activeId && (
+                {renamingId === entry.id ? (
+                  <div className="flex items-center gap-1 px-3 py-2">
+                    <input
+                      ref={renameInputRef}
+                      type="text"
+                      value={renameDraft}
+                      onChange={(e) => setRenameDraft(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') commitRename();
+                        if (e.key === 'Escape') cancelRename();
+                      }}
+                      placeholder={entry.id}
+                      aria-label={`Anzeigename für ${entry.id}`}
+                      className="min-w-0 flex-1 rounded-lg border border-olive/40 bg-cream/50 px-2 py-1 text-sm text-ink placeholder:text-ink/30 focus:border-olive focus:outline-none"
+                    />
                     <button
                       type="button"
-                      onClick={() => handleForget(entry.id)}
-                      aria-label={`${entry.displayName || entry.id} aus Liste entfernen`}
-                      title="Aus Liste entfernen (Trip-Daten bleiben in Firestore erhalten)"
-                      className="mr-2 rounded-lg p-1.5 text-ink/30 opacity-0 transition hover:bg-terracotta/10 hover:text-terracotta group-hover:opacity-100"
+                      onClick={commitRename}
+                      className="rounded-lg bg-olive px-2.5 py-1 text-xs font-semibold text-white hover:bg-olive-dark"
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      OK
                     </button>
-                  )}
-                </div>
+                    <button
+                      type="button"
+                      onClick={cancelRename}
+                      className="rounded-lg bg-ink/5 px-2 py-1 text-xs text-ink/60 hover:bg-ink/10"
+                      aria-label="Abbrechen"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <div className="group flex items-center rounded-xl hover:bg-cream">
+                    <button
+                      type="button"
+                      role="menuitemradio"
+                      aria-checked={entry.id === activeId}
+                      onClick={() => handleSelect(entry.id)}
+                      className="flex min-w-0 flex-1 items-center gap-2 px-3 py-2 text-left"
+                    >
+                      <span
+                        className={`flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full ${
+                          entry.id === activeId
+                            ? 'bg-olive text-white'
+                            : 'border border-ink/20'
+                        }`}
+                      >
+                        {entry.id === activeId && <Check className="h-3 w-3" />}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm text-ink">
+                          {entry.displayName || entry.id}
+                        </span>
+                        {entry.displayName && (
+                          <span className="block truncate text-[10px] text-ink/40">
+                            {entry.id}
+                          </span>
+                        )}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => startRename(entry)}
+                      aria-label={`${entry.displayName || entry.id} umbenennen`}
+                      title="Anzeigename ändern"
+                      className="rounded-lg p-1.5 text-ink/30 opacity-0 transition hover:bg-olive/10 hover:text-olive-dark group-hover:opacity-100"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    {entry.id !== activeId && (
+                      <button
+                        type="button"
+                        onClick={() => handleForget(entry.id)}
+                        aria-label={`${entry.displayName || entry.id} aus Liste entfernen`}
+                        title="Aus Liste entfernen (Trip-Daten bleiben in Firestore erhalten)"
+                        className="mr-2 rounded-lg p-1.5 text-ink/30 opacity-0 transition hover:bg-terracotta/10 hover:text-terracotta group-hover:opacity-100"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
+                )}
               </li>
             ))}
           </ul>
