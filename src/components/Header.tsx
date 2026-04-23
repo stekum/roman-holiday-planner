@@ -1,6 +1,7 @@
 import type { User } from 'firebase/auth';
 import { Compass, Route, Settings as SettingsIcon } from 'lucide-react';
 import { UserMenu } from './auth/UserMenu';
+import { TripSwitcher } from './trip/TripSwitcher';
 
 export type Tab = 'discover' | 'trip' | 'settings';
 
@@ -27,9 +28,7 @@ export function Header({ tab, onTabChange, user }: Props) {
           >
             Holiday Planner
           </h1>
-          <p className="truncate text-xs uppercase tracking-widest text-olive">
-            Autunno
-          </p>
+          <TripSwitcher />
         </div>
         <div className="flex items-center gap-2">
           <nav className="flex flex-shrink-0 gap-1 rounded-full bg-white p-1 shadow-sm shadow-ink/5">
