@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Star } from 'lucide-react';
 import type { POI } from '../../data/pois';
 import type { Family } from '../../settings/types';
+import type { PlacesBias } from '../../lib/placesBias';
 import {
   PlacesAutocomplete,
   type PlaceResult,
@@ -12,9 +13,11 @@ interface Props {
   families: Family[];
   onCancel: () => void;
   onSave: (poi: POI) => void;
+  /** Bias fuer Places-Suche. */
+  bias?: PlacesBias;
 }
 
-export function AddFromSearch({ families, onCancel, onSave }: Props) {
+export function AddFromSearch({ families, onCancel, onSave, bias }: Props) {
   const [place, setPlace] = useState<PlaceResult | null>(null);
   const [fields, setFields] = useState<AddPoiFieldsValue>({
     familyId: families[0]?.id ?? '',
@@ -51,7 +54,7 @@ export function AddFromSearch({ families, onCancel, onSave }: Props) {
 
   return (
     <div className="space-y-4">
-      <PlacesAutocomplete onSelect={setPlace} />
+      <PlacesAutocomplete onSelect={setPlace} bias={bias} />
 
       {place && (
         <>

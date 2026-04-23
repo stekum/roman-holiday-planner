@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { MapPin, X } from 'lucide-react';
 import type { POI } from '../../data/pois';
+import type { PlacesBias } from '../../lib/placesBias';
 import {
   PlacesAutocomplete,
   type PlaceResult,
@@ -10,9 +11,13 @@ interface Props {
   poi: POI;
   onCancel: () => void;
   onSave: (coords: { lat: number; lng: number }, placeId?: string) => void;
+  /** Stadt-Name fuer UI-Text. */
+  city?: string;
+  /** Bias fuer Places-Suche. */
+  bias?: PlacesBias;
 }
 
-export function LocatePoiModal({ poi, onCancel, onSave }: Props) {
+export function LocatePoiModal({ poi, onCancel, onSave, city, bias }: Props) {
   const [place, setPlace] = useState<PlaceResult | null>(null);
 
   return (
@@ -37,7 +42,7 @@ export function LocatePoiModal({ poi, onCancel, onSave }: Props) {
                 „{poi.title}" verorten
               </h2>
               <p className="text-xs text-ink/60">
-                Ort in Rom suchen und auswählen
+                Ort {city ? `in ${city}` : ''} suchen und auswählen
               </p>
             </div>
           </div>
@@ -51,7 +56,7 @@ export function LocatePoiModal({ poi, onCancel, onSave }: Props) {
         </div>
 
         <div className="space-y-4">
-          <PlacesAutocomplete onSelect={setPlace} />
+          <PlacesAutocomplete onSelect={setPlace} bias={bias} />
 
           {place && (
             <div className="rounded-2xl bg-olive/10 p-3 text-sm text-olive-dark">

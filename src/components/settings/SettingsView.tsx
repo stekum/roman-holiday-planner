@@ -8,6 +8,8 @@ import { TripDatesEditor } from './TripDatesEditor';
 import { TripConfigEditor } from './TripConfigEditor';
 import { FamilyEditor } from './FamilyEditor';
 import { HomebaseEditor } from './HomebaseEditor';
+import { getPlacesBias } from '../../lib/placesBias';
+import { getTripConfig } from '../../settings/tripConfig';
 import { MyFamilyEditor } from './MyFamilyEditor';
 import { ApprovalQueue } from './ApprovalQueue';
 
@@ -131,6 +133,7 @@ export function SettingsView({
       />
       <HomebaseEditor
         homebase={settings.homebase}
+        bias={getPlacesBias(getTripConfig(settings), settings.homebase)}
         onChange={onSetHomebase}
       />
       <FamilyEditor

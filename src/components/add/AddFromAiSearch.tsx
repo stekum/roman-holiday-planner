@@ -5,16 +5,10 @@ import type { POI } from '../../data/pois';
 import type { Family, TripConfig } from '../../settings/types';
 import { aiNlSearch } from '../../lib/aiNlSearch';
 import { fetchPlaceEnrichment, mapPriceLevel } from '../../lib/placesNewApi';
+import { getPlacesBias } from '../../lib/placesBias';
 import { isDevSkipMapsApi, logDevSkip } from '../../lib/devFlags';
 import { AddPoiFields, type AddPoiFieldsValue } from './AddPoiFields';
 import type { PlaceResult } from '../instagram/PlacesAutocomplete';
-
-const ROME_BIAS: google.maps.LatLngBoundsLiteral = {
-  north: 41.99,
-  south: 41.80,
-  east: 12.60,
-  west: 12.35,
-};
 
 interface SearchResult {
   placeId: string;
@@ -71,9 +65,10 @@ export function AddFromAiSearch({ families, onCancel, onSave, tripConfig }: Prop
         return;
       }
       // #181: Places API (New) — searchByText mit expliziten fields
+      const bias = getPlacesBias(tripConfig);
       const { places } = await placesLib.Place.searchByText({
         textQuery: ai.placesQuery,
-        locationBias: ROME_BIAS,
+        ...(bias ? { locationBias: bias } : {}),
         fields: [
           'id',
           'displayName',
