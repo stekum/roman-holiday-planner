@@ -115,11 +115,11 @@
 
 | Issue | Titel | Size | Est. h | Prio |
 |---|---|---|---|---|
-| #71 | Dynamischer workspaceId (Listener-Switch) | L | 15 | **critical** |
-| #70 | Trip-Selector UI (Basic: Dropdown im Header) | M | 5 | high |
+| ✅ #71 | Dynamischer workspaceId (Listener-Switch) | L | 15 | **critical** |
+| ✅ #70 | Trip-Selector UI (Basic: Dropdown im Header) | M | 5 | high |
 | #213 | cleanup: Sunset GH-Pages + alten Maps-API-Key (post-#117, frühestens 2026-05-06) | S | 1 | low |
 
-**3 Items, ~21h. 2 Wochen.**
+**3 Items, ~21h. 2 Wochen — 2 erledigt 2026-04-23, #213 wartet auf 2026-05-06.**
 
 **Scope-Lock:** #72 Trip-Wizard NICHT hier (Stefan kann manuell via Firestore). Verschoben zu v3.2.
 
@@ -135,7 +135,7 @@
 
 | Issue | Titel | Size | Est. h |
 |---|---|---|---|
-| #73 | Stadt-Konfiguration (CityConfig statt ROME_CENTER) | M | 6 |
+| ✅ #73 | Stadt-Konfiguration (CityConfig statt ROME_CENTER) | M | 6 |
 | #74 | Multi-Homebase pro Trip (datumsbasiert) | M | 6 |
 | #78 | Transit-Tage (Reisetage zwischen Städten) | M | 6 |
 | #113 | Auth: User-Profil + Workspace-Zuordnung (Multi-Trip-Access) | M | 6 |
@@ -144,7 +144,7 @@
 | #216 | docs: Firebase Hosting Rollback-Playbook | S | 1 |
 | #217 | devops: Chrome-DevTools MCP Server lokal in Claude Code registrieren | S | 1 |
 
-**8 Items, ~31h. 2 Wochen + Buffer.**
+**8 Items, ~31h. 2 Wochen + Buffer — 1 erledigt 2026-04-23 (#73 Architektur-Blocker).**
 
 > ⚠ Scope-Warnung: >5 Items. Stefan bestätigt bewusst — #215/#216/#217 sind ops-hygiene/tooling (klein, parallel zu Features machbar), #209 ist trivialer Japan-UX-Touch.
 

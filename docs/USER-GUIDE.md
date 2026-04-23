@@ -1,8 +1,8 @@
 # Roman Holiday Planner — Benutzerhandbuch
 
-> Mobile-first PWA für die gemeinsame Planung einer Rom-Reise (2 Familien).  
-> **Live:** https://stekum.github.io/roman-holiday-planner/  
-> **Beta:** https://stekum.github.io/roman-holiday-planner/beta/
+> Mobile-first PWA für die gemeinsame Planung mehrerer Reisen (Multi-Trip seit v2.2).
+> **Live:** https://holiday-planner.web.app/
+> **Beta:** https://holiday-planner-beta.web.app/
 
 ---
 
@@ -182,11 +182,15 @@ Alle Methoden bieten: **Familie-Auswahl** (farbige Pill-Buttons) + **Kategorie-A
 
 ### Trip-Konfiguration (🌐)
 
+- **Stadt aus Places befüllen:** Suchfeld am Kopf der Card — tippe eine Stadt (z.B. „Tokyo"), wähle den Treffer und die App füllt automatisch **Stadt, Land, Map-Mittelpunkt, Zeitzone und Währung**. Die darunter stehenden Felder kannst du anschließend einzeln überschreiben.
 - **Stadt / Land:** Kontext für alle AI-Prompts (Tagesplan, Briefing, Vibes-Suche, Vorschläge). Default: Rom / Italien.
 - **Sprache:** In welcher Sprache die AI antwortet (Deutsch / English / Italienisch / Japanisch / Spanisch / Französisch). Default: Deutsch.
+- **Währung:** ISO-Code (EUR / JPY / USD / GBP / CHF) — wird als Symbol auf allen POI-Karten angezeigt (€/¥/$/£/CHF). Wird via CityPicker aus dem Land abgeleitet.
+- **Map-Mittelpunkt (read-only):** Koordinaten auf die sich die Karte zentriert, wenn **keine Homebase** gesetzt ist. Für Japan z.B. Tokyo `35.68, 139.65`, für Italien Rom `41.89, 12.49`.
+- **Zeitzone (read-only):** IANA-String (z.B. `Europe/Rome`, `Asia/Tokyo`) — aktuell Info-Anzeige, zukünftig für Local-Time-Display.
 - **Kategorien:** Liste der POI-Kategorien pro Trip. Default: 7 Rom-Kategorien (Kultur, Pizza, Gelato, Trattoria, Aperitivo, Instagram, Sonstiges). Eigene hinzufügen (z.B. „Ramen", „Tempel", „Sushi") und entfernen via Pill-Editor. Bekannte Kategorien bekommen automatisch ein Emoji, unbekannte einen 📍-Fallback.
 - **„Auf Rom-Default zurücksetzen":** Setzt alles auf die Rom-Werte.
-- Bereitet die App auf v3.0 Multi-Trip vor — aktuell reicht ein Trip pro Workspace, ab v3.0 pro Trip konfigurierbar.
+- Jeder Trip hat seine eigene Config — wechsle im Header zwischen Rom-Setup und Japan-Setup, die Felder folgen mit.
 
 ### Familien
 
@@ -208,14 +212,25 @@ Alle Methoden bieten: **Familie-Auswahl** (farbige Pill-Buttons) + **Kategorie-A
 
 ## 4. Übergreifende Features
 
+### Trip wechseln (Multi-Trip, seit v2.2)
+
+Unter dem „Holiday Planner"-Titel im Header steht ein **Trip-Chip mit ▾-Indikator** — das ist der aktive Trip (z.B. „Rom 2026" oder die rohe Workspace-ID).
+
+- **Dropdown öffnen:** Chip klicken → Liste aller bekannten Trips + „+ Neuen Trip anlegen".
+- **Trip wechseln:** Anderen Eintrag anklicken. Alle Tabs laden die Daten des neuen Trips sofort, **keine Vermischung** (eigene POIs, eigener Tagesplan, eigene Settings, eigene Kategorien).
+- **Neuen Trip anlegen:** „+ Neuen Trip anlegen" → Trip-ID (kleinbuchstaben, Ziffern, Bindestrich, max 40 Zeichen — z.B. `japan-mai-26`) + Anzeigename (z.B. „Japan Mai 2026"). „Anlegen" erzeugt einen leeren Trip und wechselt dort hin. Anschließend in Settings: Reisedaten, Homebase, Familien und Trip-Konfiguration einrichten.
+- **Trip umbenennen:** Dropdown öffnen → über einen Eintrag hovern → **Pencil-Icon** klicken → Inline-Edit. Enter speichert, Escape bricht ab. Leerer Name setzt zurück auf die rohe ID.
+- **Trip aus Liste entfernen:** Hover → **Mülleimer-Icon** → Klick. Entfernt nur den Eintrag aus der lokalen Liste; die **Trip-Daten in Firestore bleiben bestehen**. Kein Undo nötig — Trip per ID neu eintragen öffnet dieselben Daten wieder.
+- **Persistenz:** Die Trip-Liste lebt im localStorage (`rhp:known-workspaces`, `rhp:active-workspace`) pro Device. Auf einem neuen Gerät siehst du anfangs nur den Default-Workspace und musst weitere manuell anlegen bzw. durch Öffnen merken lassen. Cross-Device-Sync kommt mit #113.
+
 ### Echtzeit-Synchronisation
 
 - Alle Daten (POIs, Settings, Tagesplan) werden über **Firebase Firestore** synchronisiert
 - Beide Familien sehen Änderungen sofort (`onSnapshot`-Listener)
 - Optimistische UI-Updates (keine Wartezeit auf Server-Bestätigung)
 - **Offline-fähig:** Firestore IndexedDB-Persistierung (Multi-Tab)
-- Anonyme Authentifizierung (kein Login nötig)
-- Shared Workspace über `VITE_FIREBASE_WORKSPACE_ID`
+- Google- oder Microsoft-Login via Firebase Auth (Admin muss neue Accounts freigeben)
+- **Dynamischer Workspace** — jeder Trip hat seinen eigenen Firestore-Pfad (`workspaces/{id}`). Listener werden beim Trip-Wechsel sauber abgebaut und neu aufgesetzt, kein Data-Bleed.
 
 ### Wetter
 
