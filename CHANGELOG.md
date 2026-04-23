@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.2.0](https://github.com/stekum/roman-holiday-planner/compare/v2.1.0...v2.2.0) (2026-04-23)
+
+
+### ✨ Features
+
+* **#70:** Trip-Selector UI im Header — Dropdown + Neuen Trip anlegen ([#220](https://github.com/stekum/roman-holiday-planner/issues/220)) ([09456c7](https://github.com/stekum/roman-holiday-planner/commit/09456c760cc165295b9637321ce3d016e182960a)), closes [#70](https://github.com/stekum/roman-holiday-planner/issues/70)
+* **#70:** Trip-Umbenennen per Pencil-Icon (follow-up) ([#221](https://github.com/stekum/roman-holiday-planner/issues/221)) ([16461f9](https://github.com/stekum/roman-holiday-planner/commit/16461f996329fa31eba8c22e98360986d750c58d)), closes [#70](https://github.com/stekum/roman-holiday-planner/issues/70)
+* **#71:** dynamischer workspaceId via React-Context (Listener-Switch) ([#219](https://github.com/stekum/roman-holiday-planner/issues/219)) ([beb4e98](https://github.com/stekum/roman-holiday-planner/commit/beb4e9896b6215dfdfa4aa18347412e9034af287)), closes [#71](https://github.com/stekum/roman-holiday-planner/issues/71)
+* **#73:** CityConfig — Places-Geocoding ersetzt ROME_CENTER ([#222](https://github.com/stekum/roman-holiday-planner/issues/222)) ([88eda89](https://github.com/stekum/roman-holiday-planner/commit/88eda8928fb6cfd78a3c27ccb6bb273a72db7fd7)), closes [#73](https://github.com/stekum/roman-holiday-planner/issues/73)
+
+
+### 📝 Documentation
+
+* **#70:** TC-10 End-to-End Multi-Trip Architektur-Test ergänzt (Stefan 2026-04-23 bestätigt) ([b8bc0c3](https://github.com/stekum/roman-holiday-planner/commit/b8bc0c3fee725d629b2c64d6457f9d1872270cfa))
+* Multi-Trip Cleanup — ROADMAP Done-Marker + USER-GUIDE + Smoke-Scripts ([101ef11](https://github.com/stekum/roman-holiday-planner/commit/101ef11773a36d66d0b4f120f189ae7a90ebae30))
+* sync v3.0 Japan-Ready roadmap with board (+[#209](https://github.com/stekum/roman-holiday-planner/issues/209)/[#215](https://github.com/stekum/roman-holiday-planner/issues/215)/[#216](https://github.com/stekum/roman-holiday-planner/issues/216)/[#217](https://github.com/stekum/roman-holiday-planner/issues/217)) ([9898ab0](https://github.com/stekum/roman-holiday-planner/commit/9898ab01263002469761ccda81705434cd945f43))
+
 ## [2.1.0](https://github.com/stekum/roman-holiday-planner/compare/v2.0.0...v2.1.0) (2026-04-22)
 
 
