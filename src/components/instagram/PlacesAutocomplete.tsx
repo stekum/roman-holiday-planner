@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import { Loader2, MapPin, Search, Star } from 'lucide-react';
 import { fetchPlaceEnrichment, mapPriceLevel, type PriceRange } from '../../lib/placesNewApi';
+import type { PlacesBias } from '../../lib/placesBias';
 
 export interface PlaceResult {
   name: string;
@@ -26,14 +27,13 @@ export interface PlaceResult {
 
 interface Props {
   onSelect: (place: PlaceResult) => void;
+  /**
+   * Optionaler Such-Bias. Fuer Multi-Trip-Korrektheit sollten Konsumenten
+   * via `getPlacesBias(tripConfig, homebase)` ableiten. Fehlt der Bias,
+   * sucht Google global.
+   */
+  bias?: PlacesBias;
 }
-
-const ROME_BIAS: google.maps.LatLngBoundsLiteral = {
-  north: 41.99,
-  south: 41.80,
-  east: 12.60,
-  west: 12.35,
-};
 
 interface SearchResult {
   placeId: string;
@@ -47,7 +47,7 @@ interface SearchResult {
   icon?: string;
 }
 
-export function PlacesAutocomplete({ onSelect }: Props) {
+export function PlacesAutocomplete({ onSelect, bias }: Props) {
   const placesLib = useMapsLibrary('places');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -69,7 +69,7 @@ export function PlacesAutocomplete({ onSelect }: Props) {
         // #181: Places API (New) — Place.searchByText
         const { places } = await placesLib.Place.searchByText({
           textQuery: trimmed,
-          locationBias: ROME_BIAS,
+          ...(bias ? { locationBias: bias } : {}),
           fields: [
             'id',
             'displayName',
@@ -114,7 +114,7 @@ export function PlacesAutocomplete({ onSelect }: Props) {
       cancelled = true;
       clearTimeout(handle);
     };
-  }, [query, placesLib]);
+  }, [query, placesLib, bias]);
 
   const handlePick = (result: SearchResult) => {
     if (!placesLib) return;

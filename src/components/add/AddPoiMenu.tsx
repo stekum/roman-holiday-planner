@@ -8,6 +8,7 @@ import { AddFromMap } from './AddFromMap';
 import { AddManual } from './AddManual';
 import { AddFromInstagram } from './AddFromInstagram';
 import { track, type AddPoiMethod } from '../../lib/analytics';
+import { getPlacesBias } from '../../lib/placesBias';
 
 export type AddMode = null | 'menu' | 'search' | 'ai-search' | 'map' | 'manual' | 'instagram';
 
@@ -100,6 +101,8 @@ export function AddPoiMenu({
     close();
   };
 
+  const bias = getPlacesBias(tripConfig, homebaseCoords);
+
   return (
     <>
       {/* FAB */}
@@ -181,6 +184,7 @@ export function AddPoiMenu({
             {mode === 'search' && (
               <AddFromSearch
                 families={families}
+                bias={bias}
                 onCancel={close}
                 onSave={handleSave}
               />

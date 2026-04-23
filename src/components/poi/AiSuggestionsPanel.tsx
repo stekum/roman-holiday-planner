@@ -3,20 +3,14 @@ import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import { ChevronDown, ChevronUp, Loader2, MapPin, Plus, Sparkles, Star } from 'lucide-react';
 import type { Category, POI } from '../../data/pois';
 import type { Family, Homebase, TripConfig } from '../../settings/types';
-import { getCategoryEmoji } from '../../settings/tripConfig';
+import { DEFAULT_TRIP_CONFIG, getCategoryEmoji } from '../../settings/tripConfig';
 import { generateAiSuggestions, type AiSuggestion } from '../../lib/aiPoiSuggestions';
+import { getPlacesBias } from '../../lib/placesBias';
 import {
   fetchPlaceEnrichment,
   mapPriceLevel,
   type PriceRange,
 } from '../../lib/placesNewApi';
-
-const ROME_BIAS: google.maps.LatLngBoundsLiteral = {
-  north: 41.99,
-  south: 41.80,
-  east: 12.60,
-  west: 12.35,
-};
 
 function buildPoiFromSuggestion(
   sug: EnrichedSuggestion & { coords: { lat: number; lng: number } },
@@ -87,12 +81,15 @@ export function AiSuggestionsPanel({ pois, homebase, families, myFamilyId, onAdd
 
   // #181: Places API (New) — Place.searchByText liefert alle benötigten
   // Felder in einem Call (früher: textSearch + getDetails).
+  const city = tripConfig?.city ?? DEFAULT_TRIP_CONFIG.city;
+  const bias = getPlacesBias(tripConfig, homebase);
+
   const enrichOne = async (sug: AiSuggestion): Promise<EnrichedSuggestion> => {
     if (!placesLib) return { ...sug, unlocated: true };
     try {
       const { places } = await placesLib.Place.searchByText({
-        textQuery: `${sug.name} Rome`,
-        locationBias: ROME_BIAS,
+        textQuery: `${sug.name} ${city}`,
+        ...(bias ? { locationBias: bias } : {}),
         fields: [
           'id',
           'displayName',

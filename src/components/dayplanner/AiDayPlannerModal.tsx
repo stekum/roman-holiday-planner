@@ -278,7 +278,7 @@ export function AiDayPlannerModal({
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 rows={3}
-                placeholder="Beschreib deinen idealen Tag in Rom... z.B. 'Morgens Vatikan, mittags Pizza in Trastevere, nachmittags schlendern, abends Aperitivo mit Aussicht'"
+                placeholder={`Beschreib deinen idealen Tag in ${getTripConfig(settings).city}…`}
                 className="w-full resize-none rounded-2xl border border-cream-dark bg-cream px-4 py-3 text-ink outline-none focus:border-olive focus:bg-white"
               />
             </div>

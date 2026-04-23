@@ -1,7 +1,12 @@
 /**
- * Open-Meteo Weather Forecast for Rome.
+ * Open-Meteo Weather Forecast.
  * Free, no API key, no CORS issues.
  * https://open-meteo.com/en/docs
+ *
+ * Seit Multi-Trip: Koordinaten + Timezone werden vom Caller uebergeben,
+ * default bleibt Rom als Fallback fuer alte Workspaces ohne TripConfig-
+ * Geo-Felder. Cache ist nach lat/lng/timezone gekeyed — sonst wuerde der
+ * erste Rom-Call die Tokyo-Antwort blockieren.
  */
 
 export interface DayWeather {
@@ -50,23 +55,27 @@ function decodeWmo(code: number): { icon: string; label: string } {
   return WMO[code] ?? { icon: '❓', label: `Code ${code}` };
 }
 
-// Simple in-memory cache with 1-hour TTL
-let cache: { data: DayWeather[]; fetchedAt: number } | null = null;
+// Simple in-memory cache with 1-hour TTL. Gekeyed nach lat/lng/timezone,
+// damit ein Rom-Call keinen Tokyo-Call blockiert (Multi-Trip).
+const cache = new Map<string, { data: DayWeather[]; fetchedAt: number }>();
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
 export async function fetchWeatherForecast(
   lat = 41.8925,
   lng = 12.4853,
+  timezone = 'Europe/Rome',
 ): Promise<DayWeather[]> {
-  if (cache && Date.now() - cache.fetchedAt < CACHE_TTL) {
-    return cache.data;
+  const cacheKey = `${lat.toFixed(4)},${lng.toFixed(4)},${timezone}`;
+  const cached = cache.get(cacheKey);
+  if (cached && Date.now() - cached.fetchedAt < CACHE_TTL) {
+    return cached.data;
   }
 
   const url = new URL('https://api.open-meteo.com/v1/forecast');
   url.searchParams.set('latitude', lat.toFixed(4));
   url.searchParams.set('longitude', lng.toFixed(4));
   url.searchParams.set('daily', 'temperature_2m_max,temperature_2m_min,weathercode');
-  url.searchParams.set('timezone', 'Europe/Rome');
+  url.searchParams.set('timezone', timezone);
   url.searchParams.set('forecast_days', '16');
 
   const res = await fetch(url.toString());
@@ -93,6 +102,6 @@ export async function fetchWeatherForecast(
     };
   });
 
-  cache = { data: days, fetchedAt: Date.now() };
+  cache.set(cacheKey, { data: days, fetchedAt: Date.now() });
   return days;
 }

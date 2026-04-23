@@ -13,6 +13,7 @@ import { LocatePoiModal } from './components/inbox/LocatePoiModal';
 import { EditPoiModal } from './components/poi/EditPoiModal';
 import { useWorkspace } from './firebase/useWorkspace';
 import { getTripConfig, currencySymbolFromCode } from './settings/tripConfig';
+import { getPlacesBias } from './lib/placesBias';
 import { useWeather } from './hooks/useWeather';
 import { useMyFamily } from './hooks/useMyFamily';
 import { useMyLocation } from './hooks/useMyLocation';
@@ -143,7 +144,10 @@ function AppInner({ user }: AppInnerProps) {
     removePoiFromAll,
   } = workspace;
 
-  const weatherByDay = useWeather(settings.homebase?.coords);
+  const weatherByDay = useWeather(
+    settings.homebase?.coords ?? getTripConfig(settings).center,
+    getTripConfig(settings).timezone,
+  );
   const { location: myLocation } = useMyLocation();
   const { myFamilyId, setMyFamilyId } = useMyFamily(settings.families);
   const [tab, setTab] = useState<Tab>('discover');
@@ -541,6 +545,8 @@ function AppInner({ user }: AppInnerProps) {
       {locatingPoi && (
         <LocatePoiModal
           poi={locatingPoi}
+          city={getTripConfig(settings).city}
+          bias={getPlacesBias(getTripConfig(settings), settings.homebase)}
           onCancel={() => setLocatingPoiId(null)}
           onSave={(coords, placeId) => {
             setLocation(locatingPoi.id, coords, placeId);

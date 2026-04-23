@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Home, ImagePlus, Trash2 } from 'lucide-react';
 import type { Homebase } from '../../settings/types';
+import type { PlacesBias } from '../../lib/placesBias';
 import {
   PlacesAutocomplete,
   type PlaceResult,
@@ -9,9 +10,11 @@ import {
 interface Props {
   homebase?: Homebase;
   onChange: (hb: Homebase | undefined) => void;
+  /** Bias fuer Places-Suche, aus aktivem Trip abgeleitet. */
+  bias?: PlacesBias;
 }
 
-export function HomebaseEditor({ homebase, onChange }: Props) {
+export function HomebaseEditor({ homebase, onChange, bias }: Props) {
   // Photo auto-fetch is handled centrally by HomebasePhotoSync in App.tsx,
   // which runs at startup (not only when Settings tab is open).
 
@@ -144,7 +147,7 @@ export function HomebaseEditor({ homebase, onChange }: Props) {
             <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-ink/60">
               Andere Homebase wählen
             </p>
-            <PlacesAutocomplete onSelect={handleSelect} />
+            <PlacesAutocomplete onSelect={handleSelect} bias={bias} />
           </div>
         </div>
       ) : (
@@ -154,7 +157,7 @@ export function HomebaseEditor({ homebase, onChange }: Props) {
             Endpunkt jeder Tagestour verwendet, und die Entfernung erscheint auf
             jeder POI-Card.
           </p>
-          <PlacesAutocomplete onSelect={handleSelect} />
+          <PlacesAutocomplete onSelect={handleSelect} bias={bias} />
         </div>
       )}
     </section>

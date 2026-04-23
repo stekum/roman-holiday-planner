@@ -3,19 +3,13 @@ import { useMapsLibrary } from '@vis.gl/react-google-maps';
 import { Baby, ChevronDown, ChevronUp, Loader2, MapPin, Plus, Star } from 'lucide-react';
 import type { Category, POI } from '../../data/pois';
 import type { Family, Homebase, TripConfig } from '../../settings/types';
-import { getCategoryEmoji } from '../../settings/tripConfig';
+import { DEFAULT_TRIP_CONFIG, getCategoryEmoji } from '../../settings/tripConfig';
 import {
   generateKidFriendlySuggestions,
   type AiKidSuggestion,
 } from '../../lib/aiKidFriendlySuggestions';
+import { getPlacesBias } from '../../lib/placesBias';
 import { fetchPlaceEnrichment, mapPriceLevel, type PriceRange } from '../../lib/placesNewApi';
-
-const ROME_BIAS: google.maps.LatLngBoundsLiteral = {
-  north: 41.99,
-  south: 41.80,
-  east: 12.60,
-  west: 12.35,
-};
 
 interface EnrichedSuggestion extends AiKidSuggestion {
   placeId?: string;
@@ -92,13 +86,16 @@ export function AiKidFriendlyPanel({
   const [state, setState] = useState<State>({ kind: 'idle' });
   const [expanded, setExpanded] = useState(false);
 
+  const city = tripConfig?.city ?? DEFAULT_TRIP_CONFIG.city;
+  const bias = getPlacesBias(tripConfig, homebase);
+
   // #181: Place.searchByText statt Legacy textSearch + getDetails.
   const enrichOne = async (sug: AiKidSuggestion): Promise<EnrichedSuggestion> => {
     if (!placesLib) return { ...sug, unlocated: true };
     try {
       const { places } = await placesLib.Place.searchByText({
-        textQuery: `${sug.name} Rome`,
-        locationBias: ROME_BIAS,
+        textQuery: `${sug.name} ${city}`,
+        ...(bias ? { locationBias: bias } : {}),
         fields: [
           'id',
           'displayName',
