@@ -139,8 +139,14 @@
 | #74 | Multi-Homebase pro Trip (datumsbasiert) | M | 6 |
 | #78 | Transit-Tage (Reisetage zwischen Städten) | M | 6 |
 | #113 | Auth: User-Profil + Workspace-Zuordnung (Multi-Trip-Access) | M | 6 |
+| #209 | Feature: dynamischer App-Titel aus TripConfig | S | 1 |
+| #215 | infra: Uptime-Monitoring + Alerting für Firebase Hosting (Prod) | M | 4 |
+| #216 | docs: Firebase Hosting Rollback-Playbook | S | 1 |
+| #217 | devops: Chrome-DevTools MCP Server lokal in Claude Code registrieren | S | 1 |
 
-**4 Items, ~24h. 2 Wochen + Buffer.**
+**8 Items, ~31h. 2 Wochen + Buffer.**
+
+> ⚠ Scope-Warnung: >5 Items. Stefan bestätigt bewusst — #215/#216/#217 sind ops-hygiene/tooling (klein, parallel zu Features machbar), #209 ist trivialer Japan-UX-Touch.
 
 **Japan-Use-Case:** Tokyo/Kyoto/Osaka als 3 Homebases, Shinkansen-Tage als Transit zwischen Cities, POI-Suchen pro Stadt statt Rom-zentriert.
 
