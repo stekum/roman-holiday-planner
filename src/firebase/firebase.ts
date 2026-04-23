@@ -23,7 +23,6 @@ interface FirebaseBundle {
   app: FirebaseApp;
   auth: Auth;
   db: Firestore;
-  workspaceId: string;
 }
 
 const env = import.meta.env;
@@ -62,7 +61,6 @@ export function getFirebase(): FirebaseBundle {
     app,
     auth: getAuth(app),
     db,
-    workspaceId: (env.VITE_FIREBASE_WORKSPACE_ID as string) || 'default',
   };
   return bundle;
 }
