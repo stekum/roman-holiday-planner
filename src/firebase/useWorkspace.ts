@@ -10,6 +10,7 @@ import {
 } from 'firebase/firestore';
 import { getFirebase } from './firebase';
 import { useActiveWorkspaceId } from './workspaceContext';
+import { rememberWorkspace } from './knownWorkspaces';
 import { primeEnrichmentCache } from '../lib/placesNewApi';
 import { type POI, SEED_POIS, type Vote, type Comment, type VisitStatus } from '../data/pois';
 import { DEFAULT_SETTINGS } from '../settings/defaults';
@@ -176,6 +177,7 @@ export function useWorkspace(): WorkspaceAPI {
               dayBudgets: data.dayBudgets ?? {},
               postTripAnalysis: data.postTripAnalysis ?? '',
             });
+            rememberWorkspace(workspaceId);
             setStatus('ready');
           },
           (err) => {
