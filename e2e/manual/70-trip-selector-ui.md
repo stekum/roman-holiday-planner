@@ -93,6 +93,30 @@
 
 ---
 
+### TC-10: End-to-End Multi-Trip Architektur (Validiert 2026-04-23)
+
+**Der entscheidende Test für die v3.0-beta Architektur.** Verifiziert, dass zwei
+Trips vollständig isolierte Daten haben und der `useWorkspace`-Listener-Switch
+keinerlei Data-Bleed produziert.
+
+1. Neuen Trip anlegen (TC-3), z.B. `japan-mai-2026` / "Japan Mai 2026".
+2. Settings-Tab für Japan:
+   - Tripdaten 2026-05-25 → 2026-05-31
+   - Homebase setzen
+   - Familie hinzufügen / Namen ändern
+   - Kategorien anpassen (Sushi, Tempel, Ramen statt Pizza/Pasta)
+3. Entdecken-Tab: 1–2 POIs anlegen.
+4. Reise-Tab: POI einem Tag zuweisen.
+5. **Zurück auf Rom-Trip** (Chip → roma2026/default).
+6. Verifizieren: Alle Rom-Daten unverändert (POIs, Settings, Kategorien:
+   Pizza/Pasta/Gelato, Tripdaten, Homebase).
+7. Nochmal Japan öffnen: POIs, Settings, Kategorien (Sushi/Tempel/Ramen) alle
+   korrekt wiederhergestellt.
+
+**Erwartet:** Zero data bleed. Beide Trips voll isoliert.
+
+---
+
 ## Post-Test Cleanup
 
 - `test-trip-*` Firestore-Docs löschen (Firestore-Console → `workspaces` → entsprechende Docs)
