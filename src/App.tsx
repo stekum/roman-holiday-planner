@@ -14,6 +14,7 @@ import { EditPoiModal } from './components/poi/EditPoiModal';
 import { useWorkspace } from './firebase/useWorkspace';
 import { getTripConfig, currencySymbolFromCode } from './settings/tripConfig';
 import { getPlacesBias } from './lib/placesBias';
+import { useActiveWorkspaceId } from './firebase/workspaceContext';
 import { useWeather } from './hooks/useWeather';
 import { useMyFamily } from './hooks/useMyFamily';
 import { useMyLocation } from './hooks/useMyLocation';
@@ -105,6 +106,7 @@ function AppInner({ user }: AppInnerProps) {
     void initAnalytics();
   }, []);
 
+  const workspaceId = useActiveWorkspaceId();
   const workspace = useWorkspace();
   const {
     status,
@@ -378,6 +380,7 @@ function AppInner({ user }: AppInnerProps) {
           <div className={`relative w-full flex-shrink-0 bg-cream-dark ${viewMode === 'compact' ? 'h-[60vh]' : 'h-[45vh]'}`}>
             {hasKey ? (
               <RomeMap
+                key={workspaceId}
                 pois={pois}
                 visiblePoiIds={tab === 'discover' ? visiblePoiIds : null}
                 mode={tab === 'trip' ? 'plan' : 'discover'}
