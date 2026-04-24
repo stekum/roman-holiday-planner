@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { APIProvider, useMapsLibrary } from '@vis.gl/react-google-maps';
+import { APIProvider } from '@vis.gl/react-google-maps';
 import { Header, type Tab } from './components/Header';
 import { AuthGate } from './components/auth/AuthGate';
 import { MissingKeyNotice } from './components/MissingKeyNotice';
@@ -16,6 +16,7 @@ import { getTripConfig, currencySymbolFromCode } from './settings/tripConfig';
 import { getPlacesBias } from './lib/placesBias';
 import { useActiveWorkspaceId } from './firebase/workspaceContext';
 import { useWorkspaceSync } from './firebase/useWorkspaceSync';
+import { getCurrentHomebase, getHomebaseForDay, getHomebases } from './settings/homebases';
 import { useWeather } from './hooks/useWeather';
 import { useMyFamily } from './hooks/useMyFamily';
 import { useMyLocation } from './hooks/useMyLocation';
@@ -29,47 +30,11 @@ import type { Homebase } from './settings/types';
 import { Loader2, WifiOff } from 'lucide-react';
 // import { persistAndUpdatePhoto } from './lib/photoStorage'; // TODO: re-enable after CORS fix (#91)
 
-/**
- * Render-less component (must live inside APIProvider) that auto-fetches a
- * photo for the homebase when it has a placeId but no image yet.
- * Runs at app startup — not only when the Settings tab is open.
- */
-function HomebasePhotoSync({
-  homebase,
-  onUpdate,
-}: {
-  homebase: Homebase | undefined;
-  onUpdate: (hb: Homebase) => void;
-}) {
-  const placesLib = useMapsLibrary('places');
-  const fetchedRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (!placesLib || !homebase?.placeId || homebase.image) return;
-    if (fetchedRef.current === homebase.placeId) return;
-    fetchedRef.current = homebase.placeId;
-
-    // #181: Places API (New) — Place.fetchFields statt Legacy PlacesService.getDetails
-    const place = new placesLib.Place({ id: homebase.placeId });
-    place
-      .fetchFields({ fields: ['photos'] })
-      .then(() => {
-        const photo = place.photos?.[0];
-        if (!photo) return;
-        try {
-          const photoUrl = photo.getURI({ maxWidth: 800, maxHeight: 600 });
-          if (photoUrl) onUpdate({ ...homebase, image: photoUrl });
-        } catch {
-          /* ignore */
-        }
-      })
-      .catch(() => {
-        /* ignore — photo is nice-to-have */
-      });
-  }, [placesLib, homebase, onUpdate]);
-
-  return null;
-}
+// HomebasePhotoSync (vor #74) wurde entfernt — seit Multi-Homebase liefert
+// PlacesAutocomplete die photoUrl schon beim Anlegen mit, und der legacy
+// single-Homebase-Slot wird beim ersten setHomebases-Write weggeräumt. Wenn
+// später wieder ein Auto-Photo-Fill nötig wird, operiert er auf der
+// homebases-Liste und patcht per-index — siehe #74 Scope-Lock.
 
 function FirebaseMissingNotice() {
   return (
@@ -133,7 +98,7 @@ function AppInner({ user, profile }: AppInnerProps) {
     updateFamily,
     removeFamily,
     getFamily,
-    setHomebase,
+    setHomebases,
     setTripConfig,
     plan,
     getDay,
@@ -152,8 +117,12 @@ function AppInner({ user, profile }: AppInnerProps) {
     removePoiFromAll,
   } = workspace;
 
+  const homebases = getHomebases(settings);
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const activeHomebase = getCurrentHomebase(homebases, todayIso, settings.tripStart);
+
   const weatherByDay = useWeather(
-    settings.homebase?.coords ?? getTripConfig(settings).center,
+    activeHomebase?.coords ?? getTripConfig(settings).center,
     getTripConfig(settings).timezone,
   );
   const { location: myLocation } = useMyLocation();
@@ -288,13 +257,16 @@ function AppInner({ user, profile }: AppInnerProps) {
     const poi = pois.find((p) => p.id === id);
     if (!poi?.coords) return;
     if (!confirm(`„${poi.title}" als Homebase setzen?`)) return;
-    void setHomebase({
+    const next: Homebase = {
       name: poi.title,
       address: poi.address ?? poi.description ?? '',
       coords: poi.coords,
       placeId: poi.placeId,
       image: poi.image || undefined,
-    });
+    };
+    // Als neue Homebase zur Liste hinzufügen — ohne dateRange (catch-all).
+    // User kann sie im Editor mit Datums-Range versehen oder andere entfernen.
+    void setHomebases([...homebases, next]);
   };
 
   const handleStreetView = (id: string) => {
@@ -322,10 +294,6 @@ function AppInner({ user, profile }: AppInnerProps) {
       </div>
     ) : null;
 
-  const handleHomebaseUpdate = useCallback(
-    (hb: Homebase) => { void setHomebase(hb); },
-    [setHomebase],
-  );
 
   const handleGenerateBriefing = useCallback(() => {
     if (!activeDay || activeDayPois.length === 0) return;
@@ -343,7 +311,7 @@ function AppInner({ user, profile }: AppInnerProps) {
         const briefing = await generateDayBriefing({
           dayIso,
           dayLabel,
-          homebase: settings.homebase,
+          homebase: getHomebaseForDay(homebases, dayIso),
           weather,
           pois: poisForBriefing,
           tripConfig: getTripConfig(settings),
@@ -366,6 +334,7 @@ function AppInner({ user, profile }: AppInnerProps) {
     activeDay,
     activeDayLabel,
     activeDayPois,
+    homebases,
     settings,
     setDayBriefing,
     weatherByDay,
@@ -375,12 +344,6 @@ function AppInner({ user, profile }: AppInnerProps) {
     <div className="flex h-full flex-col">
       <Header tab={tab} onTabChange={setTab} user={user} />
       {connectionBanner}
-      {hasKey && (
-        <HomebasePhotoSync
-          homebase={settings.homebase}
-          onUpdate={handleHomebaseUpdate}
-        />
-      )}
       <main className="flex flex-1 flex-col overflow-hidden">
         {tab !== 'settings' && (
           <div className={`relative w-full flex-shrink-0 bg-cream-dark ${viewMode === 'compact' ? 'h-[60vh]' : 'h-[45vh]'}`}>
@@ -392,7 +355,7 @@ function AppInner({ user, profile }: AppInnerProps) {
                 mode={tab === 'trip' ? 'plan' : 'discover'}
                 planOrder={activeDayOrder}
                 families={settings.families}
-                homebase={settings.homebase}
+                homebase={activeHomebase}
                 tripConfig={getTripConfig(settings)}
                 myLocation={myLocation}
                 highlightedPoiId={highlightedPoiId}
@@ -426,7 +389,7 @@ function AppInner({ user, profile }: AppInnerProps) {
               <div className="px-4 pt-3">
                 <AiSuggestionsPanel
                   pois={pois}
-                  homebase={settings.homebase}
+                  homebase={activeHomebase}
                   families={settings.families}
                   myFamilyId={myFamilyId}
                   onAddPoi={handleAddPoi}
@@ -450,7 +413,7 @@ function AppInner({ user, profile }: AppInnerProps) {
                 setHighlightedPoiId((prev) => (prev === id ? null : id))
               }
               onSetAsHomebase={handleSetAsHomebase}
-              homebase={settings.homebase}
+              homebase={activeHomebase}
               onLocate={(id) => setLocatingPoiId(id)}
               onStreetView={handleStreetView}
               viewMode={viewMode}
@@ -519,7 +482,7 @@ function AppInner({ user, profile }: AppInnerProps) {
               onAddFamily={addFamily}
               onUpdateFamily={updateFamily}
               onRemoveFamily={removeFamily}
-              onSetHomebase={setHomebase}
+              onSetHomebases={(list) => void setHomebases(list)}
               onSetTripConfig={(cfg) => void setTripConfig(cfg)}
               onMigrateFromLocal={workspace.migrateFromLocal}
               isAdmin={isAdmin}
@@ -533,7 +496,7 @@ function AppInner({ user, profile }: AppInnerProps) {
         <AddPoiMenu
           families={settings.families}
           tripConfig={getTripConfig(settings)}
-          homebaseCoords={settings.homebase?.coords}
+          homebaseCoords={activeHomebase?.coords}
           mode={addMode}
           setMode={(m) => {
             setAddMode(m);
@@ -555,7 +518,7 @@ function AppInner({ user, profile }: AppInnerProps) {
         <LocatePoiModal
           poi={locatingPoi}
           city={getTripConfig(settings).city}
-          bias={getPlacesBias(getTripConfig(settings), settings.homebase)}
+          bias={getPlacesBias(getTripConfig(settings), activeHomebase)}
           onCancel={() => setLocatingPoiId(null)}
           onSave={(coords, placeId) => {
             setLocation(locatingPoi.id, coords, placeId);

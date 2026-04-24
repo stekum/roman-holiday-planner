@@ -10,6 +10,7 @@ import { track } from '../../lib/analytics';
 import type { POI, Category } from '../../data/pois';
 import type { Settings } from '../../settings/types';
 import { getTripConfig } from '../../settings/tripConfig';
+import { getHomebaseForDay, getHomebases } from '../../settings/homebases';
 
 interface Props {
   open: boolean;
@@ -45,10 +46,13 @@ export function AiDayPlannerModal({
   open,
   onClose,
   dayLabel,
+  dayIso,
   settings,
   existingPoiNames,
   onAccept,
 }: Props) {
+  // #74 per-day Homebase auswählen statt singleton settings.homebase.
+  const dayHomebase = getHomebaseForDay(getHomebases(settings), dayIso);
   const placesLib = useMapsLibrary('places');
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
@@ -83,7 +87,7 @@ export function AiDayPlannerModal({
 
     try {
       const plan = await generateDayPlan(fullPrompt, {
-        homebase: settings.homebase,
+        homebase: dayHomebase,
         existingPoiNames,
         familyNames: settings.families.map((f) => f.name),
         dayLabel,
@@ -113,8 +117,8 @@ export function AiDayPlannerModal({
       console.log(`[AI Planner] Resolving ${activeStops.length} stops via Places...`);
 
       // Derive city context from homebase address
-      const cityHint = settings.homebase?.address
-        ? settings.homebase.address.split(',').slice(-2).join(',').trim()
+      const cityHint = dayHomebase?.address
+        ? dayHomebase.address.split(',').slice(-2).join(',').trim()
         : '';
 
       for (const stop of activeStops) {
@@ -147,10 +151,10 @@ export function AiDayPlannerModal({
                 'googleMapsURI',
               ],
               maxResultCount: 1,
-              ...(settings.homebase?.coords
+              ...(dayHomebase?.coords
                 ? {
                     locationBias: {
-                      center: settings.homebase.coords,
+                      center: dayHomebase.coords,
                       radius: 30000, // 30km around homebase
                     },
                   }
@@ -179,12 +183,12 @@ export function AiDayPlannerModal({
         console.log(`[AI Planner] Stop "${stop.name}" → match: ${match?.displayName ?? 'NONE'}, coords: ${match?.location ? 'YES' : 'NO'}, photo: ${photoUrl ? 'YES' : 'NO'}`);
 
         // Skip stops that resolve to the homebase (avoid duplicate POI entries)
-        if (match?.id && settings.homebase?.placeId && match.id === settings.homebase.placeId) {
+        if (match?.id && dayHomebase?.placeId && match.id === dayHomebase.placeId) {
           console.log(`[AI Planner] Skipping "${stop.name}" — matches homebase placeId`);
           continue;
         }
         const normalizedMatch = (match?.displayName ?? stop.name).toLowerCase().trim();
-        const normalizedHomebase = settings.homebase?.name?.toLowerCase().trim() ?? '';
+        const normalizedHomebase = dayHomebase?.name?.toLowerCase().trim() ?? '';
         if (normalizedHomebase && normalizedMatch === normalizedHomebase) {
           console.log(`[AI Planner] Skipping "${stop.name}" — matches homebase name`);
           continue;

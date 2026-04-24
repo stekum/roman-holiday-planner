@@ -13,6 +13,7 @@ import { RouteSummary } from './RouteSummary';
 import { AiDayPlannerModal } from './AiDayPlannerModal';
 import { AiKidFriendlyPanel } from './AiKidFriendlyPanel';
 import { AiPostTripPanel } from './AiPostTripPanel';
+import { getHomebaseForDay, getHomebases } from '../../settings/homebases';
 import { DayBudgetCard } from './DayBudgetCard';
 import { getTripConfig, currencyFromCountry } from '../../settings/tripConfig';
 import type { DayBudget } from '../../firebase/useWorkspace';
@@ -91,6 +92,11 @@ export function DayPlanner({
   const [optimizing, setOptimizing] = useState(false);
   const [optimizeResult, setOptimizeResult] = useState<string | null>(null);
   const [aiModalOpen, setAiModalOpen] = useState(false);
+
+  // Per-day Homebase für diesen activeDay (#74). Fällt auf Catch-all oder
+  // erste Homebase zurück wenn kein Range matcht. Ersetzt das frühere
+  // Singleton-`settings.homebase`.
+  const dayHomebase = getHomebaseForDay(getHomebases(settings), activeDay);
 
   // Clear optimize banner when switching days
   const prevDay = useRef(activeDay);
@@ -294,7 +300,7 @@ export function DayPlanner({
         summary={summary}
         stops={selected.length}
         waypoints={selected.flatMap((p) => p.coords ? [p.coords] : [])}
-        homebase={settings.homebase?.coords}
+        homebase={dayHomebase?.coords}
       />
 
       <DayBriefingCard
@@ -325,7 +331,7 @@ export function DayPlanner({
         <AiKidFriendlyPanel
           dayPois={selected}
           dayLabel={activeDay}
-          homebase={settings.homebase}
+          homebase={dayHomebase}
           families={settings.families}
           myFamilyId={myFamilyId}
           onAddPoi={onAddPoi}
