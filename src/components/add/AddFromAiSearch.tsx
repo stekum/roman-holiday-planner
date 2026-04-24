@@ -237,7 +237,7 @@ export function AddFromAiSearch({ families, onCancel, onSave, tripConfig }: Prop
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             rows={2}
-            placeholder="z.B. Romantisches Restaurant mit Terrasse in Trastevere"
+            placeholder="z.B. Romantisches Restaurant mit Terrasse und Aussicht"
             className="flex-1 resize-none bg-transparent text-ink outline-none placeholder:text-ink/40"
             disabled={loading}
           />
