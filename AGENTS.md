@@ -215,8 +215,9 @@ npm run dev          # Dev-Server: http://localhost:5173/roman-holiday-planner/
 npm run build        # TypeScript-Check + Vite Production Build → dist/
 npm run lint         # ESLint
 npm run preview      # Production Build lokal vorschauen
-npm run deploy:beta  # Build + Deploy nach /beta/ (zum Testen)
-npm run deploy       # Build + Deploy nach / (Production — nur nach Beta-Validierung!)
+npm run deploy       # Triggert "Deploy Firebase Prod" Workflow (manuelles Prod-Deploy)
+# Beta-Deploy: KEINE Script-Action. Läuft automatisch bei Push auf main
+# via .github/workflows/deploy-firebase-beta.yml
 ```
 
 ---
@@ -238,12 +239,12 @@ npm run deploy       # Build + Deploy nach / (Production — nur nach Beta-Valid
 
 **Gemeinsame Regel:** Beta → Production. NIEMALS direkt nach Production (sonst out-of-sync).
 
-**Lokales Testen ist OPTIONAL** — Stefan kann jederzeit `git pull && npm run dev` laufen lassen, muss aber nicht. Standard-Weg: Agent implementiert → PR → merge → `deploy:beta` → **Agent verifiziert via Playwright auf der Beta-URL** → Stefan testet auf Beta → `deploy` (Prod). Local-Iteration macht vor allem bei size:L Sinn, wenn Deploy-Zyklus bremst.
+**Lokales Testen ist OPTIONAL** — Stefan kann jederzeit `git pull && npm run dev` laufen lassen, muss aber nicht. Standard-Weg: Agent implementiert → PR → merge → **Auto-Beta-Deploy läuft** (`deploy-firebase-beta.yml`) → **Agent verifiziert via Playwright auf der Beta-URL** → Stefan testet auf Beta → `npm run deploy` (triggert Prod-Workflow). Local-Iteration macht vor allem bei size:L Sinn, wenn Deploy-Zyklus bremst.
 
 **size:S — Light (Bugfix, CSS-Tweak, Copy-Change, Dependency-Bump):**
 1. Branch + Implementieren + Build/Lint
 2. PR merge
-3. `deploy:beta`
+3. Auto-Beta-Deploy läuft nach dem Merge
 4. Stefan smoke-testet auf Beta
 5. Nach Validierung: `deploy` (Production)
 6. Issue → Done (erst nach Stefan-Validierung)
@@ -252,7 +253,7 @@ npm run deploy       # Build + Deploy nach / (Production — nur nach Beta-Valid
 1. Branch + Implementieren + Build/Lint
 2. Manuelles Testscript in `e2e/manual/<issue>.md`
 3. PR merge
-4. `deploy:beta`
+4. Auto-Beta-Deploy läuft nach dem Merge
 5. **Playwright-Smoke auf der Beta-URL** via Test-Auth-Scaffolding (#158):
    - Einmalige Einrichtung: Service-Account-JSON aus Firebase Console nach `./service-account.json` (gitignored) ODER `GOOGLE_APPLICATION_CREDENTIALS` setzen
    - Token minten: `npm run e2e:token` (erzeugt `.playwright-results/e2e-token.txt`, läuft 1h)
@@ -282,25 +283,21 @@ gh release create v1.x.y --target main --generate-notes
 
 ### Wichtig
 
-- `deploy:beta` nutzt `--add` → ersetzt nur den `beta/`-Ordner, Production bleibt unangetastet
-- `deploy` ersetzt den **gesamten** gh-pages Branch → nur ausführen wenn Beta validiert ist
+- **Beta** läuft automatisch bei jedem Push auf main, zielt auf separate Firebase-Hosting-Site (`holiday-planner-beta`)
+- **Production** wird via `npm run deploy` (triggert den Workflow) oder direkt `gh workflow run "Deploy Firebase Prod"` deployed — nur wenn Beta validiert ist
 - **KEIN direktes Production-Deploy ohne Beta mehr** (auch nicht bei size:S) — Ausnahme war zu risky
+- Der Prod-Workflow builded aus dem ausgecheckten `main`-Branch in der Actions-Runtime — uncommitted local changes können nicht mehr in Prod landen (war der #14-Fußschuss)
 - Playwright-Tests via `node -e` gegen die Beta-URL (nicht Desktop Commander, nicht localhost)
 
 ### 🚨 HARTE REGEL: Niemals uncommitted deployen
 
-**`npm run build` und `npm run deploy*` arbeiten aus dem Working Tree** — sie kümmern sich nicht darum ob die Dateien committed sind. Das ist ein Fußschuss der Prod stillschweigend regredieren lässt.
+**Historischer Kontext (2026-04-23 und früher):** `npm run deploy` lief lokal mit `gh-pages`. Das bedeutete: der lokale Working Tree wurde gebaut und auf `gh-pages` branch gepusht — **auch uncommitted Änderungen**. Daraus wurde der #14-Incident: Feature nur auf Festplatte, nächster Deploy regredierte Prod.
 
-**Warum das kritisch ist:**
-1. Du änderst lokal Dateien (ohne commit)
-2. `npm run deploy` baut aus dem Working Tree und pusht das Bundle auf gh-pages
-3. Beta/Prod funktionieren → sieht alles gut aus
-4. **Source-Code existiert nur noch auf deiner Festplatte**
-5. Nächster `npm run deploy` von main (z.B. nach einem anderen Fix) baut aus main (ohne den Code) → Bundle ohne Feature → **Production-Regression ohne Warnung**
+**Seit 2026-04-24:** `npm run deploy` triggert den GitHub-Actions-Workflow "Deploy Firebase Prod". Der Workflow cloned den `main`-Branch frisch und builded dort. Uncommitted lokale Änderungen **können technisch nicht mehr** in Prod landen.
 
-**Die Regel:**
+**Die Regel bleibt aber:**
 
-> **Bevor `npm run deploy:beta` oder `npm run deploy` ausgeführt wird, MUSS der gesamte Feature-Code committed, gepusht und nach main gemerged sein. `git status` muss clean sein (außer `.claude/settings.json` Noise).**
+> **Bevor `npm run deploy` ausgeführt wird, muss dein Feature-Branch gemerged und auf main sein. `git status` muss clean sein (außer `.claude/settings.json` Noise). Sonst passt das was du gerade bauen wolltest nicht zu dem was Prod bekommt.**
 
 Konkret vor jedem Deploy:
 
@@ -470,7 +467,7 @@ Kurze Einträge. Regel → was war passiert → wie es vermieden wird.
 
 ## Branch & PR Konventionen
 
-- `main` — production-ready, wird via `npm run deploy` auf GitHub Pages deployed
+- `main` — production-ready, wird via `npm run deploy` (triggert Firebase-Prod-Workflow) deployed
 - Feature-Branches: `feat/issue-N-kurzbeschreibung`
 - Bug-Branches: `fix/issue-N-kurzbeschreibung`
 - **Ein Branch pro Issue** — niemals zwei Issues auf demselben Branch
@@ -531,7 +528,7 @@ Mehrere Releases pro Tag sind normal — jedes Patch bekommt eine eigene Version
 Vor `gh release create`:
 
 1. **Alle geplanten Milestone-Issues abgeschlossen** oder explizit in einen späteren Milestone verschoben (siehe Leftover-Playbook unten)
-2. **`main` = Prod:** der letzte Commit auf `main` ist auf Prod deployed (via `npm run deploy`, Published-Meldung)
+2. **`main` = Prod:** der letzte Commit auf `main` ist auf Prod deployed (via `npm run deploy` / Firebase-Prod-Workflow, sichtbar in Firebase-Hosting-Release-History)
 3. **Git clean:** `git status` zeigt nur erlaubtes `.claude/settings.json`-Rauschen
 4. **Sanity-Check auf Prod:** zentrale Flows funktionieren (Entdecken-Tab, Reise-Tab, neue Features des Releases)
 5. **ROADMAP.md synchron:** alle fertigen Issues des Releases sind mit `✅` markiert, das Release-Heading hat den Status-Marker vorbereitet
@@ -634,17 +631,16 @@ Inzident-Memory beachten: bei der ersten Regen (v4.5 hinzugefuegt) ging ein Back
 Falls ein Production-Deploy Probleme macht:
 
 ```bash
-# Schritt 1: Sofort-Fix — Prod auf letzten guten Tag zurückdrehen
-git checkout vX.Y.Z            # letzter bekannt guter Release-Tag
-npm run build
-npm run deploy                  # überschreibt Prod mit bekannt gutem Stand
-git checkout main
+# Schritt 1 (schnell, 1 Minute) — Firebase Hosting Rollback
+# Firebase Console → Hosting → holiday-planner → Release-History
+# älteren Build auswählen → "Rollback" klicken
+# ODER via CLI:
+firebase hosting:clone holiday-planner:live holiday-planner:live@vX.Y.Z
 
-# Schritt 2: Fix im Code committen
-# (neuer Commit auf main mit der Korrektur)
+# Schritt 2: Fix im Code committen (neuer Commit auf main)
 
-# Schritt 3: Patch-Release erstellen
-gh release create vX.Y.(Z+1) --target main --generate-notes --title "vX.Y.(Z+1) — Hotfix …"
+# Schritt 3: Patch-Release (release-please-PR mergen)
+# Dann Prod-Deploy triggern:
 npm run deploy
 ```
 
@@ -662,7 +658,7 @@ Bewusst minimalistisch, dokumentiert damit's nicht als „wir haben CI vergessen
 | Pre-Commit Build | ❌ | manuell `npm run build` vor Commit |
 | Pre-Commit Secret-Scan | ✅ (lokal) | Semgrep-Hook aus #116 |
 | PR-CI (Build/Lint) | ❌ | Nicht eingerichtet — Agents machen es pro Commit |
-| Beta-Deploy | ✅ (auto, #171) | automatisch via `.github/workflows/deploy-beta.yml` bei Push auf `main`. Fallback: `npm run deploy:beta` manuell. |
+| Beta-Deploy | ✅ (auto, #117) | automatisch via `.github/workflows/deploy-firebase-beta.yml` bei Push auf `main`. |
 | Beta→Prod Gate | ✅ (menschlich) | Stefan testet auf Beta, gibt ok |
 | Production-Deploy | ❌ | manuell `npm run deploy` |
 | Release-Tag | ❌ | manuell `gh release create ... --generate-notes` |
