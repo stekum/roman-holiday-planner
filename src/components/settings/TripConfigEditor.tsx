@@ -75,7 +75,8 @@ export function TripConfigEditor({ tripConfig, onChange }: Props) {
       </div>
       <p className="mb-4 text-xs text-ink/60">
         Stadt, Land, Sprache und Kategorien fliessen in alle AI-Prompts
-        (Tagesplan, Briefing, Vibes-Suche, Vorschläge). Default: Rom/Italien.
+        (Tagesplan, Briefing, Vibes-Suche, Vorschläge). Leere Felder fallen
+        auf Default-Werte zurück.
       </p>
 
       <div className="mb-4">
@@ -186,7 +187,7 @@ export function TripConfigEditor({ tripConfig, onChange }: Props) {
             onClick={resetDefaults}
             className="text-xs text-ink/50 hover:text-terracotta"
           >
-            Auf Rom-Default zurücksetzen
+            Auf Default zurücksetzen
           </button>
         </div>
         <div className="flex flex-wrap gap-1.5">
