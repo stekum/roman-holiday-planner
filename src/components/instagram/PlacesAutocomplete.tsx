@@ -189,7 +189,7 @@ export function PlacesAutocomplete({ onSelect, bias }: Props) {
       )}
 
       {results.length > 0 && (
-        <ul className="absolute left-0 right-0 top-full z-20 mt-1 max-h-96 overflow-y-auto rounded-2xl border border-cream-dark bg-white shadow-lg">
+        <ul className="relative z-20 mt-1 max-h-[60vh] overflow-y-auto rounded-2xl border border-cream-dark bg-white shadow-lg">
           {results.map((r) => (
             <li key={r.placeId}>
               <button
