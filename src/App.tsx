@@ -197,6 +197,15 @@ function AppInner({ user, profile }: AppInnerProps) {
     const dayNumber = days.indexOf(activeDay) + 1;
     return `Tag ${dayNumber} — ${activeDay}`;
   }, [activeDay, days]);
+
+  // Map-Homebase folgt im Trip-Tab dem gerade ausgewählten Tag (so siehst du
+  // die Kyoto-Homebase wenn du Tag 28. Mai anschaust, nicht Tokyo).
+  // Im Entdecken-Tab + Settings: "heutige" activeHomebase (today → tripStart
+  // → erste). (#74 Follow-up nach Stefan's Beta-Test 2026-04-24)
+  const mapHomebase =
+    tab === 'trip' && activeDay
+      ? getHomebaseForDay(homebases, activeDay)
+      : activeHomebase;
   const dayCounts: Record<string, number> = {};
   const assignedDaysByPoi: Record<string, string[]> = {};
   for (const d of days) {
@@ -355,7 +364,7 @@ function AppInner({ user, profile }: AppInnerProps) {
                 mode={tab === 'trip' ? 'plan' : 'discover'}
                 planOrder={activeDayOrder}
                 families={settings.families}
-                homebase={activeHomebase}
+                homebase={mapHomebase}
                 tripConfig={getTripConfig(settings)}
                 myLocation={myLocation}
                 highlightedPoiId={highlightedPoiId}
