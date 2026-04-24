@@ -138,13 +138,14 @@
 | ✅ #73 | Stadt-Konfiguration (CityConfig statt ROME_CENTER) | M | 6 |
 | #74 | Multi-Homebase pro Trip (datumsbasiert) | M | 6 |
 | #78 | Transit-Tage (Reisetage zwischen Städten) | M | 6 |
-| #113 | Auth: User-Profil + Workspace-Zuordnung (Multi-Trip-Access) | M | 6 |
+| #113 | Auth: User-Profil + Workspace-Sync (Phase 1 — Cross-Device) | M | 2 |
+| #228 | Workspace Access Control + Einladungs-Flow (Phase 2 von #113) | L | 6 |
 | #209 | Feature: dynamischer App-Titel aus TripConfig | S | 1 |
 | #215 | infra: Uptime-Monitoring + Alerting für Firebase Hosting (Prod) | M | 4 |
 | #216 | docs: Firebase Hosting Rollback-Playbook | S | 1 |
 | #217 | devops: Chrome-DevTools MCP Server lokal in Claude Code registrieren | S | 1 |
 
-**8 Items, ~31h. 2 Wochen + Buffer — 1 erledigt 2026-04-23 (#73 Architektur-Blocker).**
+**9 Items, ~33h — 1 erledigt 2026-04-23 (#73). #113 in Phase 1/2 gesplittet nach Stefan's Cross-Device-Beobachtung.**
 
 > ⚠ Scope-Warnung: >5 Items. Stefan bestätigt bewusst — #215/#216/#217 sind ops-hygiene/tooling (klein, parallel zu Features machbar), #209 ist trivialer Japan-UX-Touch.
 
@@ -295,6 +296,7 @@ Bündelt alle Issues rund um Monetarisierung, Marketing und professionellen Laun
 | #35 | Offline Map Tiles (Kartenausschnitt vorab cachen) | parked — nice-to-have, Offline via PWA reicht meist |
 | #36 | Offline-Reiseführer: PDF/HTML-Export pro Tag | parked — nice-to-have |
 | #37 | Foto-Tagebuch: Bilder pro POI hochladen | parked — nach Japan/Rom zu bewerten |
+| #227 | Trip-Switcher: Default-Trip-Pin | nice-to-have, kein blocker für Japan |
 
 **Nicht mehr hier gelistet** (haben jetzt eigene Section, siehe oben):
 - #16, #43, #169 → v1.5.1 (AI Follow-ups Patch)
