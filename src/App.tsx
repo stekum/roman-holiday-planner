@@ -15,6 +15,7 @@ import { useWorkspace } from './firebase/useWorkspace';
 import { getTripConfig, currencySymbolFromCode } from './settings/tripConfig';
 import { getPlacesBias } from './lib/placesBias';
 import { useActiveWorkspaceId } from './firebase/workspaceContext';
+import { useWorkspaceSync } from './firebase/useWorkspaceSync';
 import { useWeather } from './hooks/useWeather';
 import { useMyFamily } from './hooks/useMyFamily';
 import { useMyLocation } from './hooks/useMyLocation';
@@ -94,9 +95,10 @@ const ADMIN_EMAIL = 'stefan.kummert@gmail.com';
 
 interface AppInnerProps {
   user: import('firebase/auth').User;
+  profile: import('./firebase/useUserProfile').UserProfile;
 }
 
-function AppInner({ user }: AppInnerProps) {
+function AppInner({ user, profile }: AppInnerProps) {
   const apiKey = (import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined)?.trim();
   const hasKey = !!apiKey;
   const isAdmin = user.email === ADMIN_EMAIL;
@@ -108,6 +110,10 @@ function AppInner({ user }: AppInnerProps) {
 
   const workspaceId = useActiveWorkspaceId();
   const workspace = useWorkspace();
+  // #113 Phase 1: sync workspace list between Firestore user-profile and
+  // local knownWorkspaces so trips show up on all devices the user logs
+  // into with the same account.
+  useWorkspaceSync(profile, workspaceId);
   const {
     status,
     error: workspaceError,
@@ -588,7 +594,7 @@ function App() {
   if (!isFirebaseConfigured) return <FirebaseMissingNotice />;
   return (
     <AuthGate>
-      {({ user }) => <AppInner user={user} />}
+      {({ user, profile }) => <AppInner user={user} profile={profile} />}
     </AuthGate>
   );
 }
