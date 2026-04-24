@@ -79,6 +79,36 @@ function MapFocus({
 }
 
 /**
+ * Pan the map when the trip's effective center (Homebase → TripConfig.center →
+ * Rom-Default) changes WITHIN the same workspace. The `defaultCenter`-Prop of
+ * `<GMap>` is only read at mount; wenn der User nachträglich im aktiven Trip
+ * Homebase/CityConfig ändert, bleibt die Map sonst auf dem alten Center stehen.
+ * Workspace-Switch wird weiterhin per key-Remount gehandhabt (App.tsx).
+ */
+function TripCenterSync({
+  center,
+}: {
+  center: { lat: number; lng: number };
+}) {
+  const map = useMap();
+  const lastAppliedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!map) return;
+    const sig = `${center.lat.toFixed(5)},${center.lng.toFixed(5)}`;
+    // Erste Anwendung: Map hat den Center bereits als defaultCenter beim
+    // Mount bekommen — nichts zu tun. Nur bei echter Änderung panTo.
+    if (lastAppliedRef.current === null) {
+      lastAppliedRef.current = sig;
+      return;
+    }
+    if (lastAppliedRef.current === sig) return;
+    lastAppliedRef.current = sig;
+    map.panTo(center);
+  }, [map, center]);
+  return null;
+}
+
+/**
  * Switches the map into Street View panorama mode when `position` is set.
  * Uses the map's built-in StreetViewPanorama which shares the same DOM
  * container — no new window, no leaving the app. Fires `onClose` when
@@ -285,6 +315,10 @@ export function RomeMap({
             ? homebase.coords
             : selected?.coords ?? null
         }
+      />
+
+      <TripCenterSync
+        center={homebase?.coords ?? tripConfig?.center ?? DEFAULT_CENTER}
       />
 
       <StreetViewController
