@@ -109,7 +109,7 @@
 
 ---
 
-## v3.0-beta — Multi-Trip Architektur (Ziel: 10. Mai 2026)
+## v3.0-beta — Multi-Trip Architektur ✅ Released 2026-04-24
 
 **Zweck:** Architektur von Single-Workspace auf Trip-fähig umstellen. Der kritische Refactor.
 
@@ -117,15 +117,12 @@
 |---|---|---|---|---|
 | ✅ #71 | Dynamischer workspaceId (Listener-Switch) | L | 15 | **critical** |
 | ✅ #70 | Trip-Selector UI (Basic: Dropdown im Header) | M | 5 | high |
-| #213 | cleanup: Sunset GH-Pages + alten Maps-API-Key (post-#117, frühestens 2026-05-06) | S | 1 | low |
 
-**3 Items, ~21h. 2 Wochen — 2 erledigt 2026-04-23, #213 wartet auf 2026-05-06.**
+**2 Items, ~20h. Geliefert 17 Tage vor Ziel (10. Mai).**
 
-**Scope-Lock:** #72 Trip-Wizard NICHT hier (Stefan kann manuell via Firestore). Verschoben zu v3.2.
+**Scope-Lock:** #72 Trip-Wizard verschoben zu v3.2. #213 GH-Pages-Sunset verschoben zu v3.1 (wartet auf 2026-05-06 Grace-Period).
 
-**Safety-Net:** Durch v2.0-CI wird jeder PR automatisch gebaut+gelintet. Refactor läuft nicht „blind".
-
-**Release:** `v3.0.0-beta.1` — 10. Mai 2026. Beta-only, nicht Production.
+**Release:** [`v3.0.0-beta.1`](https://github.com/stekum/roman-holiday-planner/releases/tag/v3.0.0-beta.1) — 2026-04-24. Beta-only.
 
 ---
 

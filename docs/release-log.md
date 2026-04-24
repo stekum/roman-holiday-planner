@@ -10,3 +10,4 @@ Regressionen (Release-Field-Option verlor Farbe/Description).
 - 2026-04-18 · v1.5 · AI Features · verified GREEN
 - 2026-04-19 · v1.5.1 · AI Briefing Ghost-Mount Fix · verified GREEN
 - 2026-04-20 · v2.0 · Pre-Multi-Trip Foundation + AI Follow-ups · verified GREEN
+- 2026-04-24 · v3.0-beta · Multi-Trip Architektur · verified GREEN
