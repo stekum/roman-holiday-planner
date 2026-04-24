@@ -20,6 +20,12 @@ export interface UserProfile {
   photoURL: string | null;
   status: UserStatus;
   createdAt?: number;
+  /**
+   * Cross-device list of workspaces the user has opened/created (#113 Phase 1).
+   * Wird von useWorkspaceSync befuellt — lokale knownWorkspaces werden mit
+   * diesem Array bei jedem Profil-Update gemerged.
+   */
+  workspaceIds?: string[];
 }
 
 export type ProfileLoadState = 'loading' | 'ready' | 'error';
@@ -107,6 +113,9 @@ export function useUserProfile(user: User | null): ProfileState {
             photoURL: data.photoURL ?? user.photoURL,
             status: (data.status as UserStatus) ?? 'pending',
             createdAt: (data.createdAt as { toMillis?: () => number })?.toMillis?.(),
+            workspaceIds: Array.isArray(data.workspaceIds)
+              ? (data.workspaceIds as string[])
+              : undefined,
           },
         });
       },

@@ -98,6 +98,35 @@ export function forgetWorkspace(id: string): void {
 }
 
 /**
+ * Merged eine Remote-Liste von Workspace-IDs (aus `users/{uid}.workspaceIds`)
+ * additiv in die lokale Known-Liste. Neue IDs bekommen einen Platzhalter-
+ * Eintrag ohne displayName (fallback auf ID in UI). Bestehende Einträge
+ * bleiben unangetastet — insbesondere ihre Display-Namen und lastOpened-
+ * Timestamps.
+ *
+ * Bewusst **additiv-only**: wir löschen keine lokalen Einträge die nicht
+ * in remote stehen. Sonst würde ein User der auf Device B einen Trip
+ * forgetet hat, ihn beim Öffnen von Device A versehentlich wieder
+ * mitnehmen (Device A hat den Trip in seiner localStorage noch drin).
+ *
+ * Returns true wenn mindestens ein Eintrag neu hinzugefuegt wurde.
+ */
+export function mergeRemoteIds(remoteIds: readonly string[]): boolean {
+  if (remoteIds.length === 0) return false;
+  const list = readRaw();
+  const localIds = new Set(list.map((e) => e.id));
+  const now = Date.now();
+  let added = false;
+  for (const id of remoteIds) {
+    if (!id || localIds.has(id)) continue;
+    list.push({ id, lastOpened: now });
+    added = true;
+  }
+  if (added) writeRaw(list);
+  return added;
+}
+
+/**
  * Updates just the display name without bumping {@link KnownWorkspace.lastOpened}.
  * Empty string clears the name. Silently no-ops if the id is not known.
  */
