@@ -10,6 +10,13 @@ export interface Homebase {
   coords: { lat: number; lng: number };
   placeId?: string;
   image?: string;
+  /**
+   * Gültigkeits-Zeitraum dieser Homebase innerhalb der Reise (#74).
+   * `from`/`to` sind inklusive ISO-Dates (YYYY-MM-DD). Fehlt das Feld,
+   * gilt die Homebase für den gesamten Trip (catch-all). Bei sich
+   * überlappenden Ranges gewinnt der erste Eintrag in der Liste.
+   */
+  dateRange?: { from: string; to: string };
 }
 
 /**
@@ -47,7 +54,19 @@ export interface Settings {
   tripStart: string; // ISO YYYY-MM-DD
   tripEnd: string;   // ISO YYYY-MM-DD
   families: Family[];
+  /**
+   * Legacy single-Homebase-Feld (vor #74). Neue Schreibzugriffe sollten
+   * `homebases` nutzen; der Resolver `getHomebases()` liest auch dieses
+   * Feld als Single-Entry-Fallback, damit existierende Workspaces ohne
+   * Migration weiterlaufen.
+   */
   homebase?: Homebase;
+  /**
+   * Multi-Homebase-Liste pro Trip (#74). Jede Homebase kann einen
+   * datumsbasierten Gültigkeits-Range haben — die App wählt automatisch
+   * die für den aktiven Tag passende. Siehe `getHomebaseForDay()`.
+   */
+  homebases?: Homebase[];
   /** Wenn nicht gesetzt → DEFAULT_TRIP_CONFIG (Rom/Italien/Deutsch). */
   tripConfig?: TripConfig;
 }
