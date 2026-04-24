@@ -63,6 +63,7 @@ export interface WorkspaceAPI {
   removeFamily: (id: string) => Promise<void>;
   getFamily: (id: string) => Family | undefined;
   setHomebase: (hb: Homebase | undefined) => Promise<void>;
+  setHomebases: (list: Homebase[]) => Promise<void>;
   setTripConfig: (cfg: TripConfig) => Promise<void>;
 
   // Trip plan
@@ -423,6 +424,26 @@ export function useWorkspace(): WorkspaceAPI {
     [doc_.settings, workspaceDocRef],
   );
 
+  /**
+   * Multi-Homebase-Bulk-Setter (#74). Schreibt die komplette Liste atomar
+   * in `settings.homebases` und räumt gleichzeitig das Legacy-Feld
+   * `settings.homebase` weg, damit der Resolver nicht doppelt liest.
+   * Leere Liste = alle Homebases entfernen.
+   */
+  const setHomebases = useCallback(
+    async (list: Homebase[]) => {
+      const cleaned = list.map((hb) =>
+        stripUndefined(hb as unknown as Record<string, unknown>),
+      );
+      // settings.homebase (legacy) aktiv "leeren" durch vollen Settings-
+      // Rewrite — Firestore kennt kein deleteField via dot-notation.
+      const next = { ...doc_.settings, homebases: cleaned } as Record<string, unknown>;
+      delete next.homebase;
+      await updateDoc(workspaceDocRef(), { settings: next });
+    },
+    [doc_.settings, workspaceDocRef],
+  );
+
   const setTripConfig = useCallback(
     async (cfg: TripConfig) => {
       await updateDoc(workspaceDocRef(), {
@@ -602,6 +623,7 @@ export function useWorkspace(): WorkspaceAPI {
     removeFamily,
     getFamily,
     setHomebase,
+    setHomebases,
     setTripConfig,
     plan: doc_.tripPlan,
     getDay,

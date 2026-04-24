@@ -7,9 +7,10 @@ import { DEFAULT_SETTINGS } from '../../settings/defaults';
 import { TripDatesEditor } from './TripDatesEditor';
 import { TripConfigEditor } from './TripConfigEditor';
 import { FamilyEditor } from './FamilyEditor';
-import { HomebaseEditor } from './HomebaseEditor';
+import { HomebasesEditor } from './HomebasesEditor';
 import { getPlacesBias } from '../../lib/placesBias';
 import { getTripConfig } from '../../settings/tripConfig';
+import { getHomebases } from '../../settings/homebases';
 import { MyFamilyEditor } from './MyFamilyEditor';
 import { ApprovalQueue } from './ApprovalQueue';
 
@@ -19,7 +20,7 @@ interface Props {
   onAddFamily: (family: Omit<Family, 'id'>) => void;
   onUpdateFamily: (id: string, patch: Partial<Omit<Family, 'id'>>) => void;
   onRemoveFamily: (id: string) => void;
-  onSetHomebase: (hb: Homebase | undefined) => void;
+  onSetHomebases: (list: Homebase[]) => void;
   onSetTripConfig: (cfg: TripConfig) => void;
   /** Optional — if present, shows a „Lokale Daten hochladen"-Button. */
   onMigrateFromLocal?: (data: {
@@ -84,7 +85,7 @@ export function SettingsView({
   onAddFamily,
   onUpdateFamily,
   onRemoveFamily,
-  onSetHomebase,
+  onSetHomebases,
   onSetTripConfig,
   onMigrateFromLocal,
   isAdmin,
@@ -131,10 +132,12 @@ export function SettingsView({
         tripConfig={settings.tripConfig}
         onChange={onSetTripConfig}
       />
-      <HomebaseEditor
-        homebase={settings.homebase}
-        bias={getPlacesBias(getTripConfig(settings), settings.homebase)}
-        onChange={onSetHomebase}
+      <HomebasesEditor
+        homebases={getHomebases(settings)}
+        tripStart={settings.tripStart}
+        tripEnd={settings.tripEnd}
+        bias={getPlacesBias(getTripConfig(settings), getHomebases(settings)[0])}
+        onChange={onSetHomebases}
       />
       <FamilyEditor
         families={settings.families}
