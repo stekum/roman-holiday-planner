@@ -91,8 +91,12 @@ service cloud.firestore {
 
     // Workspace-Hauptdokument + POI-Subkollektion (#228)
     match /workspaces/{workspaceId} {
-      // Read: jeder Member oder Admin
-      allow read: if isAdmin() || isMember(workspaceId);
+      // Read: jeder Member oder Admin. Non-existent docs sind eh leer —
+      // erlauben, sonst kann der useWorkspace-Listener sein eigenes
+      // Auto-Create-Doc nicht lesen (Listener mountet vor Create).
+      allow read: if isAdmin()
+                  || (hasAccess() && !exists(/databases/$(database)/documents/workspaces/$(workspaceId)))
+                  || isMember(workspaceId);
 
       // Create: nur approved users; Creator MUSS sich selbst als
       // ownerUid + alleinigen memberIds[0] eintragen. Sonst kann jeder
@@ -120,8 +124,13 @@ service cloud.firestore {
       allow delete: if isAdmin() || isOwner(workspaceId);
 
       match /pois/{poiId} {
-        // POIs sind Inhalt — jeder Member darf alles.
-        allow read, write: if isAdmin() || isMember(workspaceId);
+        // POIs sind Inhalt — jeder Member darf alles. Non-existent
+        // workspace = leere Subkollektion → read erlauben damit der
+        // POI-Listener nicht crashed bevor das Auto-Create durch ist.
+        allow read: if isAdmin()
+                    || (hasAccess() && !exists(/databases/$(database)/documents/workspaces/$(workspaceId)))
+                    || isMember(workspaceId);
+        allow write: if isAdmin() || isMember(workspaceId);
       }
     }
 
