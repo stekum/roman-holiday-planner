@@ -10,6 +10,7 @@ import { getGeminiModel } from './gemini';
 import type { Homebase, TripConfig } from '../settings/types';
 import type { POI } from '../data/pois';
 import { DEFAULT_TRIP_CONFIG } from '../settings/tripConfig';
+import { extractCityFromAddress } from '../settings/homebases';
 
 export interface AiStop {
   order: number;
@@ -35,8 +36,12 @@ function buildSystemPrompt(context: {
   tripConfig?: TripConfig;
 }): string {
   const cfg = context.tripConfig ?? DEFAULT_TRIP_CONFIG;
+  // #240: Stadt aus Day-Homebase ableiten — bei Multi-City-Trips
+  // (Tokyo/Kyoto/Osaka) sollte der Tagesplan die Region der heutigen
+  // Homebase ansprechen, NICHT die Trip-weite tripConfig.city.
+  const dayCity = extractCityFromAddress(context.homebase?.address, cfg.city);
   const parts: string[] = [
-    `Du bist ein lokaler Reiseplaner für ${cfg.city}, ${cfg.country}.`,
+    `Du bist ein lokaler Reiseplaner für ${dayCity}, ${cfg.country}.`,
     `Antworte auf ${cfg.language}.`,
     `Du erstellst einen Tagesplan für ${context.dayLabel}.`,
     `Die Reisegruppe besteht aus: ${context.familyNames.join(', ')}.`,
@@ -48,9 +53,15 @@ function buildSystemPrompt(context: {
 
   if (context.homebase) {
     parts.push(
-      `Die Unterkunft (Homebase) ist: ${context.homebase.name}, ${context.homebase.address}. ` +
+      `Die Unterkunft (Homebase) für diesen Tag ist: ${context.homebase.name}, ${context.homebase.address}. ` +
       `Koordinaten: ${context.homebase.coords.lat.toFixed(4)}, ${context.homebase.coords.lng.toFixed(4)}. ` +
       `Der Tag startet und endet hier.`,
+      // #240: explizite Geo-Constraint — bei Multi-City-Trips würde
+      // Gemini sonst gerne berühmte Orte aus anderen Städten vorschlagen.
+      `WICHTIG: Plane ausschließlich Stops in der näheren Umgebung der Homebase ` +
+      `(maximal 30 km Entfernung). Schlage KEINE Orte aus anderen Städten oder ` +
+      `Regionen vor — auch wenn sie zur Reise gehören könnten. Heute geht es nur ` +
+      `um ${dayCity} und Umgebung.`,
     );
   }
 
@@ -69,7 +80,7 @@ function buildSystemPrompt(context: {
     `- Plane Pausen ein (Kaffee, Gelato, Mittagessen) — nicht nur Sehenswürdigkeiten.`,
     `- Wenn Kinder dabei sind: kindgerechte Aktivitäten einbauen, nicht zu viel laufen.`,
     `- Gib für jeden Stop eine ungefähre Uhrzeit an.`,
-    `- Nenne echte, existierende Orte in ${cfg.city} mit korrektem Namen.`,
+    `- Nenne echte, existierende Orte in ${dayCity} mit korrektem Namen.`,
     ``,
     `ANTWORT-FORMAT (strikt JSON, kein Markdown):`,
     `{`,
