@@ -139,13 +139,13 @@
 | ✅ #240 | Bug: AI-Plan generiert Tokyo-POIs für Osaka-Tag (#74-Follow-up) | M | 2 |
 | ✅ #241 | Bug: Map-Anzeige (Folgebug aus #240) | S | 0 |
 | #78 | Transit-Tage (Reisetage zwischen Städten) | M | 6 |
-| #228 | Workspace Access Control + Einladungs-Flow (Phase 2 von #113) | L | 6 |
+| ✅ #228 | Workspace Access Control + Einladungs-Flow (Phase 2 von #113) | L | 6 |
 | #209 | Feature: dynamischer App-Titel aus TripConfig | S | 1 |
 | #215 | infra: Uptime-Monitoring + Alerting für Firebase Hosting (Prod) | M | 4 |
 | #216 | docs: Firebase Hosting Rollback-Playbook | S | 1 |
 | #217 | devops: Chrome-DevTools MCP Server lokal in Claude Code registrieren | S | 1 |
 
-**12 Items in v3.0, 6 erledigt 2026-04-23/25 (Multi-Trip-Foundation + Validation-Sweep). 6 Items / ~19h offen — knapp 4 Wochen Puffer bis Japan-Abreise.**
+**12 Items in v3.0, 7 erledigt 2026-04-23/25 (Multi-Trip-Foundation + Validation-Sweep + Workspace Access Control). 5 Items / ~13h offen — knapp 4 Wochen Puffer bis Japan-Abreise.**
 
 > ⚠ Scope-Warnung: >5 Items. Stefan bestätigt bewusst — #215/#216/#217 sind ops-hygiene/tooling (klein, parallel zu Features machbar), #209 ist trivialer Japan-UX-Touch.
 
@@ -190,8 +190,9 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 | #79 | Trip-Archivierung | S | aus v3.0 |
 | #72 | Trip-Erstellungs-Wizard | M | aus v3.0-beta |
 | #122 | Multi-Language Support (DE + EN + evtl. JP) | L | aus v2.0 |
+| #235 | Onboarding: Interactive Quickstart-Wizard + kontextuelle Hints | L | neu 2026-04-25 — ggf. #72 absorbieren |
 
-**3 Items, bis ~25h.**
+**4 Items, bis ~37h.** Klären: #72 als eigenständig oder Teilkomponente von #235.
 
 **Release:** `v3.2.0` — 30. Sep 2026.
 

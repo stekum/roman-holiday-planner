@@ -228,6 +228,21 @@ Unter dem „Holiday Planner"-Titel im Header steht ein **Trip-Chip mit ▾-Indi
 - **Trip aus Liste entfernen:** Hover → **Mülleimer-Icon** → Klick. Entfernt nur den Eintrag aus der lokalen Liste; die **Trip-Daten in Firestore bleiben bestehen**. Kein Undo nötig — Trip per ID neu eintragen öffnet dieselben Daten wieder.
 - **Persistenz + Cross-Device-Sync (seit v2.2):** Die Trip-Liste lebt sowohl im localStorage (`rhp:known-workspaces`, `rhp:active-workspace`) pro Device als auch in Firestore (`users/{uid}.workspaceIds`). Beim Login auf einem neuen Gerät werden alle deine bekannten Trips automatisch aus dem User-Profil gemerged. Display-Namen bleiben device-local (kannst du pro Gerät via Pencil-Icon umbenennen).
 
+### Mitglieder & Einladungen (seit v3.0)
+
+Trips sind nicht mehr für jeden approved User offen — jeder Trip hat einen **Owner** (der ihn angelegt hat) und eine explizite **Mitglieder-Liste**. Wer nicht Mitglied ist, sieht den Trip nicht.
+
+**Settings-Tab → Sektion „Mitglieder":**
+- Liste aller Mitglieder mit Avatar + Name. Eigener Eintrag ist mit „Du" markiert; Owner trägt einen 👑-Badge.
+- **Einladungs-Link erstellen** (Owner-only): generiert einen Magic-Link `?invite=<token>`, gültig 7 Tage, **einmalig einlösbar**. Per Kopieren-Button in die Zwischenablage, dann via WhatsApp/iMessage teilen.
+- **Mitglied entfernen** (Owner-only, Hover-Icon): Member fliegt sofort aus dem Trip raus, sieht ihn nicht mehr.
+- **Eigentümerschaft übergeben** (Owner-only, 👑-Hover-Icon): Member wird neuer Owner, du bleibst Mitglied.
+- **Trip löschen** (Owner-only, „Owner-Bereich"-Sektion): kaskadiert auf alle POIs des Trips. Unwiderruflich.
+
+**Empfänger-Flow:** Wer einen Einladungs-Link öffnet, sieht ein Modal „X hat dich zu Y eingeladen" mit „Beitreten" oder „Später". Nach Beitritt wechselt die App automatisch in den neuen Trip. **Family-Wahl** passiert separat in `Settings → Meine Familie` — sonst hat man kein gültiges Family-Set für Votes.
+
+**Zugang verloren?** Wenn der Link abgelaufen ist (>7 Tage) oder bereits eingelöst wurde, zeigt das Modal eine entsprechende Fehlermeldung. Owner muss dann einen frischen Link generieren.
+
 ### Echtzeit-Synchronisation
 
 - Alle Daten (POIs, Settings, Tagesplan) werden über **Firebase Firestore** synchronisiert
