@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import { Header, type Tab } from './components/Header';
 import { AuthGate } from './components/auth/AuthGate';
+import { InviteAcceptModal } from './components/auth/InviteAcceptModal';
 import { MissingKeyNotice } from './components/MissingKeyNotice';
 import { RomeMap } from './components/map/RomeMap';
 import { PoiList, type ViewMode } from './components/poi/PoiList';
@@ -551,6 +552,7 @@ function AppInner({ user, profile }: AppInnerProps) {
           }}
         />
       )}
+      <InviteAcceptModal />
     </div>
   );
 

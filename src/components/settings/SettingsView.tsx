@@ -13,6 +13,7 @@ import { getTripConfig } from '../../settings/tripConfig';
 import { getHomebases } from '../../settings/homebases';
 import { MyFamilyEditor } from './MyFamilyEditor';
 import { ApprovalQueue } from './ApprovalQueue';
+import { WorkspaceMembersSection } from './WorkspaceMembersSection';
 
 interface Props {
   settings: Settings;
@@ -150,6 +151,7 @@ export function SettingsView({
         myFamilyId={myFamilyId}
         onChange={onMyFamilyChange}
       />
+      <WorkspaceMembersSection />
 
       {onMigrateFromLocal && localPoiCount > 0 && (
         <section className="rounded-3xl border-2 border-dashed border-olive/40 bg-white p-5">
