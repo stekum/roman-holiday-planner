@@ -145,7 +145,7 @@
 | #216 | docs: Firebase Hosting Rollback-Playbook | S | 1 |
 | #217 | devops: Chrome-DevTools MCP Server lokal in Claude Code registrieren | S | 1 |
 
-**12 Items in v3.0, 7 erledigt 2026-04-23/25 (Multi-Trip-Foundation + Validation-Sweep + Workspace Access Control). 5 Items / ~13h offen — knapp 4 Wochen Puffer bis Japan-Abreise.**
+**14 Items in v3.0, 9 erledigt 2026-04-23/25 (Multi-Trip-Foundation + Validation-Sweep + Workspace Access Control). 5 Items / ~13h offen — knapp 4 Wochen Puffer bis Japan-Abreise.**
 
 > ⚠ Scope-Warnung: >5 Items. Stefan bestätigt bewusst — #215/#216/#217 sind ops-hygiene/tooling (klein, parallel zu Features machbar), #209 ist trivialer Japan-UX-Touch.
 
