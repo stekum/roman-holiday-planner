@@ -147,7 +147,7 @@ export function useWorkspace(): WorkspaceAPI {
     const run = async () => {
       try {
         // Auth is guaranteed to be ready by AuthGate before this hook mounts.
-        const { db } = getFirebase();
+        const { db, auth } = getFirebase();
         if (cancelled) return;
         const workspaceRef = doc(db, 'workspaces', workspaceId);
         const poisRef = collection(db, 'workspaces', workspaceId, 'pois');
@@ -157,8 +157,16 @@ export function useWorkspace(): WorkspaceAPI {
           async (snap) => {
             if (cancelled) return;
             if (!snap.exists()) {
-              // First visit ever — create the workspace with defaults
+              // First visit ever — create the workspace with defaults.
+              // Creator becomes owner + first member (#228).
+              const creatorUid = auth.currentUser?.uid;
+              if (!creatorUid) {
+                console.warn('[useWorkspace] auto-create skipped: no auth user');
+                return;
+              }
               await setDoc(workspaceRef, {
+                ownerUid: creatorUid,
+                memberIds: [creatorUid],
                 settings: DEFAULT_SETTINGS,
                 tripPlan: {},
                 dayDescriptions: {},
