@@ -65,7 +65,7 @@ deterministischen Workspace `multi-trip-smoke-test` mit 3 Homebases
 | 3 | Wiederhole für Tag 4 (Kyoto) | Stops in Kyoto |
 | 4 | Wiederhole für Tag 1 (Tokyo) | Stops in Tokyo |
 
-**Status:** 🔁 needs-retest — Fix in PR (siehe #240). Root Cause: Gemini-Prompt nannte Trip-weite `tripConfig.city` ("Tokyo") statt Tages-Homebase-Stadt. Fix leitet die Stadt via `extractCityFromAddress(homebase.address)` aus der Tages-Homebase ab + harter Geo-Constraint im Prompt. Wartet auf Beta-Deploy + Validation auf Tag 7 Osaka.
+**Status:** ✅ passed — verifiziert 2026-04-25 via `e2e/issue-240-ai-plan-day-city.e2e.js`. Tag 6 (30. Mai = Osaka): Gemini lieferte "Ein entspannter Tag in **Osaka**..." mit Kids Plaza Osaka + Ogimachi Park als Stops. 15× Osaka-Mentions, 0× Tokyo. Screenshot: `.playwright-results/issue-240-ai-plan.png`.
 
 ---
 
@@ -77,7 +77,7 @@ deterministischen Workspace `multi-trip-smoke-test` mit 3 Homebases
 |---|---|---|
 | 1 | "Briefing erzeugen"-Button | Briefing-Text nennt Kyoto / Westin Miyako / Kyoto-Sehenswürdigkeiten — NICHT Tokyo / Park Hyatt |
 
-**Status:** ⏳ open (nach Fix #240 retesten — sollte korrekt sein, weil App.tsx bereits `getHomebaseForDay(homebases, dayIso)` an `generateDayBriefing` weiterleitet)
+**Status:** 🔁 needs-retest — durch #240 sollte das Briefing nun auch die Tages-City nennen (extractCityFromAddress in aiDayBriefing.ts mit-gefixed). Manuell auf Beta validieren.
 
 ---
 
