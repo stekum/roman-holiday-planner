@@ -200,13 +200,18 @@ Alle Methoden bieten: **Familie-Auswahl** (farbige Pill-Buttons) + **Kategorie-A
 - **Kinder-Info:** Optionales Freitextfeld (z.B. „2 Kinder, 4 und 7 Jahre") — wird dem KI-Planer mitgegeben
 - Familie löschen (nur wenn keine POIs zugeordnet, mindestens 1 Familie muss bleiben)
 
-### Homebase (Unterkunft)
+### Homebases (Unterkünfte, seit v2.3 Multi-Homebase)
 
-- **Google Places Suche** um die Unterkunft zu finden
-- Zeigt Name, Adresse, Foto, Bewertung
-- Wird als 🏠-Pin auf der Karte angezeigt
-- Dient als Start-/Endpunkt für Routen
-- Entfernungsberechnung (Luftlinie) für jeden POI
+Trips können **mehrere Unterkünfte** mit Datums-Ranges haben — z.B. eine Japan-Reise mit Hotel Tokyo (Tag 1-3), Ryokan Kyoto (Tag 4-5), Hotel Osaka (Tag 6-7). Die App wählt automatisch die für den aktiven Tag passende.
+
+- **Hinzufügen:** „+ Homebase hinzufügen" → Google-Places-Suche → Treffer wählen
+- **Datums-Range pro Homebase:** *Von* / *Bis* Felder. Bleibt das leer → gilt für den gesamten Trip (Catch-all)
+- **Mehrere Homebases:** Reihenfolge in der Liste = Prio bei überlappenden Ranges
+- **Auf der Karte:**
+  - **Aktive Homebase** (für den aktuellen Tag) — großer dunkler 🏠-Pin
+  - **Weitere Homebases** — kleinere halbtransparente 🏠-Pins (sichtbar beim Rauszoomen)
+- **AI-Tagesplan:** nutzt automatisch die Tages-Homebase als Start-Stadt im Gemini-Prompt — Tag in Kyoto = Plan in Kyoto, Tag in Osaka = Plan in Osaka
+- **Wetter, Routen, Distanzen** beziehen sich auf die jeweils aktive Tages-Homebase
 
 ---
 
@@ -221,7 +226,7 @@ Unter dem „Holiday Planner"-Titel im Header steht ein **Trip-Chip mit ▾-Indi
 - **Neuen Trip anlegen:** „+ Neuen Trip anlegen" → Trip-ID (kleinbuchstaben, Ziffern, Bindestrich, max 40 Zeichen — z.B. `japan-mai-26`) + Anzeigename (z.B. „Japan Mai 2026"). „Anlegen" erzeugt einen leeren Trip und wechselt dort hin. Anschließend in Settings: Reisedaten, Homebase, Familien und Trip-Konfiguration einrichten.
 - **Trip umbenennen:** Dropdown öffnen → über einen Eintrag hovern → **Pencil-Icon** klicken → Inline-Edit. Enter speichert, Escape bricht ab. Leerer Name setzt zurück auf die rohe ID.
 - **Trip aus Liste entfernen:** Hover → **Mülleimer-Icon** → Klick. Entfernt nur den Eintrag aus der lokalen Liste; die **Trip-Daten in Firestore bleiben bestehen**. Kein Undo nötig — Trip per ID neu eintragen öffnet dieselben Daten wieder.
-- **Persistenz:** Die Trip-Liste lebt im localStorage (`rhp:known-workspaces`, `rhp:active-workspace`) pro Device. Auf einem neuen Gerät siehst du anfangs nur den Default-Workspace und musst weitere manuell anlegen bzw. durch Öffnen merken lassen. Cross-Device-Sync kommt mit #113.
+- **Persistenz + Cross-Device-Sync (seit v2.2):** Die Trip-Liste lebt sowohl im localStorage (`rhp:known-workspaces`, `rhp:active-workspace`) pro Device als auch in Firestore (`users/{uid}.workspaceIds`). Beim Login auf einem neuen Gerät werden alle deine bekannten Trips automatisch aus dem User-Profil gemerged. Display-Namen bleiben device-local (kannst du pro Gerät via Pencil-Icon umbenennen).
 
 ### Echtzeit-Synchronisation
 

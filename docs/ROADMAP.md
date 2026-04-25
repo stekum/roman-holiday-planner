@@ -133,16 +133,19 @@
 | Issue | Titel | Size | Est. h |
 |---|---|---|---|
 | ✅ #73 | Stadt-Konfiguration (CityConfig statt ROME_CENTER) | M | 6 |
-| #74 | Multi-Homebase pro Trip (datumsbasiert) | M | 6 |
+| ✅ #74 | Multi-Homebase pro Trip (datumsbasiert) | M | 6 |
+| ✅ #113 | Auth: User-Profil + Workspace-Sync (Phase 1 — Cross-Device) | M | 2 |
+| ✅ #239 | Bug: AI-Tagesplan Quick-Tags hardcoded (#74-Follow-up) | S | 1 |
+| ✅ #240 | Bug: AI-Plan generiert Tokyo-POIs für Osaka-Tag (#74-Follow-up) | M | 2 |
+| ✅ #241 | Bug: Map-Anzeige (Folgebug aus #240) | S | 0 |
 | #78 | Transit-Tage (Reisetage zwischen Städten) | M | 6 |
-| #113 | Auth: User-Profil + Workspace-Sync (Phase 1 — Cross-Device) | M | 2 |
 | #228 | Workspace Access Control + Einladungs-Flow (Phase 2 von #113) | L | 6 |
 | #209 | Feature: dynamischer App-Titel aus TripConfig | S | 1 |
 | #215 | infra: Uptime-Monitoring + Alerting für Firebase Hosting (Prod) | M | 4 |
 | #216 | docs: Firebase Hosting Rollback-Playbook | S | 1 |
 | #217 | devops: Chrome-DevTools MCP Server lokal in Claude Code registrieren | S | 1 |
 
-**9 Items, ~33h — 1 erledigt 2026-04-23 (#73). #113 in Phase 1/2 gesplittet nach Stefan's Cross-Device-Beobachtung.**
+**12 Items in v3.0, 6 erledigt 2026-04-23/25 (Multi-Trip-Foundation + Validation-Sweep). 6 Items / ~19h offen — knapp 4 Wochen Puffer bis Japan-Abreise.**
 
 > ⚠ Scope-Warnung: >5 Items. Stefan bestätigt bewusst — #215/#216/#217 sind ops-hygiene/tooling (klein, parallel zu Features machbar), #209 ist trivialer Japan-UX-Touch.
 
