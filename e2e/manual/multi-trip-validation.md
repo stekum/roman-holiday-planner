@@ -50,7 +50,7 @@ deterministischen Workspace `multi-trip-smoke-test` mit 3 Homebases
 | 1 | Modal öffnet | Quick-Tags zeigen `tripConfig.categories` (Sushi, Ramen, Tempel, …) — NICHT Pizza/Gelato/Trattoria/Aperitivo |
 | 2 | Switche zu Rom-Trip → "AI Tagesplan" | Quick-Tags zeigen Rom-Defaults |
 
-**Status:** 🔁 needs-retest — fixed in PR (siehe #239), Beta-Deploy + Stefan-Validation pending.
+**Status:** ✅ passed — verifiziert 2026-04-25 via `e2e/issue-239-quick-tags-smoke.e2e.js`. Quick-Tags zeigen Kultur/Sushi/Ramen/Tempel/Sonstiges (aus tripConfig.categories) + Universal-Tags. Rom-Defaults nicht mehr da. Screenshot: `.playwright-results/issue-239-quick-tags.png`.
 
 ---
 
