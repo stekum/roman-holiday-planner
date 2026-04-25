@@ -2,11 +2,16 @@ rules_version = '2';
 
 // Roman Holiday Planner — Firestore Security Rules
 //
-// Modell (nach #112):
-// - Auth via Google Sign-In (anonyme Auth wird nach Prod-Rollout abgeschaltet)
+// Modell (nach #112 + #228):
+// - Auth via Google/Microsoft Sign-In (anonyme Auth abgeschaltet)
 // - Neue User entstehen als `users/{uid}` mit status='pending'
-// - Admin (stefan.kummert@gmail.com) wird beim Bootstrap als 'approved' angelegt
-// - Workspace-Zugriff nur mit status='approved' (oder Admin)
+// - Admin (stefan.kummert@gmail.com) ist hardcoded approved
+// - Pre-approved Allowlist (Familie) entgeht der Pending-Queue
+// - Workspace-Zugriff: User muss in `workspaces/{id}.memberIds` stehen
+//   ODER Admin sein. `hasAccess()` (= approved status) ist Vorbedingung,
+//   schützt aber nicht mehr alleine — Member-Check ist authoritative.
+// - Owner-Privilegien (Member-Liste editieren, Trip löschen, umbenennen)
+//   prüfen `workspaces/{id}.ownerUid == request.auth.uid`.
 //
 // Admin-Email ist hardcoded. Mirrored in src/firebase/adminConfig.ts.
 
@@ -39,10 +44,29 @@ service cloud.firestore {
       return isAdmin() || isApproved();
     }
 
+    // #228 — Workspace membership checks. Reads workspaces/{id} doc, so
+    // each call costs one extra get(); Firestore caches within a single
+    // rule evaluation, so calling both isMember+isOwner is fine.
+    function workspaceData(workspaceId) {
+      return get(/databases/$(database)/documents/workspaces/$(workspaceId)).data;
+    }
+    function isMember(workspaceId) {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/workspaces/$(workspaceId))
+        && (request.auth.uid in workspaceData(workspaceId).memberIds);
+    }
+    function isOwner(workspaceId) {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/workspaces/$(workspaceId))
+        && workspaceData(workspaceId).ownerUid == request.auth.uid;
+    }
+
     // User-Profile
     match /users/{uid} {
+      // #228: Approved users may read other approved users' basic profile so
+      // the Member-list UI can show names + emails. Self-read is unconditional.
       allow read: if request.auth != null
-                  && (request.auth.uid == uid || isAdmin());
+                  && (request.auth.uid == uid || isAdmin() || isApproved());
       allow create: if request.auth != null
                     && request.auth.uid == uid
                     && (
@@ -53,6 +77,8 @@ service cloud.firestore {
       // User darf sein eigenes Doc patchen (email/displayName/photoURL
       // Self-Heal bei unvollständigen Profilen), aber NICHT den Status
       // oder createdAt ändern. Admin darf alles.
+      // workspaceIds wird vom syncWorkspaceMembers Cloud-Function-Trigger
+      // mit Admin-Privilegien geschrieben — die Rule fasst es nicht an.
       allow update: if isAdmin()
                     || (
                       request.auth != null
@@ -63,13 +89,72 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // Workspace-Hauptdokument + POI-Subkollektion
+    // Workspace-Hauptdokument + POI-Subkollektion (#228)
     match /workspaces/{workspaceId} {
-      allow read, write: if hasAccess();
+      // Read: jeder Member oder Admin
+      allow read: if isAdmin() || isMember(workspaceId);
+
+      // Create: nur approved users; Creator MUSS sich selbst als
+      // ownerUid + alleinigen memberIds[0] eintragen. Sonst kann jeder
+      // approved user fremde Workspace-IDs hijacken.
+      allow create: if hasAccess()
+                    && request.resource.data.ownerUid == request.auth.uid
+                    && request.resource.data.memberIds is list
+                    && request.resource.data.memberIds.size() == 1
+                    && request.resource.data.memberIds[0] == request.auth.uid;
+
+      // Update: Members dürfen Inhalte ändern (POIs, Plan, Settings).
+      // Owner-only Mutationen: memberIds, ownerUid (= Owner-Übergabe).
+      // Members dürfen memberIds NICHT ändern (heißt: nicht selbst ergänzen,
+      // nicht andere entfernen). Ownership-Felder müssen unverändert sein
+      // wenn nicht Owner.
+      allow update: if isAdmin()
+                    || (
+                      isMember(workspaceId)
+                      && request.resource.data.ownerUid == resource.data.ownerUid
+                      && request.resource.data.memberIds == resource.data.memberIds
+                    )
+                    || isOwner(workspaceId);
+
+      // Delete: nur Owner oder Admin
+      allow delete: if isAdmin() || isOwner(workspaceId);
 
       match /pois/{poiId} {
-        allow read, write: if hasAccess();
+        // POIs sind Inhalt — jeder Member darf alles.
+        allow read, write: if isAdmin() || isMember(workspaceId);
       }
+    }
+
+    // #228 — Invite-Tokens. Owner generiert, Empfänger liest + markiert
+    // als used. Inhaltliche Validierung passiert hier (nicht in Cloud Function),
+    // um Latency niedrig zu halten.
+    match /invites/{token} {
+      // Read: jeder eingeloggte approved user darf einen Token lesen, um
+      // ihn einzulösen. Token-IDs sind unguessable (32+ chars random).
+      allow read: if hasAccess();
+
+      // Create: nur Owner des referenzierten Workspaces darf invites generieren.
+      // Felder müssen vorhanden + plausibel sein.
+      allow create: if hasAccess()
+                    && request.resource.data.workspaceId is string
+                    && request.resource.data.createdBy == request.auth.uid
+                    && request.resource.data.expiresAt is timestamp
+                    && request.resource.data.used == false
+                    && isOwner(request.resource.data.workspaceId);
+
+      // Update: nur Used-Flag setzen erlaubt. Restliche Felder bleiben.
+      // Jeder approved User kann einlösen (= used: true setzen). Die Cloud
+      // Function macht die eigentliche memberIds-Mutation mit Admin-Privs.
+      allow update: if hasAccess()
+                    && resource.data.used == false
+                    && request.resource.data.used == true
+                    && request.resource.data.workspaceId == resource.data.workspaceId
+                    && request.resource.data.createdBy == resource.data.createdBy
+                    && request.resource.data.expiresAt == resource.data.expiresAt;
+
+      // Delete: nur Owner des Workspaces oder Admin.
+      allow delete: if isAdmin()
+                    || (hasAccess() && isOwner(resource.data.workspaceId));
     }
 
     match /{document=**} {

@@ -28,6 +28,8 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 const WORKSPACE_ID = 'multi-trip-smoke-test';
+// Mirrors TEST_UID in scripts/mint-e2e-token.mjs — keep in sync.
+const E2E_TEST_UID = 'e2e-test-user-1';
 
 const homebases = [
   {
@@ -54,6 +56,8 @@ const homebases = [
 ];
 
 const docData = {
+  ownerUid: E2E_TEST_UID,
+  memberIds: [E2E_TEST_UID],
   createdAt: Date.now(),
   tripPlan: {},
   dayDescriptions: {},

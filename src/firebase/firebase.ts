@@ -18,11 +18,13 @@ import {
   getFirestore,
   type Firestore,
 } from 'firebase/firestore';
+import { getFunctions, type Functions } from 'firebase/functions';
 
 interface FirebaseBundle {
   app: FirebaseApp;
   auth: Auth;
   db: Firestore;
+  functions: Functions;
 }
 
 const env = import.meta.env;
@@ -61,6 +63,8 @@ export function getFirebase(): FirebaseBundle {
     app,
     auth: getAuth(app),
     db,
+    // Region must match the deployed Cloud Functions in functions/index.js
+    functions: getFunctions(app, 'europe-west1'),
   };
   return bundle;
 }
