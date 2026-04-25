@@ -15,6 +15,7 @@ export const ADMIN_EMAIL = 'stefan.kummert@gmail.com';
  */
 export const PRE_APPROVED_EMAILS: readonly string[] = [
   'sandkumm@gmail.com',
+  'johannabrandstetter1@web.de',
 ];
 
 export function isAdminUser(email: string | null | undefined): boolean {
