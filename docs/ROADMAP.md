@@ -297,6 +297,7 @@ Bündelt alle Issues rund um Monetarisierung, Marketing und professionellen Laun
 | #36 | Offline-Reiseführer: PDF/HTML-Export pro Tag | parked — nice-to-have |
 | #37 | Foto-Tagebuch: Bilder pro POI hochladen | parked — nach Japan/Rom zu bewerten |
 | #227 | Trip-Switcher: Default-Trip-Pin | nice-to-have, kein blocker für Japan |
+| #244 | Map-Controls + Multi-Homebase-Trip-Übersicht | UX-Polish für Multi-City-Trips, nach Japan-Erfahrung re-prio |
 
 **Nicht mehr hier gelistet** (haben jetzt eigene Section, siehe oben):
 - #16, #43, #169 → v1.5.1 (AI Follow-ups Patch)
