@@ -9,7 +9,7 @@ import { isGeminiConfigured } from '../../lib/gemini';
 import { track } from '../../lib/analytics';
 import type { POI, Category } from '../../data/pois';
 import type { Settings } from '../../settings/types';
-import { getTripConfig } from '../../settings/tripConfig';
+import { getCategoryEmoji, getTripConfig } from '../../settings/tripConfig';
 import { getHomebaseForDay, getHomebases } from '../../settings/homebases';
 
 interface Props {
@@ -22,16 +22,28 @@ interface Props {
   onAccept: (pois: POI[], order: string[], overview: string) => void;
 }
 
-const QUICK_TAGS = [
-  { label: '🏛️ Kultur', value: 'Sehenswürdigkeiten und Kultur' },
-  { label: '🍕 Pizza', value: 'gute Pizza' },
-  { label: '🍨 Gelato', value: 'Gelato-Pause' },
-  { label: '🍝 Trattoria', value: 'authentische Trattoria zum Mittagessen' },
-  { label: '🍹 Aperitivo', value: 'Aperitivo am Abend' },
+/**
+ * Universal Quick-Tags die nicht von Trip-Config abhängen — Hinweise an die
+ * AI für Pacing/Familien-Setup. Bleiben in jedem Trip identisch.
+ */
+const UNIVERSAL_QUICK_TAGS = [
   { label: '👨‍👩‍👧‍👦 Kinderfreundlich', value: 'kinderfreundliche Aktivitäten' },
   { label: '🌅 Aussicht', value: 'schöne Aussichtspunkte' },
   { label: '🚶 Wenig laufen', value: 'kompakte Route, nicht zu viel Laufen' },
 ];
+
+/**
+ * Kategorie-spezifische Tags werden aus `tripConfig.categories` generiert
+ * (#239). Vorher hardcoded auf Rom-Defaults — leakte in Japan-Trips als
+ * Pizza/Trattoria/Aperitivo statt Sushi/Ramen/Tempel.
+ */
+function buildQuickTags(categories: readonly string[]) {
+  const cat = categories.map((c) => ({
+    label: `${getCategoryEmoji(c)} ${c}`,
+    value: c,
+  }));
+  return [...cat, ...UNIVERSAL_QUICK_TAGS];
+}
 
 const CATEGORY_MAP: Record<string, Category> = {
   kultur: 'Kultur',
@@ -287,7 +299,7 @@ export function AiDayPlannerModal({
               />
             </div>
             <div className="flex flex-wrap gap-2">
-              {QUICK_TAGS.map((tag) => (
+              {buildQuickTags(getTripConfig(settings).categories).map((tag) => (
                 <button
                   key={tag.value}
                   type="button"

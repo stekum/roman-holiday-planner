@@ -50,7 +50,7 @@ deterministischen Workspace `multi-trip-smoke-test` mit 3 Homebases
 | 1 | Modal öffnet | Quick-Tags zeigen `tripConfig.categories` (Sushi, Ramen, Tempel, …) — NICHT Pizza/Gelato/Trattoria/Aperitivo |
 | 2 | Switche zu Rom-Trip → "AI Tagesplan" | Quick-Tags zeigen Rom-Defaults |
 
-**Status:** ❌ FAILED — siehe **#239**. Quick-Tags hardcoded auf Rom in `AiDayPlannerModal.tsx:24-33`.
+**Status:** 🔁 needs-retest — fixed in PR (siehe #239), Beta-Deploy + Stefan-Validation pending.
 
 ---
 
