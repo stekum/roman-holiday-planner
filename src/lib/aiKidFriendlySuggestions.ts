@@ -16,6 +16,7 @@ import { getGeminiModel } from './gemini';
 import type { Category, POI } from '../data/pois';
 import type { Homebase, TripConfig } from '../settings/types';
 import { DEFAULT_TRIP_CONFIG } from '../settings/tripConfig';
+import { extractCityFromAddress } from '../settings/homebases';
 
 export interface AiKidSuggestion {
   name: string;
@@ -42,13 +43,18 @@ export interface AiKidSuggestionsContext {
 function buildPrompt(ctx: AiKidSuggestionsContext): string {
   const count = ctx.count ?? 4;
   const cfg = ctx.tripConfig ?? DEFAULT_TRIP_CONFIG;
+  // #240: bei Multi-City-Trips Stadt aus Tages-Homebase ableiten.
+  const dayCity = extractCityFromAddress(ctx.homebase?.address, cfg.city);
   const parts: string[] = [
-    `Du bist ein ${cfg.city}-Reise-Experte (${cfg.country}) mit Fokus auf Familien mit Kindern. Antworte auf ${cfg.language}.`,
+    `Du bist ein ${dayCity}-Reise-Experte (${cfg.country}) mit Fokus auf Familien mit Kindern. Antworte auf ${cfg.language}.`,
     '',
     `Reisegruppe: ${ctx.familyNames.join(', ') || 'Unbekannt'}.`,
   ];
   if (ctx.homebase) {
-    parts.push(`Homebase: ${ctx.homebase.name}, ${ctx.homebase.address}.`);
+    parts.push(
+      `Homebase: ${ctx.homebase.name}, ${ctx.homebase.address}.`,
+      `WICHTIG: Vorschläge nur in der Umgebung der Homebase (max 30 km), KEINE Orte aus anderen Städten.`,
+    );
   }
   if (ctx.dayLabel) {
     parts.push(`Tag: ${ctx.dayLabel}`);
@@ -69,7 +75,7 @@ function buildPrompt(ctx: AiKidSuggestionsContext): string {
   parts.push(
     '',
     `AUFGABE:`,
-    `Schlage ${count} KINDGERECHTE Orte in ${cfg.city} vor die sich als Zwischen- oder Zusatzstopp anbieten. Beispiele: Spielplätze, Eisdielen, Parks, Kinder-Museen, interaktive Kunst, Aussichtspunkte die Kinder beeindrucken, Brunnen zum Planschen.`,
+    `Schlage ${count} KINDGERECHTE Orte in ${dayCity} vor die sich als Zwischen- oder Zusatzstopp anbieten. Beispiele: Spielplätze, Eisdielen, Parks, Kinder-Museen, interaktive Kunst, Aussichtspunkte die Kinder beeindrucken, Brunnen zum Planschen.`,
     '',
     `ANTWORT-FORMAT (strikt JSON, kein Markdown):`,
     `{`,

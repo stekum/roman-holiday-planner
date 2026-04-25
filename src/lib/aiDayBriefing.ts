@@ -2,6 +2,7 @@ import { getGeminiModel } from './gemini';
 import type { POI } from '../data/pois';
 import type { Homebase, TripConfig } from '../settings/types';
 import { DEFAULT_TRIP_CONFIG } from '../settings/tripConfig';
+import { extractCityFromAddress } from '../settings/homebases';
 import type { DayWeather } from './weather';
 import { deduplicateParagraphs } from './briefingDedup';
 
@@ -40,14 +41,16 @@ function buildPrompt(context: DayBriefingContext): string {
   });
 
   const cfg = context.tripConfig ?? DEFAULT_TRIP_CONFIG;
+  // #240: bei Multi-City-Trips Stadt aus Tages-Homebase ableiten.
+  const dayCity = extractCityFromAddress(context.homebase?.address, cfg.city);
   return [
-    `Du bist ein lokaler Reiseassistent fuer eine ${cfg.city}-Reise (${cfg.country}).`,
+    `Du bist ein lokaler Reiseassistent fuer ${dayCity} (${cfg.country}).`,
     `Antworte auf ${cfg.language}.`,
     `Erstelle ein kurzes Tages-Briefing fuer ${context.dayLabel} (${context.dayIso}).`,
     '',
     '🚨 WICHTIG:',
     `- Das Briefing ist SPEZIFISCH fuer ${context.dayLabel} am ${context.dayIso}.`,
-    `- Nimm NICHT an dass dies der erste Tag ist. Beziehe dich auf ${context.dayLabel}, nicht auf "Tag 1" oder den "ersten Tag in ${cfg.city}".`,
+    `- Nimm NICHT an dass dies der erste Tag ist. Beziehe dich auf ${context.dayLabel}, nicht auf "Tag 1" oder den "ersten Tag in ${dayCity}".`,
     '- Verwende ausschliesslich die unten gelisteten Stops dieses Tages.',
     '',
     'KONTEXT:',

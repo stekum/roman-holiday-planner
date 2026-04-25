@@ -65,7 +65,7 @@ deterministischen Workspace `multi-trip-smoke-test` mit 3 Homebases
 | 3 | Wiederhole für Tag 4 (Kyoto) | Stops in Kyoto |
 | 4 | Wiederhole für Tag 1 (Tokyo) | Stops in Tokyo |
 
-**Status:** ❌ FAILED — siehe **#240**. Tag 7 Osaka liefert Tokyo-POIs (Shinjuku Gyoen, Isetan, Tokyo Metropolitan Government Building). Bias / Prompt-City falsch.
+**Status:** 🔁 needs-retest — Fix in PR (siehe #240). Root Cause: Gemini-Prompt nannte Trip-weite `tripConfig.city` ("Tokyo") statt Tages-Homebase-Stadt. Fix leitet die Stadt via `extractCityFromAddress(homebase.address)` aus der Tages-Homebase ab + harter Geo-Constraint im Prompt. Wartet auf Beta-Deploy + Validation auf Tag 7 Osaka.
 
 ---
 
