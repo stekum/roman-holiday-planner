@@ -3,12 +3,15 @@
  *  - persistPoiPhoto: persist Google Places photos to Firebase Storage
  *  - notifyAccessRequest (#133): email admin when a new user signs up
  *    with status='pending' and waits for approval.
+ *  - syncWorkspaceMembers (#228): mirror workspaces.memberIds → users.workspaceIds
+ *    so the trip-switcher UI knows which workspaces a user belongs to.
  */
 
 const { onDocumentWritten } = require("firebase-functions/v2/firestore");
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret, defineString } = require("firebase-functions/params");
 const { getStorage } = require("firebase-admin/storage");
-const { getFirestore } = require("firebase-admin/firestore");
+const { getFirestore, FieldValue, Timestamp } = require("firebase-admin/firestore");
 const { initializeApp } = require("firebase-admin/app");
 const fetch = require("node-fetch");
 
@@ -202,4 +205,171 @@ exports.notifyAccessRequest = onDocumentWritten(
       console.error(`[notifyAccessRequest] failed for ${uid}:`, err.message);
     }
   }
+);
+
+/**
+ * #228: Mirror workspaces.memberIds onto users.{uid}.workspaceIds.
+ *
+ * Trigger fires on every workspace doc write. We diff before/after memberIds
+ * and:
+ *   - For each newly-added uid:    arrayUnion(workspaceId)  on users/{uid}
+ *   - For each newly-removed uid:  arrayRemove(workspaceId) on users/{uid}
+ *   - On workspace deletion:       arrayRemove from every previous member
+ *
+ * users.workspaceIds is the read-cache used by the trip-switcher UI. The
+ * authoritative access check runs against workspaces.memberIds via Firestore
+ * Rules — even if this mirror drifts, no user can access a workspace they
+ * aren't a member of. The mirror is best-effort.
+ *
+ * Idempotent: arrayUnion/arrayRemove are no-ops when the value is already
+ * (not) present. Safe to retry on transient failures.
+ */
+exports.syncWorkspaceMembers = onDocumentWritten(
+  {
+    document: "workspaces/{workspaceId}",
+    region: "europe-west1",
+  },
+  async (event) => {
+    const workspaceId = event.params.workspaceId;
+    const before = event.data?.before?.data();
+    const after = event.data?.after?.data();
+
+    const beforeMembers = Array.isArray(before?.memberIds)
+      ? before.memberIds
+      : [];
+    const afterMembers = Array.isArray(after?.memberIds)
+      ? after.memberIds
+      : [];
+
+    const beforeSet = new Set(beforeMembers);
+    const afterSet = new Set(afterMembers);
+
+    const added = afterMembers.filter((uid) => !beforeSet.has(uid));
+    const removed = beforeMembers.filter((uid) => !afterSet.has(uid));
+
+    if (added.length === 0 && removed.length === 0) return;
+
+    const ops = [
+      ...added.map((uid) =>
+        db
+          .collection("users")
+          .doc(uid)
+          .set(
+            { workspaceIds: FieldValue.arrayUnion(workspaceId) },
+            { merge: true },
+          ),
+      ),
+      ...removed.map((uid) =>
+        db
+          .collection("users")
+          .doc(uid)
+          .set(
+            { workspaceIds: FieldValue.arrayRemove(workspaceId) },
+            { merge: true },
+          ),
+      ),
+    ];
+
+    const results = await Promise.allSettled(ops);
+    const failed = results.filter((r) => r.status === "rejected");
+    if (failed.length > 0) {
+      console.error(
+        `[syncWorkspaceMembers] ${failed.length}/${results.length} mirror writes failed for workspace ${workspaceId}:`,
+        failed.map((f) => f.reason?.message ?? String(f.reason)),
+      );
+    } else {
+      console.log(
+        `[syncWorkspaceMembers] ${workspaceId}: +${added.length} -${removed.length} mirrored`,
+      );
+    }
+  },
+);
+
+/**
+ * #228: Redeem a workspace invite token.
+ *
+ * Callable from the client. Atomically:
+ *   1. Validates token exists, not used, not expired
+ *   2. Adds caller's uid to workspaces/{wsId}.memberIds (arrayUnion)
+ *   3. Marks invite as used + records redeemedBy/redeemedAt
+ *
+ * Caller's uid comes from request.auth (Firebase auth), not from any
+ * client-supplied field — cannot be spoofed.
+ *
+ * Errors:
+ *   - unauthenticated   : not signed in
+ *   - failed-precondition: caller is not approved (status !== 'approved')
+ *   - not-found         : token doesn't exist
+ *   - already-exists    : token already used
+ *   - deadline-exceeded : token expired
+ *   - failed-precondition: workspace doesn't exist (data inconsistency)
+ *
+ * Returns: { workspaceId } on success, so the client can switch to it.
+ */
+exports.redeemInvite = onCall(
+  { region: "europe-west1" },
+  async (request) => {
+    const uid = request.auth?.uid;
+    if (!uid) {
+      throw new HttpsError("unauthenticated", "Sign in required.");
+    }
+
+    const token = request.data?.token;
+    if (!token || typeof token !== "string") {
+      throw new HttpsError("invalid-argument", "Token is required.");
+    }
+
+    // Verify caller is approved (mirrors the rules' isApproved/isAdmin check)
+    const userSnap = await db.collection("users").doc(uid).get();
+    if (!userSnap.exists || userSnap.data()?.status !== "approved") {
+      throw new HttpsError(
+        "failed-precondition",
+        "Your account is not yet approved.",
+      );
+    }
+
+    const inviteRef = db.collection("invites").doc(token);
+
+    // Transaction: read invite, validate, add member, mark used.
+    const result = await db.runTransaction(async (tx) => {
+      const inviteSnap = await tx.get(inviteRef);
+      if (!inviteSnap.exists) {
+        throw new HttpsError("not-found", "Invite not found.");
+      }
+      const invite = inviteSnap.data();
+
+      if (invite.used) {
+        throw new HttpsError("already-exists", "Invite already used.");
+      }
+
+      const expiresMs = invite.expiresAt?.toMillis?.() ?? 0;
+      if (Date.now() > expiresMs) {
+        throw new HttpsError("deadline-exceeded", "Invite has expired.");
+      }
+
+      const workspaceId = invite.workspaceId;
+      const workspaceRef = db.collection("workspaces").doc(workspaceId);
+      const workspaceSnap = await tx.get(workspaceRef);
+      if (!workspaceSnap.exists) {
+        throw new HttpsError(
+          "failed-precondition",
+          "Workspace no longer exists.",
+        );
+      }
+
+      tx.update(workspaceRef, {
+        memberIds: FieldValue.arrayUnion(uid),
+      });
+      tx.update(inviteRef, {
+        used: true,
+        redeemedBy: uid,
+        redeemedAt: Timestamp.now(),
+      });
+
+      return { workspaceId };
+    });
+
+    console.log(`[redeemInvite] ${uid} joined ${result.workspaceId} via ${token}`);
+    return result;
+  },
 );
