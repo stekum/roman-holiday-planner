@@ -33,6 +33,12 @@ functions/.env.*
 # Playwright test artifacts (local only)
 .playwright-results/
 
+# Claude Code per-session noise (lock-files, ad-hoc local settings).
+# Note: .claude/agents/, .claude/settings.json sind committed (geteilte
+# Team-Setups). Nur scheduled_tasks.lock + settings.local.json sind lokal.
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
+
 # Firebase Admin SDK service account — NEVER commit
 service-account*.json
 **/service-account*.json
