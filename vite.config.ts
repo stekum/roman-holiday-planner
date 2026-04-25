@@ -10,6 +10,12 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Beta-Builds setzen VITE_DISABLE_PWA=1 — der erzeugte Service Worker
+      // ist dann ein "Selbstmord-SW" der sich beim ersten Visit unregistert
+      // und alle Caches leert. Damit ist die Beta für immer cache-frei und
+      // User müssen nicht mehr "Clear site data" klicken bei jedem Deploy.
+      // Production behält PWA für Offline-Fähigkeit.
+      selfDestroying: process.env.VITE_DISABLE_PWA === '1',
       includeAssets: ['favicon.svg', 'icon.svg'],
       manifest: {
         name: 'Holiday Planner',
