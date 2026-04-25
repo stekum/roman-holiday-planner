@@ -32,7 +32,19 @@ interface Props {
   /** Ordered POI ids for the currently active day (plan mode). */
   planOrder?: string[];
   families: Family[];
+  /**
+   * Aktive Homebase fuer den gerade angezeigten Tag (Trip-Tab) bzw. den
+   * heutigen Tag (Entdecken). Wird groesser + markant gerendert + ist
+   * Source fuer Map-Center, Routen-Origin und InfoWindow.
+   */
   homebase?: Homebase;
+  /**
+   * Alle Homebases dieses Trips (#74). Werden zusaetzlich als kleinere
+   * Marker auf der Karte gezeigt — beim Rauszoomen sieht man alle
+   * Stationen einer Multi-City-Reise (Tokyo / Kyoto / Osaka). Der
+   * `homebase`-Eintrag (active) wird hervorgehoben.
+   */
+  homebases?: readonly Homebase[];
   /** Active trip — provides per-trip map center + default zoom (#73). */
   tripConfig?: TripConfig;
   myLocation?: { lat: number; lng: number; accuracy: number } | null;
@@ -239,6 +251,7 @@ export function RomeMap({
   planOrder = [],
   families,
   homebase,
+  homebases,
   tripConfig,
   myLocation,
   highlightedPoiId,
@@ -368,6 +381,34 @@ export function RomeMap({
           </div>
         </AdvancedMarker>
       )}
+
+      {/* Inaktive Homebases (#74): kleinere, halbtransparente Marker für
+          alle nicht-aktiven Trip-Stationen. So sieht man beim Rauszoomen
+          die ganze Multi-City-Route (Tokyo/Kyoto/Osaka). */}
+      {homebases?.map((hb, i) => {
+        if (!hb.coords) return null;
+        const isActive =
+          homebase?.placeId && hb.placeId
+            ? homebase.placeId === hb.placeId
+            : homebase?.coords.lat === hb.coords.lat &&
+              homebase?.coords.lng === hb.coords.lng;
+        if (isActive) return null; // active wird unten separat gerendert
+        const key = hb.placeId ?? `${hb.coords.lat},${hb.coords.lng},${i}`;
+        return (
+          <AdvancedMarker
+            key={`hb-inactive-${key}`}
+            position={hb.coords}
+            zIndex={500}
+            title={`${hb.name}${
+              hb.dateRange ? ` (${hb.dateRange.from} – ${hb.dateRange.to})` : ''
+            }`}
+          >
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-ink/40 text-white opacity-70 ring-1 ring-white">
+              <span className="text-xs">🏠</span>
+            </div>
+          </AdvancedMarker>
+        );
+      })}
 
       {homebase?.coords && (
         <AdvancedMarker

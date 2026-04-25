@@ -365,6 +365,7 @@ function AppInner({ user, profile }: AppInnerProps) {
                 planOrder={activeDayOrder}
                 families={settings.families}
                 homebase={mapHomebase}
+                homebases={homebases}
                 tripConfig={getTripConfig(settings)}
                 myLocation={myLocation}
                 highlightedPoiId={highlightedPoiId}
