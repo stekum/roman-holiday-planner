@@ -58,9 +58,10 @@ jobs:
           awk -F= '{ if (length($2) < 5) { print "FAIL: " $1; exit 1 } }' .env.local
           echo "env.local OK ($(wc -l < .env.local) lines)"
 
-      - name: Build (root-based for Firebase)
+      - name: Build (root-based for Firebase, PWA selfDestroying)
         env:
           VITE_BASE: /
+          VITE_DISABLE_PWA: '1'
         run: npm run build
 
       - name: Write service-account.json from split secrets
