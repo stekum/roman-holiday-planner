@@ -1,6 +1,6 @@
 # Multi-Trip Validation Test-Plan (Living Doc)
 
-**Master-Tracker:** [#238](https://github.com/stekum/roman-holiday-planner/issues/238)
+**Master-Tracker:** [#238](https://github.com/stekum/roman-holiday-planner/issues/238) ✅ closed 2026-04-25
 **Setup:** `node scripts/setup-multi-trip-test-workspace.mjs` legt einen
 deterministischen Workspace `multi-trip-smoke-test` mit 3 Homebases
 (Tokyo/Kyoto/Osaka mit Datums-Ranges 25.-31. Mai 2026) an.
