@@ -9,6 +9,13 @@ interface Props {
   tab: Tab;
   onTabChange: (t: Tab) => void;
   user: User;
+  /**
+   * Optional city prefix from the active TripConfig (#209). Renders as
+   * "<City> Holiday Planner". Empty/undefined = plain "Holiday Planner"
+   * (no leading space, no fallback name) — used during connecting/error
+   * states and for trips that haven't set a city.
+   */
+  cityName?: string;
 }
 
 const TABS: { id: Tab; label: string; Icon: typeof Compass; activeClass: string }[] = [
@@ -17,7 +24,8 @@ const TABS: { id: Tab; label: string; Icon: typeof Compass; activeClass: string 
   { id: 'settings', label: 'Settings', Icon: SettingsIcon, activeClass: 'bg-ink text-cream' },
 ];
 
-export function Header({ tab, onTabChange, user }: Props) {
+export function Header({ tab, onTabChange, user, cityName }: Props) {
+  const title = cityName ? `${cityName} Holiday Planner` : 'Holiday Planner';
   return (
     <header className="sticky top-0 z-30 border-b border-cream-dark bg-cream/90 backdrop-blur">
       <div className="mx-auto flex max-w-2xl items-center justify-between gap-2 px-4 py-3">
@@ -26,7 +34,7 @@ export function Header({ tab, onTabChange, user }: Props) {
             className="truncate text-2xl leading-none text-ink"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            Holiday Planner
+            {title}
           </h1>
           <TripSwitcher />
         </div>

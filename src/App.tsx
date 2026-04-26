@@ -148,6 +148,15 @@ function AppInner({ user, profile }: AppInnerProps) {
   const todayIso = new Date().toISOString().slice(0, 10);
   const activeHomebase = getCurrentHomebase(homebases, todayIso, settings.tripStart);
 
+  // #209: dynamic app title from active TripConfig.city. Empty until the
+  // workspace is ready so we don't flash the Rom-default for the first
+  // half-second on a Japan trip. Tab title syncs via document.title.
+  const cityName =
+    workspace.status === 'ready' ? getTripConfig(settings).city || '' : '';
+  useEffect(() => {
+    document.title = cityName ? `${cityName} Holiday Planner` : 'Holiday Planner';
+  }, [cityName]);
+
   const weatherByDay = useWeather(
     activeHomebase?.coords ?? getTripConfig(settings).center,
     getTripConfig(settings).timezone,
@@ -378,7 +387,7 @@ function AppInner({ user, profile }: AppInnerProps) {
 
   const content = (
     <div className="flex h-full flex-col">
-      <Header tab={tab} onTabChange={setTab} user={user} />
+      <Header tab={tab} onTabChange={setTab} user={user} cityName={cityName} />
       {connectionBanner}
       <main className="flex flex-1 flex-col overflow-hidden">
         {tab !== 'settings' && (
