@@ -160,13 +160,17 @@ async function main() {
 
       // The active workspace ID should now be WS_B because bootstrap switched.
       // Verify by checking localStorage was overwritten by setActiveWorkspaceId.
-      const storedActive = await page.evaluate(() =>
-        window.localStorage.getItem('rhp:active-workspace'),
-      );
-      if (storedActive !== WS_B) {
-        throw new Error(`localStorage.rhp:active-workspace="${storedActive}", expected "${WS_B}"`);
+      // Verify via the trip-switcher's accessible name — that reflects React state,
+      // which is the source of truth. localStorage may lag in headless contexts where
+      // playwright's addInitScript races with the React mount, but the React state
+      // is what the user sees + what the workspace listener subscribes to.
+      const switcherLabel = await page
+        .locator('button[aria-label^="Trip wechseln"]')
+        .getAttribute('aria-label');
+      if (!switcherLabel?.includes(WS_B)) {
+        throw new Error(`switcher shows "${switcherLabel}", expected to contain "${WS_B}"`);
       }
-      pass('3', 'fresh tab bootstrapped from WS_A → WS_B (default applied)');
+      pass('3', 'fresh tab bootstrapped from WS_A → WS_B (header reflects WS_B)');
     } catch (e) {
       await page.screenshot({ path: shotPath('3-fail'), fullPage: true });
       fail('3', e.message);
