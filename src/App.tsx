@@ -15,8 +15,12 @@ import { EditPoiModal } from './components/poi/EditPoiModal';
 import { useWorkspace } from './firebase/useWorkspace';
 import { getTripConfig, currencySymbolFromCode } from './settings/tripConfig';
 import { getPlacesBias } from './lib/placesBias';
-import { useActiveWorkspaceId } from './firebase/workspaceContext';
+import { useActiveWorkspaceId, useSetActiveWorkspaceId } from './firebase/workspaceContext';
 import { useWorkspaceSync } from './firebase/useWorkspaceSync';
+import {
+  markDefaultBootstrapped,
+  wasDefaultBootstrapped,
+} from './firebase/defaultWorkspace';
 import { getCurrentHomebase, getHomebaseForDay, getHomebases } from './settings/homebases';
 import { useWeather } from './hooks/useWeather';
 import { useMyFamily } from './hooks/useMyFamily';
@@ -75,11 +79,29 @@ function AppInner({ user, profile }: AppInnerProps) {
   }, []);
 
   const workspaceId = useActiveWorkspaceId();
+  const setWorkspaceId = useSetActiveWorkspaceId();
   const workspace = useWorkspace();
   // #113 Phase 1: sync workspace list between Firestore user-profile and
   // local knownWorkspaces so trips show up on all devices the user logs
   // into with the same account.
   useWorkspaceSync(profile, workspaceId);
+  // #227: switch to user's pinned default workspace once per tab on bootstrap.
+  // Only fires if the default differs from the currently-active workspace AND
+  // we haven't already bootstrapped this tab — so manual trip switches stick.
+  // Refs hold workspaceId+setter so we don't depend on them and re-trigger
+  // the switch on every nav.
+  const workspaceIdRef = useRef(workspaceId);
+  workspaceIdRef.current = workspaceId;
+  const setWorkspaceIdRef = useRef(setWorkspaceId);
+  setWorkspaceIdRef.current = setWorkspaceId;
+  useEffect(() => {
+    if (wasDefaultBootstrapped()) return;
+    const def = profile.defaultWorkspaceId;
+    if (def && def !== workspaceIdRef.current) {
+      setWorkspaceIdRef.current(def);
+    }
+    markDefaultBootstrapped();
+  }, [profile.defaultWorkspaceId]);
   const {
     status,
     error: workspaceError,
