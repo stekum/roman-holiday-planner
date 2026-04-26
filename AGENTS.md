@@ -376,7 +376,7 @@ Das Script verwendet ein isoliertes Profil unter `/tmp/chrome-agent-profile` —
 
 Port ist Standard `9222` (override: `CHROME_AGENT_PORT=9223 ./scripts/chrome-agent.sh`).
 
-**2. MCP-Server in Claude Code registrieren** (lokal, `.claude/settings.local.json` — NICHT committed):
+**2. MCP-Server-Registrierung** (committed, gilt für Claude Code UND Codex): ist seit #217 in `.mcp.json` im Repo-Root eingecheckt:
 
 ```json
 {
@@ -389,14 +389,16 @@ Port ist Standard `9222` (override: `CHROME_AGENT_PORT=9223 ./scripts/chrome-age
 }
 ```
 
-Alternativ das offizielle Plugin:
+Beim ersten Mal bittet Claude Code um Approval (`enabledMcpjsonServers`). Akzeptieren → `chrome-devtools:*`-Tools sind verfügbar.
+
+Alternativ als Plugin:
 
 ```
 /plugin marketplace add ChromeDevTools/chrome-devtools-mcp
 /plugin install chrome-devtools-mcp
 ```
 
-**3. Claude Code neu starten** → Tools sollten als `chrome-devtools:*` auftauchen.
+**3. Claude Code neu starten** (oder `/mcp` reload) → Tools sollten als `chrome-devtools:*` auftauchen.
 
 ### Nutzung im Alltag
 
