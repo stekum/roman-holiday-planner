@@ -143,10 +143,10 @@
 | ✅ #227 | Trip-Switcher: Default-Trip-Pin (cross-device) | S | 1 |
 | ✅ #209 | Feature: dynamischer App-Titel aus TripConfig | S | 1 |
 | #215 | infra: Uptime-Monitoring + Alerting für Firebase Hosting (Prod) | M | 4 |
-| #216 | docs: Firebase Hosting Rollback-Playbook | S | 1 |
-| #217 | devops: Chrome-DevTools MCP Server lokal in Claude Code registrieren | S | 1 |
+| ✅ #216 | docs: Firebase Hosting Rollback-Playbook | S | 1 |
+| ✅ #217 | devops: Chrome-DevTools MCP Server lokal in Claude Code registrieren | S | 1 |
 
-**15 Items in v3.0, 11 erledigt 2026-04-23/26 (Multi-Trip-Foundation + Validation-Sweep + Workspace Access Control + Default-Trip-Pin + dynamischer App-Titel). 4 Items / ~12h offen — knapp 4 Wochen Puffer bis Japan-Abreise.**
+**15 Items in v3.0, 13 erledigt 2026-04-23/26 (Multi-Trip-Foundation + Validation-Sweep + Workspace Access Control + Default-Trip-Pin + dynamischer App-Titel + Rollback-Playbook + Chrome-DevTools-MCP). 2 Items / ~10h offen — knapp 4 Wochen Puffer bis Japan-Abreise.**
 
 > ⚠ Scope-Warnung: >5 Items. Stefan bestätigt bewusst — #215/#216/#217 sind ops-hygiene/tooling (klein, parallel zu Features machbar), #209 ist trivialer Japan-UX-Touch.
 
