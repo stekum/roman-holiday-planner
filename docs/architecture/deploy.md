@@ -129,8 +129,42 @@ Alternativ: Git-Revert des problematischen Commits auf main → Beta-Auto-Deploy
 
 - **Firebase Console → Hosting** für Deploy-History und Traffic
 - **Firebase Console → Functions → Logs** für Cloud-Function-Fehler
-- **GA4 Realtime** (ab #123) für Traffic + Events
-- **Google Cloud Billing** für API-Verbrauch — Uptime-Monitoring siehe #215
+- **GA4 Realtime** (ab #123) für Traffic + Events. Measurement-ID `G-S85W09YM2P` ist im Live-Bundle (via GitHub-Secret `VITE_GA_MEASUREMENT_ID`). Property in Firebase-Console: https://console.firebase.google.com/project/roman-holiday-planner-6ac48/analytics
+- **Google Cloud Billing** für API-Verbrauch
+
+### Uptime-Monitoring (#215, seit v3.0)
+
+Google Cloud Monitoring überwacht `https://holiday-planner.web.app/` minütlich. Bei >2 min Downtime kommt eine Email an `stefan.kummert@gmail.com`.
+
+**Initial-Setup oder Recreate auf einer neuen Maschine:**
+
+```bash
+./scripts/setup-uptime-monitoring.sh           # dry-run, zeigt was gebaut würde
+./scripts/setup-uptime-monitoring.sh --apply   # legt Resources tatsächlich an
+```
+
+Idempotent — re-run skipt wenn Resources schon existieren (Match auf Display-Namen). Erstellt drei Resources im Projekt `roman-holiday-planner-6ac48`:
+
+| Resource | Display-Name | Zweck |
+|---|---|---|
+| NotificationChannel (email) | `Stefan email (alerts)` | Empfänger der Alerts |
+| UptimeCheckConfig | `Holiday Planner Prod — root` | HTTPS GET `/` alle 60s, erwartet HTTP 200, 10s Timeout |
+| AlertPolicy | `Holiday Planner Prod down` | Feuert wenn Uptime-Check >2 min hintereinander failed |
+
+**Console-Links:**
+- https://console.cloud.google.com/monitoring/uptime?project=roman-holiday-planner-6ac48
+- https://console.cloud.google.com/monitoring/alerting?project=roman-holiday-planner-6ac48
+
+**Ändern statt scripten:** Die drei Resources lassen sich im Console-UI direkt editieren (Threshold, Empfänger, Multi-Region). Script bleibt für Initial-Setup oder Recreate.
+
+**Kosten:** 0 EUR — Free-Tier deckt 1 Uptime-Check/min + 1 Alert-Policy + ≤5 Channels.
+
+**Test ob die Pipe funktioniert:** `firebase.json` temporär auf einen Bad-Rewrite umstellen, kurz deployen, ~3 min warten — Mail sollte kommen. Sofort revertieren danach.
+
+**Erweitern (zukünftig, kein Scope von #215):**
+- Synthetic-Check der einen Login-Flow durchspielt → braucht Cloud Functions als Probe oder externen Service (Checkly etc.)
+- Sentry / Client-Side Error-Reporting → eigenes Issue
+- Multi-Region-Probes für Latenz-Map → Console-Edit reicht
 
 ## Related Issues
 
