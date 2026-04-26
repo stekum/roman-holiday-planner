@@ -26,6 +26,14 @@ export interface UserProfile {
    * diesem Array bei jedem Profil-Update gemerged.
    */
   workspaceIds?: string[];
+  /**
+   * Optional: User-pinned default trip (#227). Wenn gesetzt, öffnet die App
+   * beim ersten Mount in diesem Workspace statt im zuletzt-aktiven. Cross-
+   * device, weil im User-Doc gespeichert. Nutzer-toggelbar via Pin-Icon im
+   * TripSwitcher. Wenn der gepinnte Workspace nicht (mehr) zugänglich ist,
+   * wird stillschweigend auf Last-Active zurückgefallen.
+   */
+  defaultWorkspaceId?: string;
 }
 
 export type ProfileLoadState = 'loading' | 'ready' | 'error';
@@ -116,6 +124,10 @@ export function useUserProfile(user: User | null): ProfileState {
             workspaceIds: Array.isArray(data.workspaceIds)
               ? (data.workspaceIds as string[])
               : undefined,
+            defaultWorkspaceId:
+              typeof data.defaultWorkspaceId === 'string'
+                ? data.defaultWorkspaceId
+                : undefined,
           },
         });
       },

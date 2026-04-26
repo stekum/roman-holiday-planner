@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronDown, Check, Pencil, Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, Check, Pencil, Pin, PinOff, Plus, Trash2 } from 'lucide-react';
 import {
   forgetWorkspace,
   getKnownWorkspaces,
@@ -12,6 +12,9 @@ import {
   useActiveWorkspaceId,
   useSetActiveWorkspaceId,
 } from '../../firebase/workspaceContext';
+import { pinDefaultWorkspace, unpinDefaultWorkspace } from '../../firebase/defaultWorkspace';
+import { useUserProfile } from '../../firebase/useUserProfile';
+import { getFirebase } from '../../firebase/firebase';
 
 /**
  * Header chip that shows the active trip + opens a dropdown with all known
@@ -21,6 +24,12 @@ import {
 export function TripSwitcher() {
   const activeId = useActiveWorkspaceId();
   const setActiveId = useSetActiveWorkspaceId();
+  // #227: surface the user's pinned default trip so we can show a filled
+  // pin-icon next to it. Re-uses the existing user-profile listener.
+  const { auth } = getFirebase();
+  const profileState = useUserProfile(auth.currentUser);
+  const defaultWorkspaceId = profileState.profile?.defaultWorkspaceId ?? null;
+  const [pinBusy, setPinBusy] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [list, setList] = useState<KnownWorkspace[]>(() => getKnownWorkspaces());
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -93,6 +102,22 @@ export function TripSwitcher() {
       setList(getKnownWorkspaces());
     }
     cancelRename();
+  }
+
+  // #227: Toggle pin. Same trip clicked again = unpin.
+  async function handleTogglePin(id: string) {
+    setPinBusy(id);
+    try {
+      if (defaultWorkspaceId === id) {
+        await unpinDefaultWorkspace();
+      } else {
+        await pinDefaultWorkspace(id);
+      }
+    } catch (err) {
+      console.warn('[TripSwitcher] pin toggle failed:', err);
+    } finally {
+      setPinBusy(null);
+    }
   }
 
   return (
@@ -179,6 +204,33 @@ export function TripSwitcher() {
                           </span>
                         )}
                       </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleTogglePin(entry.id)}
+                      disabled={pinBusy === entry.id}
+                      aria-label={
+                        defaultWorkspaceId === entry.id
+                          ? `${entry.displayName || entry.id} als Standard-Trip lösen`
+                          : `${entry.displayName || entry.id} als Standard-Trip festlegen`
+                      }
+                      aria-pressed={defaultWorkspaceId === entry.id}
+                      title={
+                        defaultWorkspaceId === entry.id
+                          ? 'Standard-Trip — beim App-Start wird dieser geöffnet (klicken zum Lösen)'
+                          : 'Als Standard-Trip festlegen (öffnet bei App-Start auf allen Geräten)'
+                      }
+                      className={`rounded-lg p-1.5 transition disabled:opacity-50 ${
+                        defaultWorkspaceId === entry.id
+                          ? 'text-terracotta hover:bg-terracotta/10'
+                          : 'text-ink/30 opacity-0 hover:bg-olive/10 hover:text-olive-dark group-hover:opacity-100'
+                      }`}
+                    >
+                      {defaultWorkspaceId === entry.id ? (
+                        <Pin className="h-3.5 w-3.5 fill-current" />
+                      ) : (
+                        <PinOff className="h-3.5 w-3.5" />
+                      )}
                     </button>
                     <button
                       type="button"
