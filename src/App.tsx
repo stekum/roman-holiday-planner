@@ -99,8 +99,12 @@ function AppInner({ user, profile }: AppInnerProps) {
     const def = profile.defaultWorkspaceId;
     if (def && def !== workspaceIdRef.current) {
       setWorkspaceIdRef.current(def);
+      markDefaultBootstrapped();
+    } else if (def !== undefined) {
+      // Explicitly cleared or already active → bootstrap done
+      markDefaultBootstrapped();
     }
-    markDefaultBootstrapped();
+    // def === undefined: profile not yet hydrated — wait for next dep change
   }, [profile.defaultWorkspaceId]);
   const {
     status,
