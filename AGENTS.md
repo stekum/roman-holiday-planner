@@ -628,21 +628,9 @@ Inzident-Memory beachten: bei der ersten Regen (v4.5 hinzugefuegt) ging ein Back
 
 ### Rollback-Prozedur
 
-Falls ein Production-Deploy Probleme macht:
+Falls ein Production-Deploy Probleme macht: **siehe [docs/runbooks/rollback-prod.md](./docs/runbooks/rollback-prod.md)** (#216).
 
-```bash
-# Schritt 1 (schnell, 1 Minute) — Firebase Hosting Rollback
-# Firebase Console → Hosting → holiday-planner → Release-History
-# älteren Build auswählen → "Rollback" klicken
-# ODER via CLI:
-firebase hosting:clone holiday-planner:live holiday-planner:live@vX.Y.Z
-
-# Schritt 2: Fix im Code committen (neuer Commit auf main)
-
-# Schritt 3: Patch-Release (release-please-PR mergen)
-# Dann Prod-Deploy triggern:
-npm run deploy
-```
+Drei Optionen darin (Console-Klick, GH-Actions Re-Run, lokaler Tag-Build) plus `scripts/rollback-prod.sh` für die Re-Run-Variante. Schnellste Option (Firebase-Console) ist <30 Sekunden.
 
 **Milestone-Handling:** Der Milestone des kaputten Release bleibt offen wenn der Fix noch dazu gehört; Release-Notes dokumentieren den Kontext.
 
