@@ -14,6 +14,8 @@ import { AiDayPlannerModal } from './AiDayPlannerModal';
 import { AiKidFriendlyPanel } from './AiKidFriendlyPanel';
 import { AiPostTripPanel } from './AiPostTripPanel';
 import { getHomebaseForDay, getHomebases } from '../../settings/homebases';
+import { getTransitDayForDate } from '../../settings/transitDays';
+import { TransitDayCard } from './TransitDayCard';
 import { DayBudgetCard } from './DayBudgetCard';
 import { getTripConfig, currencyFromCountry } from '../../settings/tripConfig';
 import type { DayBudget } from '../../firebase/useWorkspace';
@@ -92,6 +94,10 @@ export function DayPlanner({
   const [optimizing, setOptimizing] = useState(false);
   const [optimizeResult, setOptimizeResult] = useState<string | null>(null);
   const [aiModalOpen, setAiModalOpen] = useState(false);
+
+  // #78: ist dieser Tag als Transit-Tag markiert? Dann rendert der Body
+  // unten eine Transit-Karte statt POI-Routing.
+  const transitDay = getTransitDayForDate(settings, activeDay);
 
   // Per-day Homebase für diesen activeDay (#74). Fällt auf Catch-all oder
   // erste Homebase zurück wenn kein Range matcht. Ersetzt das frühere
@@ -198,6 +204,23 @@ export function DayPlanner({
         <div className="rounded-3xl bg-white p-8 text-center text-ink/60 shadow-sm">
           Setze zuerst in den <strong>Einstellungen</strong> einen Reise-Zeitraum.
         </div>
+      </div>
+    );
+  }
+
+  // #78: Transit-Tag → Tagesprogramm wird durch eine Transit-Karte
+  // ersetzt; Tab-Navigation zwischen Tagen bleibt funktional.
+  if (transitDay) {
+    return (
+      <div className="mx-auto max-w-2xl space-y-4 px-4 py-4">
+        <DayTabs
+          days={days}
+          activeDay={activeDay}
+          onChange={onDayChange}
+          counts={dayCounts}
+          weather={weather}
+        />
+        <TransitDayCard transitDay={transitDay} />
       </div>
     );
   }

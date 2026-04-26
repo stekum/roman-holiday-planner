@@ -22,6 +22,7 @@ import {
   wasDefaultBootstrapped,
 } from './firebase/defaultWorkspace';
 import { getCurrentHomebase, getHomebaseForDay, getHomebases } from './settings/homebases';
+import { isTransitDay } from './settings/transitDays';
 import { useWeather } from './hooks/useWeather';
 import { useMyFamily } from './hooks/useMyFamily';
 import { useMyLocation } from './hooks/useMyLocation';
@@ -126,6 +127,7 @@ function AppInner({ user, profile }: AppInnerProps) {
     removeFamily,
     getFamily,
     setHomebases,
+    setTransitDays,
     setTripConfig,
     plan,
     getDay,
@@ -390,7 +392,7 @@ function AppInner({ user, profile }: AppInnerProps) {
       <Header tab={tab} onTabChange={setTab} user={user} cityName={cityName} />
       {connectionBanner}
       <main className="flex flex-1 flex-col overflow-hidden">
-        {tab !== 'settings' && (
+        {tab !== 'settings' && !(tab === 'trip' && isTransitDay(settings, activeDay)) && (
           <div className={`relative w-full flex-shrink-0 bg-cream-dark ${viewMode === 'compact' ? 'h-[60vh]' : 'h-[45vh]'}`}>
             {hasKey ? (
               <RomeMap
@@ -529,6 +531,7 @@ function AppInner({ user, profile }: AppInnerProps) {
               onUpdateFamily={updateFamily}
               onRemoveFamily={removeFamily}
               onSetHomebases={(list) => void setHomebases(list)}
+              onSetTransitDays={(list) => void setTransitDays(list)}
               onSetTripConfig={(cfg) => void setTripConfig(cfg)}
               onMigrateFromLocal={workspace.migrateFromLocal}
               isAdmin={isAdmin}

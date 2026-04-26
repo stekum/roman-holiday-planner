@@ -14,7 +14,7 @@ import { rememberWorkspace } from './knownWorkspaces';
 import { primeEnrichmentCache } from '../lib/placesNewApi';
 import { type POI, SEED_POIS, type Vote, type Comment, type VisitStatus } from '../data/pois';
 import { DEFAULT_SETTINGS } from '../settings/defaults';
-import type { Family, Homebase, Settings, TripConfig } from '../settings/types';
+import type { Family, Homebase, Settings, TransitDay, TripConfig } from '../settings/types';
 import type { TripPlan } from '../hooks/useTripPlan';
 
 export type ConnectionStatus = 'connecting' | 'ready' | 'error';
@@ -64,6 +64,7 @@ export interface WorkspaceAPI {
   getFamily: (id: string) => Family | undefined;
   setHomebase: (hb: Homebase | undefined) => Promise<void>;
   setHomebases: (list: Homebase[]) => Promise<void>;
+  setTransitDays: (list: TransitDay[]) => Promise<void>;
   setTripConfig: (cfg: TripConfig) => Promise<void>;
 
   // Trip plan
@@ -452,6 +453,18 @@ export function useWorkspace(): WorkspaceAPI {
     [doc_.settings, workspaceDocRef],
   );
 
+  const setTransitDays = useCallback(
+    async (list: TransitDay[]) => {
+      const cleaned = list.map((t) =>
+        stripUndefined(t as unknown as Record<string, unknown>),
+      );
+      await updateDoc(workspaceDocRef(), {
+        'settings.transitDays': cleaned,
+      });
+    },
+    [workspaceDocRef],
+  );
+
   const setTripConfig = useCallback(
     async (cfg: TripConfig) => {
       await updateDoc(workspaceDocRef(), {
@@ -632,6 +645,7 @@ export function useWorkspace(): WorkspaceAPI {
     getFamily,
     setHomebase,
     setHomebases,
+    setTransitDays,
     setTripConfig,
     plan: doc_.tripPlan,
     getDay,
