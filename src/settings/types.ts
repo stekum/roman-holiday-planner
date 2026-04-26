@@ -67,6 +67,30 @@ export interface Settings {
    * die für den aktiven Tag passende. Siehe `getHomebaseForDay()`.
    */
   homebases?: Homebase[];
+  /**
+   * Transit-Tage pro Trip (#78). Reisetage zwischen Städten ohne
+   * POI-Programm. Wenn ein TripPlan-Tag in dieser Liste auftaucht,
+   * rendert der DayPlanner statt POI-Routing eine Transit-Card.
+   */
+  transitDays?: TransitDay[];
   /** Wenn nicht gesetzt → DEFAULT_TRIP_CONFIG (Rom/Italien/Deutsch). */
   tripConfig?: TripConfig;
+}
+
+export interface TransitDay {
+  /** ISO YYYY-MM-DD — der Tag der Reise. */
+  date: string;
+  /** Frei-Text Stadt-Namen, oder per Convention die Homebase-Namen
+   *  zur Konsistenz mit homebases[].name. */
+  fromCity: string;
+  toCity: string;
+  /** Verkehrsmittel als freier Text — "Shinkansen", "Flug", "Auto",
+   *  "Bus", "Zug" — keine Enum, weil zu eng. */
+  mode: string;
+  /** Optional: Abfahrt im "HH:MM"-Format. */
+  departure?: string;
+  /** Optional: Ankunft im "HH:MM"-Format. */
+  arrival?: string;
+  /** Optional: Reservation/Sitz/Gleis/Buchungsnr. — frei. */
+  info?: string;
 }

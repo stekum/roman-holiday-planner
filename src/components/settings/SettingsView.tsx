@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AlertTriangle, Upload } from 'lucide-react';
-import type { Family, Homebase, Settings, TripConfig } from '../../settings/types';
+import type { Family, Homebase, Settings, TransitDay, TripConfig } from '../../settings/types';
 import type { POI } from '../../data/pois';
 import type { TripPlan } from '../../hooks/useTripPlan';
 import { DEFAULT_SETTINGS } from '../../settings/defaults';
@@ -8,6 +8,7 @@ import { TripDatesEditor } from './TripDatesEditor';
 import { TripConfigEditor } from './TripConfigEditor';
 import { FamilyEditor } from './FamilyEditor';
 import { HomebasesEditor } from './HomebasesEditor';
+import { TransitDaysEditor } from './TransitDaysEditor';
 import { getPlacesBias } from '../../lib/placesBias';
 import { getTripConfig } from '../../settings/tripConfig';
 import { getHomebases } from '../../settings/homebases';
@@ -22,6 +23,7 @@ interface Props {
   onUpdateFamily: (id: string, patch: Partial<Omit<Family, 'id'>>) => void;
   onRemoveFamily: (id: string) => void;
   onSetHomebases: (list: Homebase[]) => void;
+  onSetTransitDays: (list: TransitDay[]) => void;
   onSetTripConfig: (cfg: TripConfig) => void;
   /** Optional — if present, shows a „Lokale Daten hochladen"-Button. */
   onMigrateFromLocal?: (data: {
@@ -87,6 +89,7 @@ export function SettingsView({
   onUpdateFamily,
   onRemoveFamily,
   onSetHomebases,
+  onSetTransitDays,
   onSetTripConfig,
   onMigrateFromLocal,
   isAdmin,
@@ -139,6 +142,13 @@ export function SettingsView({
         tripEnd={settings.tripEnd}
         bias={getPlacesBias(getTripConfig(settings), getHomebases(settings)[0])}
         onChange={onSetHomebases}
+      />
+      <TransitDaysEditor
+        transitDays={settings.transitDays ?? []}
+        homebases={getHomebases(settings)}
+        tripStart={settings.tripStart}
+        tripEnd={settings.tripEnd}
+        onChange={onSetTransitDays}
       />
       <FamilyEditor
         families={settings.families}
