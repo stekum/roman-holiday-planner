@@ -234,7 +234,6 @@ export function WorkspaceMembersSection() {
               className="group flex items-center gap-2 rounded-xl px-2 py-1.5 hover:bg-cream/60"
             >
               {p?.photoURL ? (
-                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={p.photoURL}
                   alt=""
