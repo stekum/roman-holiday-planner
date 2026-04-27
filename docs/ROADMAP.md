@@ -126,7 +126,7 @@
 
 ---
 
-## v3.0 — Japan-Ready (Ziel: 24. Mai 2026)
+## v3.0 — Japan-Ready ✅ Released 2026-04-27
 
 **Zweck:** Features die Japan-Trip (25.-31. Mai) technisch ermöglichen.
 
@@ -154,7 +154,7 @@
 
 **Scope-Lock:** #79 Archivierung verschoben zu v3.2 (nicht Japan-kritisch bei nur 2 Trips).
 
-**Release:** `v3.0.0` — 24. Mai 2026. **Production-Deploy, 1 Tag vor Japan-Abreise.**
+**Release:** [`v3.0.0`](https://github.com/stekum/roman-holiday-planner/releases/tag/v3.0.0) — 2026-04-27 (28 Tage vor Japan-Abreise gecut, lange Burn-In-Phase).
 
 ---
 
