@@ -1,0 +1,6 @@
+# Codex defaults for Roman Holiday Planner
+# Override per call via --model / --effort flags.
+# Loaded only when project is trusted (siehe ~/.codex/config.toml projects-Eintrag).
+
+model = "gpt-5.5"
+model_reasoning_effort = "medium"

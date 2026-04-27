@@ -347,6 +347,54 @@ Beide Agents arbeiten am selben Repo. Damit das nicht chaotisch wird:
 
 Wenn Dev-Workflow-Regeln geändert werden: **immer in AGENTS.md**, nicht in CLAUDE.md. Sonst driften die Agents auseinander.
 
+### Codex via Claude Code aufrufen (Second-Opinion-Workflow)
+
+Claude Code kann Codex direkt aus der Session heraus delegieren — z.B. für Architektur-Second-Opinion, Aufwandsschätzung, PR-Review. **Nicht den Slash-Command `/codex:rescue` nutzen** (Subagent-Wrapper hängt regelmäßig). Stattdessen den Companion-Script direkt:
+
+```bash
+node ~/.claude/plugins/cache/openai-codex/codex/1.0.1/scripts/codex-companion.mjs task --background "<prompt>"
+```
+
+Project-Default ist über `.codex/config.toml` (committed) auf `gpt-5.5` + `medium` gesetzt — gleiche Datei wirkt auch wenn Codex direkt im Repo läuft.
+
+**Override pro Aufruf via Flags:**
+
+| Flag | Werte |
+|---|---|
+| `--model` | `gpt-5.5` (Default), `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.3-codex` |
+| `--effort` | `low`, `medium` (Default), `high`, `xhigh` |
+
+**Wann welcher Aufruf:**
+
+| Aufgabe | Override | Erwartete Dauer |
+|---|---|---|
+| Quick-Check, Yes/No-Frage | `--model gpt-5.4-mini --effort low` | <30s |
+| Issue-Triage, Aufwandsschätzung | (Default `gpt-5.5` + `medium`) | 30-90s |
+| Architektur-Analyse, Trade-offs | `--effort high` | 1-3min |
+| Critical Refactor / großes Design | `--effort xhigh` | 3-10min |
+
+**Workflow:**
+
+```bash
+# 1. Job starten (gibt Job-ID zurück)
+node ~/.claude/plugins/cache/openai-codex/codex/1.0.1/scripts/codex-companion.mjs task --background "<prompt>"
+
+# 2. Status prüfen (wenn ungewiss ob's läuft)
+node ~/.claude/plugins/cache/openai-codex/codex/1.0.1/scripts/codex-companion.mjs status <job-id> --json
+
+# 3. Ergebnis abholen wenn fertig
+node ~/.claude/plugins/cache/openai-codex/codex/1.0.1/scripts/codex-companion.mjs result <job-id>
+
+# Notfall: Job abbrechen
+node ~/.claude/plugins/cache/openai-codex/codex/1.0.1/scripts/codex-companion.mjs cancel <job-id>
+```
+
+**Troubleshooting:**
+
+- "gpt-5.5 requires newer Codex version" → Codex CLI ist alt ODER Plugin-Broker hält ein altes Binary fest. Lösung: `npm install -g @openai/codex@latest`, dann Broker killen (`pgrep -f "codex app-server" | xargs kill`), nächster Aufruf startet neuen Broker.
+- Job hängt in `phase=starting` >2min → mit `cancel` abbrechen, log unter `~/.claude/plugins/data/codex-openai-codex/state/.../jobs/<job-id>.log` prüfen.
+- Slash-Command `/codex:rescue` hängt ohne Output → bekanntes Problem, nicht nutzen, direkten Bash-Call verwenden.
+
 ---
 
 ## Agentisches Testing — Chrome DevTools MCP (#190)
