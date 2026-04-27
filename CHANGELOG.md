@@ -1,5 +1,56 @@
 # Changelog
 
+## [3.0.0](https://github.com/stekum/roman-holiday-planner/compare/v2.2.0...v3.0.0) (2026-04-27)
+
+
+### ✨ Features
+
+* **#113:** Phase 1 — Cross-Device Workspace-Sync ([#229](https://github.com/stekum/roman-holiday-planner/issues/229)) ([710b31c](https://github.com/stekum/roman-holiday-planner/commit/710b31ca71151657ce4feb6ed0983f18a8548485))
+* **#209:** dynamic app title from TripConfig.city ([#247](https://github.com/stekum/roman-holiday-planner/issues/247)) ([f444dc3](https://github.com/stekum/roman-holiday-planner/commit/f444dc35a0b830a2c5fecf089f9a45858ca80cbd))
+* **#227:** default-trip-pin (cross-device via users.defaultWorkspaceId) ([#246](https://github.com/stekum/roman-holiday-planner/issues/246)) ([8506eeb](https://github.com/stekum/roman-holiday-planner/commit/8506eebe290b6c09385f76b47e6ba250d51ad13c))
+* **#228:** Workspace Access Control + Einladungs-Flow ([#245](https://github.com/stekum/roman-holiday-planner/issues/245)) ([cbc091f](https://github.com/stekum/roman-holiday-planner/commit/cbc091f655ad80580b08040bd647df75221ff446))
+* **#74:** alle Homebases als Map-Marker, aktive hervorgehoben ([#234](https://github.com/stekum/roman-holiday-planner/issues/234)) ([e2edc85](https://github.com/stekum/roman-holiday-planner/commit/e2edc85275ad6cb21c4edaef654e3783dc651974))
+* **#74:** Multi-Homebase pro Trip (datumsbasiert) ([#232](https://github.com/stekum/roman-holiday-planner/issues/232)) ([12df264](https://github.com/stekum/roman-holiday-planner/commit/12df264172f937164cc6afd723a90081d592595c)), closes [#74](https://github.com/stekum/roman-holiday-planner/issues/74)
+* **#78:** transit days (Reisetage zwischen Städten) ([#251](https://github.com/stekum/roman-holiday-planner/issues/251)) ([2a1e874](https://github.com/stekum/roman-holiday-planner/commit/2a1e874e8dda10f459a1c01b6153996fbd03966a))
+
+
+### 🐛 Bug Fixes
+
+* **#227:** bootstrap-effect must wait for profile hydration ([7985999](https://github.com/stekum/roman-holiday-planner/commit/7985999176cd2a215c76ba432d4e907277ed8d3a))
+* **#228:** allow read on non-existent workspace doc + add e2e smokes ([7796bf1](https://github.com/stekum/roman-holiday-planner/commit/7796bf156322afcfff14e596a63b22e88052f3ab))
+* **#239:** AI-Tagesplan Quick-Tags aus tripConfig.categories statt hardcoded ([#242](https://github.com/stekum/roman-holiday-planner/issues/242)) ([ff86418](https://github.com/stekum/roman-holiday-planner/commit/ff86418880aa9cbef69f234c1e2d8479d34ed870)), closes [#239](https://github.com/stekum/roman-holiday-planner/issues/239)
+* **#240:** AI-Prompts nutzen Tages-Homebase-Stadt statt Trip-City ([#243](https://github.com/stekum/roman-holiday-planner/issues/243)) ([4186c86](https://github.com/stekum/roman-holiday-planner/commit/4186c86ef30afd769a94bf473e807aec405919cd))
+* **#74:** Map folgt activeDay im Trip-Tab (dayHomebase statt activeHomebase) ([#233](https://github.com/stekum/roman-holiday-planner/issues/233)) ([d9be0cd](https://github.com/stekum/roman-holiday-planner/commit/d9be0cdd8ae23df3c4e6b5d921d7a6ea270c4412))
+* generische UX-Texte in TripConfigEditor + AddFromAiSearch ([#225](https://github.com/stekum/roman-holiday-planner/issues/225)) ([1974bf0](https://github.com/stekum/roman-holiday-planner/commit/1974bf01afb099a24e1d63460615a2254d2e4d24))
+* Map pan auf Center-Change innerhalb desselben Workspace ([#231](https://github.com/stekum/roman-holiday-planner/issues/231)) ([50141c9](https://github.com/stekum/roman-holiday-planner/commit/50141c91556f12a67a7df2718f2c145bd4d5c5c3))
+* Map-Remount bei Trip-Switch + Places-Results inline-scrolbar ([#226](https://github.com/stekum/roman-holiday-planner/issues/226)) ([042436d](https://github.com/stekum/roman-holiday-planner/commit/042436d5411f915ed96c04e68ea00de74985d41c))
+* multi-trip Rom-Leaks — Places-Bias, Weather-Timezone, UX-Texte ([#223](https://github.com/stekum/roman-holiday-planner/issues/223)) ([2b1f196](https://github.com/stekum/roman-holiday-planner/commit/2b1f19607d3cb2d3ecb1caf9476d6de791966d49))
+* PWA-Cache-Hölle auf Beta abschalten — selfDestroying Service Worker ([#236](https://github.com/stekum/roman-holiday-planner/issues/236)) ([725a1a6](https://github.com/stekum/roman-holiday-planner/commit/725a1a67007e130ca02b42947e55320df2ee250b))
+* remove stray Next.js eslint-disable comment from WorkspaceMembersSection ([3d2efe1](https://github.com/stekum/roman-holiday-planner/commit/3d2efe185fc802ee724de53e997161744dcafcf2))
+
+
+### 📝 Documentation
+
+* [#244](https://github.com/stekum/roman-holiday-planner/issues/244) Map-Controls + Multi-Homebase-Trip-Übersicht in Deferred-Backlog ([ea90dee](https://github.com/stekum/roman-holiday-planner/commit/ea90deec4bcbe1fa819566740bc74e4ba5125018))
+* **#209:** ROADMAP done (11/15 v3.0 erledigt, 4 offen) ([411dfc2](https://github.com/stekum/roman-holiday-planner/commit/411dfc20f9fa4e9adcf6b53b02a6e15d4bd3df0c))
+* **#215:** ROADMAP done (14/15 v3.0 erledigt — nur noch [#78](https://github.com/stekum/roman-holiday-planner/issues/78) Transit-Tage offen) ([45a6835](https://github.com/stekum/roman-holiday-planner/commit/45a6835b0cd8d1132974b1787a34c54df1ad893c))
+* **#216, #217:** ROADMAP done (13/15 v3.0 erledigt, 2 offen — [#78](https://github.com/stekum/roman-holiday-planner/issues/78) + [#215](https://github.com/stekum/roman-holiday-planner/issues/215)) ([7387390](https://github.com/stekum/roman-holiday-planner/commit/7387390c21ed65d4c4ce53a15428cd006b78c62c))
+* **#216:** Firebase Hosting Rollback-Playbook + helper script ([#248](https://github.com/stekum/roman-holiday-planner/issues/248)) ([aa905a2](https://github.com/stekum/roman-holiday-planner/commit/aa905a2dcfa76c3eaf700dad35db50daf4ed93a4))
+* **#227:** USER-GUIDE Default-Trip-Pin Sektion + ROADMAP done ([c32e71c](https://github.com/stekum/roman-holiday-planner/commit/c32e71c7824f1ad87fd0306688fae4deaebf22ec))
+* **#228:** manual test plan + USER-GUIDE Mitglieder-Sektion + ROADMAP done ([031877b](https://github.com/stekum/roman-holiday-planner/commit/031877b5e6a782dfa965e0b3af403cba25b2913c))
+* **#238:** Multi-Trip Validation Test-Plan + Setup/Smoke-Skripte ([99baa14](https://github.com/stekum/roman-holiday-planner/commit/99baa1402504401629299407d08e2df29c95b60b))
+* **#78:** ROADMAP v3.0 komplett — 15/15 Items done ([f365f97](https://github.com/stekum/roman-holiday-planner/commit/f365f970029f004bae7c63e40c266363ca3a3e2b))
+* add [#227](https://github.com/stekum/roman-holiday-planner/issues/227) (Default-Trip-Pin, Deferred) + [#228](https://github.com/stekum/roman-holiday-planner/issues/228) (Workspace Access Control Phase 2 von [#113](https://github.com/stekum/roman-holiday-planner/issues/113), v3.0) to roadmap ([b22dc6e](https://github.com/stekum/roman-holiday-planner/commit/b22dc6e87aaba0d9ec572e31d730a517ba2526cf))
+* Cleanup nach Multi-Trip Sweep — ROADMAP + USER-GUIDE + tester-Subagent ([3cba59c](https://github.com/stekum/roman-holiday-planner/commit/3cba59cd54798c48bb68a3b9310750970fa80d9f))
+* Multi-Trip Validation Sweep abgeschlossen — [#238](https://github.com/stekum/roman-holiday-planner/issues/238)/[#239](https://github.com/stekum/roman-holiday-planner/issues/239)/[#240](https://github.com/stekum/roman-holiday-planner/issues/240)/[#241](https://github.com/stekum/roman-holiday-planner/issues/241) closed ([3cdf1fc](https://github.com/stekum/roman-holiday-planner/commit/3cdf1fc064c719ed60c34e2c28f08a0e6339be66))
+* ROADMAP v3.0-Count auf 14/9 korrigiert ([#77](https://github.com/stekum/roman-holiday-planner/issues/77), [#238](https://github.com/stekum/roman-holiday-planner/issues/238) waren nicht gezählt) ([b8cd51b](https://github.com/stekum/roman-holiday-planner/commit/b8cd51b3367091ba95a7fbc2b37aa386f49f4342))
+* v3.0-beta released — Multi-Trip Architektur ([#70](https://github.com/stekum/roman-holiday-planner/issues/70) + [#71](https://github.com/stekum/roman-holiday-planner/issues/71)), 17 Tage vor Plan ([976d205](https://github.com/stekum/roman-holiday-planner/commit/976d2054a764761f8967bb1082b90a506c295f34))
+
+
+### 🧹 Chores
+
+* bump release to 3.0.0 (v3.0 Japan-Ready milestone complete) ([a74ec3f](https://github.com/stekum/roman-holiday-planner/commit/a74ec3f3aa12c9de0b033f35e91beac1c307c381))
+
 ## [2.2.0](https://github.com/stekum/roman-holiday-planner/compare/v2.1.0...v2.2.0) (2026-04-23)
 
 
