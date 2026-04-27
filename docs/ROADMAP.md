@@ -138,7 +138,7 @@
 | ✅ #239 | Bug: AI-Tagesplan Quick-Tags hardcoded (#74-Follow-up) | S | 1 |
 | ✅ #240 | Bug: AI-Plan generiert Tokyo-POIs für Osaka-Tag (#74-Follow-up) | M | 2 |
 | ✅ #241 | Bug: Map-Anzeige (Folgebug aus #240) | S | 0 |
-| #78 | Transit-Tage (Reisetage zwischen Städten) | M | 6 |
+| ✅ #78 | Transit-Tage (Reisetage zwischen Städten) | M | 6 |
 | ✅ #228 | Workspace Access Control + Einladungs-Flow (Phase 2 von #113) | L | 6 |
 | ✅ #227 | Trip-Switcher: Default-Trip-Pin (cross-device) | S | 1 |
 | ✅ #209 | Feature: dynamischer App-Titel aus TripConfig | S | 1 |
@@ -146,7 +146,7 @@
 | ✅ #216 | docs: Firebase Hosting Rollback-Playbook | S | 1 |
 | ✅ #217 | devops: Chrome-DevTools MCP Server lokal in Claude Code registrieren | S | 1 |
 
-**15 Items in v3.0, 14 erledigt 2026-04-23/26 (Multi-Trip-Foundation + Validation-Sweep + Workspace Access Control + Default-Trip-Pin + dynamischer App-Titel + Rollback-Playbook + Chrome-DevTools-MCP + Uptime-Monitoring). 1 Item / ~6h offen — knapp 4 Wochen Puffer bis Japan-Abreise.**
+**15 Items in v3.0, 15 erledigt 2026-04-23/26 — komplett. Knapp 4 Wochen Puffer bis Japan-Abreise.** 🎉
 
 > ⚠ Scope-Warnung: >5 Items. Stefan bestätigt bewusst — #215/#216/#217 sind ops-hygiene/tooling (klein, parallel zu Features machbar), #209 ist trivialer Japan-UX-Touch.
 
