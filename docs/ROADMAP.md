@@ -194,8 +194,9 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 | #72 | Trip-Erstellungs-Wizard | M | aus v3.0-beta |
 | #122 | Multi-Language Support (DE + EN + evtl. JP) | L | aus v2.0 |
 | #235 | Onboarding: Interactive Quickstart-Wizard + kontextuelle Hints | L | neu 2026-04-25 — ggf. #72 absorbieren |
+| #254 | fix: Erstanmelder-Banner "Firebase-Verbindung fehlgeschlagen" entschärfen | S | User-Report 2026-04-28 |
 
-**4 Items, bis ~37h.** Klären: #72 als eigenständig oder Teilkomponente von #235.
+**5 Items, bis ~38h.** Klären: #72 als eigenständig oder Teilkomponente von #235. #254 könnte mit #235 zusammen umgesetzt werden (Onboarding-Pfad).
 
 **Release:** `v3.2.0` — 30. Sep 2026.
 
