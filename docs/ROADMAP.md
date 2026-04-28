@@ -175,13 +175,15 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 | #255 | Fremdwährungs-Umrechnung (Tagesbudget + Preise in EUR) | S | neu 2026-04-28 — wertvoll für Japan-Trip (JPY) |
 | #256 | POI-Card-Beschreibung "Mehr lesen" / Expand | S | neu 2026-04-28 — Stefan-Report aus Realtest |
 | #257 | POI-Card Tag-Badge klickbar → Sprung zum Tagesplan | S | neu 2026-04-28 — Stefan-Report aus Realtest |
+| #258 | Tagesplan-POI klickbar → Map-Highlight | S | neu 2026-04-28 — Stefan-Report aus Realtest |
+| #259 | Map-InfoWindow konsistent mit POI-Card (aiSummary sichtbar) | S | neu 2026-04-28 — Stefan-Report aus Realtest |
 | #33 | Zeitzonen-Awareness (lokale + Heimatzeit) | M | aus v2.0, WIP-Stash vorhanden |
 | #46 | Packing List (kategorisiert, pro Person) | M | verschoben aus v2.0 |
 | #44 | Notfall-Dashboard | M | aus Deferred |
 | #45 | Dokumente-Tresor (Reisepass, Buchungen) | M | aus Buffer |
 | #50 | Aktivitäts-Feed (wer hat was geändert) | M | aus Buffer |
 
-**10 Items** (1 done, 9 open). Scope deutlich über Soft-Limit (5) — bewusst akzeptiert wegen Japan-Trip-Pre-Polish (Pfingsten 2026): mehrere size:S-Bugs/UX-Verbesserungen aus realen User-Tests. Vor Phase-Start mit Japan-Learnings möglicherweise neu priorisieren — manche S-Items können post-Japan rutschen wenn Zeit knapp wird.
+**12 Items** (1 done, 11 open). Scope deutlich über Soft-Limit (5) — bewusst akzeptiert wegen Japan-Trip-Pre-Polish (Pfingsten 2026): 7× size:S Bugs/UX-Verbesserungen aus realen User-Tests + 5× M Features. Re-Priorisierung Anfang Mai: einzelne S-Items können post-Japan rutschen wenn Zeit knapp wird, M-Features behalten Vorrang.
 
 **Release:** `v3.1.0` — 1. Aug 2026.
 
