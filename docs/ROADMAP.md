@@ -200,8 +200,9 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 | #122 | Multi-Language Support (DE + EN + evtl. JP) | L | aus v2.0 |
 | #235 | Onboarding: Interactive Quickstart-Wizard + kontextuelle Hints | L | neu 2026-04-25 — ggf. #72 absorbieren |
 | #254 | fix: Erstanmelder-Banner "Firebase-Verbindung fehlgeschlagen" entschärfen | S | User-Report 2026-04-28 |
+| #260 | spike: AI-Infografik-Generator (Tagesplan/Trip als Karte, Gemini Image) | M | Premium-Feature-Spike, vorbereitet Production-Issue v4.5 |
 
-**5 Items, bis ~38h.** Klären: #72 als eigenständig oder Teilkomponente von #235. #254 könnte mit #235 zusammen umgesetzt werden (Onboarding-Pfad).
+**6 Items, bis ~44h.** Klären: #72 als eigenständig oder Teilkomponente von #235. #254 könnte mit #235 zusammen umgesetzt werden (Onboarding-Pfad). #260 ist ein experimenteller Spike — Stop-Criterion 3h, sonst Vendor-Wechsel auf GPT-Image-2 in v4.5 erwägen.
 
 **Release:** `v3.2.0` — 30. Sep 2026.
 
