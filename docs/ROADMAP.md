@@ -172,13 +172,14 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 |---|---|---|---|
 | #237 | Update-Banner für Production-PWA ✅ | S | merged 2026-04-28 (PR #253, Codex-Implementierung) |
 | #213 | Sunset GH-Pages + alten Maps-API-Key löschen (post-#117) | S | Cleanup nach Hosting-Transition |
+| #255 | Fremdwährungs-Umrechnung (Tagesbudget + Preise in EUR) | S | neu 2026-04-28 — wertvoll für Japan-Trip (JPY) |
 | #33 | Zeitzonen-Awareness (lokale + Heimatzeit) | M | aus v2.0, WIP-Stash vorhanden |
 | #46 | Packing List (kategorisiert, pro Person) | M | verschoben aus v2.0 |
 | #44 | Notfall-Dashboard | M | aus Deferred |
 | #45 | Dokumente-Tresor (Reisepass, Buchungen) | M | aus Buffer |
 | #50 | Aktivitäts-Feed (wer hat was geändert) | M | aus Buffer |
 
-**7 Items** (1 done, 6 open). Scope vor Phase-Start ggf. nochmal mit Japan-Learnings angepasst.
+**8 Items** (1 done, 7 open). Scope über Soft-Limit (5) — bewusst akzeptiert: #237 retrospektiv, #213 Cleanup-S, #255 time-sensitive für Japan-Trip Pfingsten 2026. Vor Phase-Start ggf. nochmal mit Japan-Learnings angepasst.
 
 **Release:** `v3.1.0` — 1. Aug 2026.
 
