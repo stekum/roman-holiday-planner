@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import { Header, type Tab } from './components/Header';
+import { PwaUpdateBanner } from './components/PwaUpdateBanner';
 import { AuthGate } from './components/auth/AuthGate';
 import { InviteAcceptModal } from './components/auth/InviteAcceptModal';
 import { MissingKeyNotice } from './components/MissingKeyNotice';
@@ -390,6 +391,7 @@ function AppInner({ user, profile }: AppInnerProps) {
   const content = (
     <div className="flex h-full flex-col">
       <Header tab={tab} onTabChange={setTab} user={user} cityName={cityName} />
+      <PwaUpdateBanner />
       {connectionBanner}
       <main className="flex flex-1 flex-col overflow-hidden">
         {tab !== 'settings' && !(tab === 'trip' && isTransitDay(settings, activeDay)) && (

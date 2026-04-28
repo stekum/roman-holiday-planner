@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       // Beta-Builds setzen VITE_DISABLE_PWA=1 — der erzeugte Service Worker
       // ist dann ein "Selbstmord-SW" der sich beim ersten Visit unregistert
       // und alle Caches leert. Damit ist die Beta für immer cache-frei und
@@ -48,10 +48,9 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Take over pages as soon as the new SW is installed — no waiting
-        // for all tabs to close. Combined with registerType 'autoUpdate'
-        // this ensures updates propagate within one reload cycle.
-        skipWaiting: true,
+        // In prompt mode the waiting worker is only activated after the
+        // user taps the in-app update banner.
+        skipWaiting: false,
         clientsClaim: true,
         // Cleanup outdated caches from older SW versions
         cleanupOutdatedCaches: true,
