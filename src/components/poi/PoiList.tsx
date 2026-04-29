@@ -33,6 +33,7 @@ interface Props {
   homebase?: Homebase;
   onLocate: (id: string) => void;
   onStreetView?: (id: string) => void;
+  onJumpToDay?: (dayIso: string) => void;
   viewMode: ViewMode;
   onViewModeChange: (m: ViewMode) => void;
   // Filter state — controlled by parent so the map stays in sync
@@ -77,6 +78,7 @@ export function PoiList({
   homebase,
   onLocate,
   onStreetView,
+  onJumpToDay,
   viewMode,
   onViewModeChange,
   filterCategory,
@@ -160,6 +162,7 @@ export function PoiList({
     homebase,
     onLocate,
     onStreetView,
+    onJumpToDay,
     currencySymbol,
   });
 

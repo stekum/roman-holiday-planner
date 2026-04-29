@@ -50,6 +50,7 @@ export interface PoiCardProps {
   onLocate?: (id: string) => void;
   /** Opens Street View panorama in the shared map container for this POI. */
   onStreetView?: (id: string) => void;
+  onJumpToDay?: (dayIso: string) => void;
   /** Cycles visitStatus: undefined → visited → skipped → null (unset). */
   onSetVisitStatus: (id: string, status: VisitStatus | null) => void;
   /** Waehrungssymbol fuer price-level-Badge. Default: €. */
@@ -357,6 +358,7 @@ function FullCard({
   homebase,
   onLocate,
   onStreetView,
+  onJumpToDay,
   currencySymbol = '€',
 }: PoiCardProps) {
   const [imgFailed, setImgFailed] = useState(false);
@@ -467,12 +469,16 @@ function FullCard({
               const label =
                 idx >= 0 ? `Tag ${idx + 1} · ${formatDayLabel(day)}` : formatDayLabel(day);
               return (
-                <span
+                <button
                   key={day}
-                  className="rounded-full bg-olive/15 px-2 py-0.5 text-[10px] font-semibold text-olive-dark"
+                  type="button"
+                  onClick={() => onJumpToDay?.(day)}
+                  className="cursor-pointer rounded-full bg-olive/15 px-2 py-0.5 text-[10px] font-semibold text-olive-dark transition hover:bg-olive/25 hover:text-olive-dark focus:outline-none focus:ring-2 focus:ring-olive/40"
+                  aria-label={`${label} in der Tagesplanung öffnen`}
+                  title="In der Tagesplanung öffnen"
                 >
                   {label}
-                </span>
+                </button>
               );
             })}
           </div>
