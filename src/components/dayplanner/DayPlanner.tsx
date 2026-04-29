@@ -60,6 +60,12 @@ interface Props {
   /** Post-Trip-Analyse (#43) — trip-weit, nicht pro Tag. */
   postTripAnalysis: string;
   onSavePostTripAnalysis: (analysis: string) => void | Promise<void>;
+  /**
+   * #258: Click-to-highlight im Tagesplan. Setzt highlightedPoiId in App,
+   * Map zentriert + InfoWindow geht auf. Same Handler wie PoiList.onHighlight.
+   */
+  onHighlight?: (id: string) => void;
+  highlightedPoiId?: string | null;
 }
 
 export function DayPlanner({
@@ -89,6 +95,8 @@ export function DayPlanner({
   onSetDayBudget,
   postTripAnalysis,
   onSavePostTripAnalysis,
+  onHighlight,
+  highlightedPoiId,
 }: Props) {
   const routesLib = useMapsLibrary('routes');
   const [optimizing, setOptimizing] = useState(false);
@@ -386,64 +394,78 @@ export function DayPlanner({
                     </span>
                   </div>
                 )}
-                <div className="flex items-center gap-3 rounded-3xl bg-white p-3 shadow-sm shadow-ink/5">
                 <div
-                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-lg font-bold text-white"
-                  style={{ backgroundColor: family?.color ?? '#C96F4A' }}
+                  className={`flex items-center gap-3 rounded-3xl bg-white p-3 shadow-sm shadow-ink/5 ${
+                    highlightedPoiId === poi.id
+                      ? 'ring-2 ring-terracotta/60 ring-offset-2 ring-offset-cream'
+                      : ''
+                  }`}
                 >
-                  {idx + 1}
-                </div>
-                {poi.image?.trim() ? (
-                  <img
-                    src={poi.image}
-                    alt=""
-                    className="h-14 w-14 flex-shrink-0 rounded-2xl object-cover bg-cream"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden'); }}
-                  />
-                ) : null}
-                <div className={`flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-cream text-2xl ${poi.image?.trim() ? 'hidden' : ''}`}>
-                  {CATEGORY_EMOJI[poi.category]}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p
-                    className="truncate text-lg text-ink"
-                    style={{ fontFamily: 'var(--font-display)' }}
-                  >
-                    {poi.title}
-                  </p>
-                  <p className="text-xs text-ink/50">
-                    {poi.category}
-                    {family ? ` · ${family.name}` : ''}
-                  </p>
-                </div>
-                <div className="flex flex-col gap-1">
                   <button
                     type="button"
-                    disabled={idx === 0}
-                    onClick={() => onMove(poi.id, 'up')}
-                    className="rounded-full p-1 text-ink/60 hover:bg-cream disabled:opacity-30"
-                    aria-label="Nach oben"
+                    onClick={() => onHighlight?.(poi.id)}
+                    disabled={!onHighlight}
+                    aria-label={`${poi.title} auf Karte zeigen`}
+                    className="flex min-w-0 flex-1 items-center gap-3 rounded-2xl text-left transition enabled:hover:bg-cream/40 focus:outline-none enabled:focus:ring-2 enabled:focus:ring-terracotta/40 disabled:cursor-default"
                   >
-                    <ArrowUp className="h-4 w-4" />
+                    <div
+                      className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-lg font-bold text-white"
+                      style={{ backgroundColor: family?.color ?? '#C96F4A' }}
+                    >
+                      {idx + 1}
+                    </div>
+                    {poi.image?.trim() ? (
+                      <img
+                        src={poi.image}
+                        alt=""
+                        className="h-14 w-14 flex-shrink-0 rounded-2xl object-cover bg-cream"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden'); }}
+                      />
+                    ) : null}
+                    <div className={`flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-cream text-2xl ${poi.image?.trim() ? 'hidden' : ''}`}>
+                      {CATEGORY_EMOJI[poi.category]}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className="truncate text-lg text-ink"
+                        style={{ fontFamily: 'var(--font-display)' }}
+                      >
+                        {poi.title}
+                      </p>
+                      <p className="text-xs text-ink/50">
+                        {poi.category}
+                        {family ? ` · ${family.name}` : ''}
+                      </p>
+                    </div>
                   </button>
+                  <div className="flex flex-col gap-1">
+                    <button
+                      type="button"
+                      disabled={idx === 0}
+                      onClick={() => onMove(poi.id, 'up')}
+                      className="rounded-full p-1 text-ink/60 hover:bg-cream disabled:opacity-30"
+                      aria-label="Nach oben"
+                    >
+                      <ArrowUp className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={idx === selected.length - 1}
+                      onClick={() => onMove(poi.id, 'down')}
+                      className="rounded-full p-1 text-ink/60 hover:bg-cream disabled:opacity-30"
+                      aria-label="Nach unten"
+                    >
+                      <ArrowDown className="h-4 w-4" />
+                    </button>
+                  </div>
                   <button
                     type="button"
-                    disabled={idx === selected.length - 1}
-                    onClick={() => onMove(poi.id, 'down')}
-                    className="rounded-full p-1 text-ink/60 hover:bg-cream disabled:opacity-30"
-                    aria-label="Nach unten"
+                    onClick={() => onRemove(poi.id)}
+                    className="rounded-full p-1.5 text-ink/40 hover:bg-terracotta/10 hover:text-terracotta"
+                    aria-label="Aus Tag entfernen"
                   >
-                    <ArrowDown className="h-4 w-4" />
+                    <X className="h-4 w-4" />
                   </button>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onRemove(poi.id)}
-                  className="rounded-full p-1.5 text-ink/40 hover:bg-terracotta/10 hover:text-terracotta"
-                  aria-label="Aus Tag entfernen"
-                >
-                  <X className="h-4 w-4" />
-                </button>
                 </div>
               </li>
             );
