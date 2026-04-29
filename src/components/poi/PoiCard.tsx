@@ -362,6 +362,9 @@ function FullCard({
   currencySymbol = '€',
 }: PoiCardProps) {
   const [imgFailed, setImgFailed] = useState(false);
+  // #256: Mehr-lesen-Toggle für description + aiSummary
+  const [descExpanded, setDescExpanded] = useState(false);
+  const [aiExpanded, setAiExpanded] = useState(false);
   const priceBadge = formatPriceBadge(poi, currencySymbol);
   const familyName = family?.name ?? 'Unbekannt';
   const familyColor = family?.color ?? '#94999d';
@@ -535,16 +538,47 @@ function FullCard({
           </div>
         )}
 
-        <p className="flex-1 line-clamp-2 text-sm text-ink/60">
-          {poi.description || '\u00A0'}
-        </p>
+        {(() => {
+          const desc = poi.description ?? '';
+          const isLong = desc.length > 120;
+          return (
+            <div className="flex-1">
+              <p className={`text-sm text-ink/60 ${isLong && !descExpanded ? 'line-clamp-2' : ''}`}>
+                {desc || ' '}
+              </p>
+              {isLong && (
+                <button
+                  type="button"
+                  onClick={() => setDescExpanded((v) => !v)}
+                  className="mt-0.5 text-xs font-semibold text-olive-dark hover:text-olive focus:outline-none focus:underline"
+                >
+                  {descExpanded ? 'Weniger anzeigen' : 'Mehr lesen'}
+                </button>
+              )}
+            </div>
+          );
+        })()}
 
-        {poi.aiSummary && (
-          <div className="rounded-xl bg-purple-50 px-3 py-2 text-xs text-ink/70">
-            <span className="mr-1 font-semibold text-purple-600">Was Gäste sagen</span>
-            <span className="line-clamp-3">{poi.aiSummary}</span>
-          </div>
-        )}
+        {poi.aiSummary && (() => {
+          const isLong = (poi.aiSummary?.length ?? 0) > 180;
+          return (
+            <div className="rounded-xl bg-purple-50 px-3 py-2 text-xs text-ink/70">
+              <span className="mr-1 font-semibold text-purple-600">Was Gäste sagen</span>
+              <span className={isLong && !aiExpanded ? 'line-clamp-3' : ''}>
+                {poi.aiSummary}
+              </span>
+              {isLong && (
+                <button
+                  type="button"
+                  onClick={() => setAiExpanded((v) => !v)}
+                  className="mt-0.5 block text-[11px] font-semibold text-purple-600 hover:text-purple-700 focus:outline-none focus:underline"
+                >
+                  {aiExpanded ? 'Weniger anzeigen' : 'Mehr lesen'}
+                </button>
+              )}
+            </div>
+          );
+        })()}
 
         {(poi.instagramUrl || poi.mapsUrl || poi.coords) && (
           <div className="flex flex-wrap gap-2">
