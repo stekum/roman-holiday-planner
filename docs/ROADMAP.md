@@ -175,7 +175,7 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 | #255 | Fremdwährungs-Umrechnung (Tagesbudget + Preise in EUR) | S | neu 2026-04-28 — wertvoll für Japan-Trip (JPY) |
 | #256 | POI-Card-Beschreibung "Mehr lesen" / Expand | S | neu 2026-04-28 — Stefan-Report aus Realtest |
 | #257 | POI-Card Tag-Badge klickbar → Sprung zum Tagesplan ✅ | S | merged 2026-04-29 (PR #261, Codex-Implementierung 2m39s) |
-| #258 | Tagesplan-POI klickbar → Map-Highlight | S | neu 2026-04-28 — Stefan-Report aus Realtest |
+| #258 | Tagesplan-POI klickbar → Map-Highlight ✅ | S | merged 2026-04-29 (PR #262, Claude-Implementierung) |
 | #259 | Map-InfoWindow konsistent mit POI-Card (aiSummary sichtbar) | S | neu 2026-04-28 — Stefan-Report aus Realtest |
 | #33 | Zeitzonen-Awareness (lokale + Heimatzeit) | M | aus v2.0, WIP-Stash vorhanden |
 | #46 | Packing List (kategorisiert, pro Person) | M | verschoben aus v2.0 |
