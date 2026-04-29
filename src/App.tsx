@@ -326,6 +326,12 @@ function AppInner({ user, profile }: AppInnerProps) {
     setStreetViewCoords(poi.coords);
   };
 
+  const handleJumpToDay = useCallback((dayIso: string) => {
+    if (!days.includes(dayIso)) return;
+    if (activeDay !== dayIso) setActiveDay(dayIso);
+    if (tab !== 'trip') setTab('trip');
+  }, [activeDay, days, tab]);
+
   const connectionBanner =
     status === 'connecting' ? (
       <div className="flex items-center gap-2 bg-olive/10 px-4 py-2 text-xs text-olive-dark">
@@ -466,6 +472,7 @@ function AppInner({ user, profile }: AppInnerProps) {
               homebase={activeHomebase}
               onLocate={(id) => setLocatingPoiId(id)}
               onStreetView={handleStreetView}
+              onJumpToDay={handleJumpToDay}
               viewMode={viewMode}
               onViewModeChange={setViewMode}
               filterCategory={filterCategory}
