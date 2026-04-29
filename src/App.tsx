@@ -530,6 +530,10 @@ function AppInner({ user, profile }: AppInnerProps) {
               onSetDayBudget={(dayIso, b) => void setDayBudget(dayIso, b)}
               postTripAnalysis={postTripAnalysis}
               onSavePostTripAnalysis={(text) => void setPostTripAnalysis(text)}
+              onHighlight={(id) =>
+                setHighlightedPoiId((prev) => (prev === id ? null : id))
+              }
+              highlightedPoiId={highlightedPoiId}
             />
           )}
           {tab === 'settings' && (
