@@ -583,9 +583,10 @@ export function RomeMap({
                     </p>
                   )}
                   {selected.aiSummary && (
-                    <p className="line-clamp-2 text-[10px] italic text-purple-600/70">
-                      ✨ {selected.aiSummary}
-                    </p>
+                    <div className="rounded-lg bg-purple-50 px-2 py-1.5 text-[11px] text-ink/70">
+                      <span className="mr-1 font-semibold text-purple-600">Was Gäste sagen</span>
+                      <span className="line-clamp-3">{selected.aiSummary}</span>
+                    </div>
                   )}
                   {(selected.mapsUrl || selected.instagramUrl) && (
                     <div className="flex gap-1 pt-1">
