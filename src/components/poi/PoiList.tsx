@@ -50,6 +50,9 @@ interface Props {
   categories?: string[];
   onSetVisitStatus: (id: string, status: import('../../data/pois').VisitStatus | null) => void;
   currencySymbol?: string;
+  /** #266: Heimat-Waehrung + Wechselkurse fuer POI-Preisrange-Conversion. */
+  homeCurrency?: string;
+  exchangeRates?: import('../../lib/exchangeRates').ExchangeRatesData | null;
 }
 
 const SORT_OPTIONS: { key: SortKey; label: string }[] = [
@@ -93,6 +96,8 @@ export function PoiList({
   categories = CATEGORIES,
   onSetVisitStatus,
   currencySymbol,
+  homeCurrency,
+  exchangeRates,
 }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('date');
 
@@ -164,6 +169,8 @@ export function PoiList({
     onStreetView,
     onJumpToDay,
     currencySymbol,
+    homeCurrency,
+    exchangeRates,
   });
 
   return (

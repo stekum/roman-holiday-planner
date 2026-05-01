@@ -24,6 +24,8 @@ import {
 import type { POI, Vote, VisitStatus } from '../../data/pois';
 import { CATEGORY_EMOJI, countVotes } from '../../data/pois';
 import { formatPriceRange } from '../../lib/placesNewApi';
+import { convertAmount, type ExchangeRatesData } from '../../lib/exchangeRates';
+import { currencySymbolFromCode } from '../../settings/tripConfig';
 import type { Family, Homebase } from '../../settings/types';
 import { formatDayLabel } from '../../lib/dates';
 import { haversineKm, formatDistance } from '../../lib/geo';
@@ -55,6 +57,10 @@ export interface PoiCardProps {
   onSetVisitStatus: (id: string, status: VisitStatus | null) => void;
   /** Waehrungssymbol fuer price-level-Badge. Default: €. */
   currencySymbol?: string;
+  /** #266: ISO-4217 der Heimat-Waehrung fuer Preis-Conversion. */
+  homeCurrency?: string;
+  /** #266: Wechselkurse (lazy geladen in App.tsx). null = noch nicht geladen. */
+  exchangeRates?: ExchangeRatesData | null;
 }
 
 function nextVisitStatus(current: VisitStatus | undefined): VisitStatus | null {
@@ -77,11 +83,57 @@ function priceLevelSymbols(priceLevel: number | undefined, symbol: string): stri
 /**
  * Priorisiert Places-API-(New) priceRange ("€30–€50") ueber price_level-Symbole ("€€€").
  * Fallback-Reihenfolge: priceRange → priceLevel-Symbole → leer.
+ *
+ * #266: Wenn priceRange.currencyCode != homeCurrency und Rates verfuegbar,
+ * wird ein konvertierter Wert "(≈ €12-€30)" angehaengt. Bei priceLevel-
+ * Symbolen ($, $$$) keine Conversion (haben keinen Betrag).
  */
-function formatPriceBadge(poi: POI, currencySymbol: string): string {
+function formatPriceBadge(
+  poi: POI,
+  currencySymbol: string,
+  homeCurrency?: string,
+  rates?: ExchangeRatesData | null,
+): string {
   const range = formatPriceRange(poi.priceRange, currencySymbol);
-  if (range) return range;
+  if (range) {
+    const conv = formatPriceRangeConverted(poi.priceRange, homeCurrency, rates);
+    return conv ? `${range} ${conv}` : range;
+  }
   return priceLevelSymbols(poi.priceLevel, currencySymbol);
+}
+
+/**
+ * #266: Konvertiert eine PriceRange in die Heimat-Waehrung. Liefert
+ * z.B. "(≈ €12-€30)" oder "(≈ €18+)" oder leeren String wenn nicht
+ * moeglich/sinnvoll.
+ */
+function formatPriceRangeConverted(
+  range: POI['priceRange'],
+  homeCurrency: string | undefined,
+  rates: ExchangeRatesData | null | undefined,
+): string {
+  if (!range || !homeCurrency || !rates) return '';
+  const from = range.currencyCode;
+  if (!from || from.toUpperCase() === homeCurrency.toUpperCase()) return '';
+
+  const homeSymbol = currencySymbolFromCode(homeCurrency);
+  const noDecimals = ['JPY', 'KRW', 'HUF'].includes(homeCurrency.toUpperCase());
+  const fmt = (n: number) =>
+    `${homeSymbol}${noDecimals ? Math.round(n) : n.toFixed(0)}`;
+
+  const start =
+    range.startAmount !== undefined
+      ? convertAmount(range.startAmount, from, homeCurrency, rates)
+      : null;
+  const end =
+    range.endAmount !== undefined
+      ? convertAmount(range.endAmount, from, homeCurrency, rates)
+      : null;
+
+  if (start !== null && end !== null) return `(≈ ${fmt(start)}–${fmt(end)})`;
+  if (start !== null) return `(≈ ${fmt(start)}+)`;
+  if (end !== null) return `(≈ ${fmt(end)})`;
+  return '';
 }
 
 function VoteRow({
@@ -200,6 +252,8 @@ function CompactCard({
   onSetVisitStatus,
   homebase,
   currencySymbol = '€',
+  homeCurrency,
+  exchangeRates,
 }: PoiCardProps) {
   const [imgFailed, setImgFailed] = useState(false);
   const familyColor = family?.color ?? '#94999d';
@@ -208,7 +262,7 @@ function CompactCard({
     homebase?.coords && poi.coords
       ? haversineKm(homebase.coords, poi.coords)
       : null;
-  const priceBadge = formatPriceBadge(poi, currencySymbol);
+  const priceBadge = formatPriceBadge(poi, currencySymbol, homeCurrency, exchangeRates);
 
   return (
     <article className="flex items-center gap-3 rounded-2xl bg-white p-2 shadow-sm shadow-ink/5 transition hover:shadow-md">
@@ -360,12 +414,14 @@ function FullCard({
   onStreetView,
   onJumpToDay,
   currencySymbol = '€',
+  homeCurrency,
+  exchangeRates,
 }: PoiCardProps) {
   const [imgFailed, setImgFailed] = useState(false);
   // #256: Mehr-lesen-Toggle für description + aiSummary
   const [descExpanded, setDescExpanded] = useState(false);
   const [aiExpanded, setAiExpanded] = useState(false);
-  const priceBadge = formatPriceBadge(poi, currencySymbol);
+  const priceBadge = formatPriceBadge(poi, currencySymbol, homeCurrency, exchangeRates);
   const familyName = family?.name ?? 'Unbekannt';
   const familyColor = family?.color ?? '#94999d';
   const distFromHome =
