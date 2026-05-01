@@ -1,0 +1,52 @@
+{
+  "startedAt": "2026-05-01T19:57:24.939Z",
+  "model": "gemini-3.1-flash-image-preview",
+  "jobs": [
+    {
+      "name": "day2-watercolor",
+      "description": "Day 2 Tokyo Tradition (watercolor)",
+      "success": false,
+      "elapsedSeconds": 301.042,
+      "error": "fetch failed"
+    },
+    {
+      "name": "trip-overview-watercolor",
+      "description": "Trip-Übersicht 5 Tage (watercolor)",
+      "success": true,
+      "imagePath": "/Users/stefankummert/Documents/_Roman-Holidays/docs/spikes/infografik/trip-overview-watercolor-1777665756973.jpeg",
+      "imageBytes": 1225872,
+      "images": 1,
+      "elapsedSeconds": 10.985,
+      "usage": {
+        "promptTokenCount": 403,
+        "candidatesTokenCount": 1627,
+        "totalTokenCount": 2030,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 403
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "IMAGE",
+            "tokenCount": 1120
+          }
+        ]
+      },
+      "textOutput": null,
+      "finishReason": "STOP"
+    },
+    {
+      "name": "day2-flat-illustration",
+      "description": "Day 2 Tokyo (flat-illustration alt-style)",
+      "success": false,
+      "elapsedSeconds": 301.351,
+      "error": "fetch failed"
+    }
+  ],
+  "completedAt": "2026-05-01T20:07:38.330Z",
+  "totalImages": 1,
+  "totalCost": 0.04,
+  "avgLatency": 204.45933333333332
+}

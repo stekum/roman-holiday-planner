@@ -1,0 +1,79 @@
+{
+  "_comment": "Mock-Trip für Spike #260. Realistische Japan-Pfingsten-26-Daten, nicht aus Firestore — reicht für Prompt-Engineering-Test.",
+  "id": "japan-pfingsten-26-mock",
+  "title": "Japan zu Pfingsten 2026",
+  "destination": "Tokyo & Kyoto",
+  "country": "Japan",
+  "startDate": "2026-05-22",
+  "endDate": "2026-05-26",
+  "days": [
+    {
+      "date": "2026-05-22",
+      "dayNumber": 1,
+      "city": "Tokyo",
+      "theme": "Ankunft & Shibuya",
+      "stops": [
+        { "name": "Shibuya Crossing", "category": "Sightseeing", "timeSlot": "afternoon", "note": "Berühmte Kreuzung, Foto-Stopp" },
+        { "name": "Hachiko Statue", "category": "Sightseeing", "timeSlot": "afternoon" },
+        { "name": "Meiji Shrine", "category": "Shrine", "timeSlot": "evening", "note": "Ruhe nach Crowd" },
+        { "name": "Omoide Yokocho", "category": "Food", "timeSlot": "evening", "note": "Yakitori-Gassen Shinjuku" }
+      ]
+    },
+    {
+      "date": "2026-05-23",
+      "dayNumber": 2,
+      "city": "Tokyo",
+      "theme": "Tradition & Old Tokyo",
+      "stops": [
+        { "name": "Senso-ji Temple", "category": "Temple", "timeSlot": "morning", "note": "Asakusa, früh wegen Crowds" },
+        { "name": "Nakamise Shopping Street", "category": "Shopping", "timeSlot": "morning" },
+        { "name": "Tokyo Skytree", "category": "Sightseeing", "timeSlot": "afternoon", "note": "Aussicht" },
+        { "name": "Akihabara Electric Town", "category": "Shopping", "timeSlot": "afternoon", "note": "Anime/Tech" },
+        { "name": "Ueno Park", "category": "Park", "timeSlot": "evening" }
+      ]
+    },
+    {
+      "date": "2026-05-24",
+      "dayNumber": 3,
+      "city": "Tokyo",
+      "theme": "Modern Tokyo",
+      "stops": [
+        { "name": "Tsukiji Outer Market", "category": "Food", "timeSlot": "morning", "note": "Sushi-Frühstück" },
+        { "name": "Imperial Palace Gardens", "category": "Park", "timeSlot": "morning" },
+        { "name": "Ginza", "category": "Shopping", "timeSlot": "afternoon" },
+        { "name": "teamLab Borderless", "category": "Museum", "timeSlot": "evening", "note": "Tickets vorab!" }
+      ]
+    },
+    {
+      "date": "2026-05-25",
+      "dayNumber": 4,
+      "city": "Kyoto",
+      "theme": "Shinkansen & Kyoto",
+      "stops": [
+        { "name": "Shinkansen Tokyo→Kyoto", "category": "Transport", "timeSlot": "morning", "note": "~2h 15min" },
+        { "name": "Fushimi Inari Shrine", "category": "Shrine", "timeSlot": "afternoon", "note": "Tausend Torii" },
+        { "name": "Gion District", "category": "Sightseeing", "timeSlot": "evening", "note": "Geisha-Viertel" },
+        { "name": "Pontocho Alley", "category": "Food", "timeSlot": "evening" }
+      ]
+    },
+    {
+      "date": "2026-05-26",
+      "dayNumber": 5,
+      "city": "Kyoto",
+      "theme": "Tempel & Bambus",
+      "stops": [
+        { "name": "Arashiyama Bamboo Grove", "category": "Park", "timeSlot": "morning", "note": "Sehr früh!" },
+        { "name": "Tenryu-ji Temple", "category": "Temple", "timeSlot": "morning" },
+        { "name": "Kinkaku-ji (Golden Pavilion)", "category": "Temple", "timeSlot": "afternoon" },
+        { "name": "Nishiki Market", "category": "Food", "timeSlot": "afternoon" }
+      ]
+    }
+  ],
+  "tips": [
+    "Suica/Pasmo Card für ÖPNV",
+    "Tipping unüblich, kann beleidigend wirken",
+    "Schuhe ausziehen in Tempeln/traditionellen Räumen",
+    "Bargeld ist König — viele kleine Läden nehmen keine Karte"
+  ],
+  "currency": "JPY (Yen)"
+}
