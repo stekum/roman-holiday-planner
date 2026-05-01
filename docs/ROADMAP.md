@@ -180,11 +180,11 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 | #259 | Map-InfoWindow konsistent mit POI-Card (aiSummary sichtbar) ✅ | S | merged 2026-04-30 (PR #264, Claude-Implementierung) |
 | #33 | Zeitzonen-Awareness (lokale + Heimatzeit) ✅ | M | merged 2026-05-01 (PR #288) — Dual-Time-Badge im Header |
 | #44 | Notfall-Dashboard ✅ | M | merged 2026-05-01 (PR #289) — statische Country-Daten + tel:-Links + Versicherung |
-| #50 | Aktivitäts-Feed (wer hat was geändert) | M | aus Buffer |
+| #50 | Aktivitäts-Feed (wer hat was geändert) ✅ | M | merged 2026-05-01 (PR #291) — workspaces/{id}/activity Subcollection + Live-Feed im Reise-Tab |
 
-**12 Items insgesamt** (9 done, 3 open). Re-Priorisierung 2026-05-01: #45 (Dokumente-Tresor) + #46 (Packing List) → Backlog. #270 (Wechselkurse-Backend-Cache) → v4.0 (Skalierung passt zu App-Stores-Launch). Verbleibend offen: #44 (Notfall-Dashboard, M), #50 (Aktivitäts-Feed, M), #213 (GH-Pages-Sunset, S, blockiert bis 06.05.).
+**12 Items insgesamt** (11 done, 1 open). Re-Priorisierung 2026-05-01: #45/#46 → Backlog, #270 → v4.0, #213 → v3.2 (blockiert bis 06.05.). v3.1.0 als Pre-Pfingsten-Polish geshippt mit 9 Items, v3.1.1 mit #44 (Notfall) + #50 (Activity-Feed) als Patch nachgezogen.
 
-**Release:** `v3.1.0` — vorgezogen 2026-05-01 als Pre-Pfingsten-Polish-Release (9 Items shipped, weitere als v3.1.x Patches später).
+**Release:** `v3.1.0` (1. Mai 2026, 9 Items) + `v3.1.1` (1. Mai 2026, +#44 +#50). Verbleibend: #213 in v3.2.
 
 ---
 
