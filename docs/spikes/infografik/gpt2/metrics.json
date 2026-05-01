@@ -1,0 +1,78 @@
+{
+  "startedAt": "2026-05-01T20:20:37.922Z",
+  "model": "gpt-image-2",
+  "size": "1024x1536",
+  "quality": "medium",
+  "jobs": [
+    {
+      "name": "gpt2-day2-watercolor",
+      "description": "Day 2 Tokyo Tradition (watercolor)",
+      "success": true,
+      "imagePath": "/Users/stefankummert/Documents/_Roman-Holidays/docs/spikes/infografik/gpt2/gpt2-day2-watercolor-1777666913880.png",
+      "imageBytes": 3466564,
+      "elapsedSeconds": 75.957,
+      "revisedPrompt": null,
+      "usage": {
+        "input_tokens": 381,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 381
+        },
+        "output_tokens": 1372,
+        "output_tokens_details": {
+          "image_tokens": 1372,
+          "text_tokens": 0
+        },
+        "total_tokens": 1753
+      }
+    },
+    {
+      "name": "gpt2-trip-overview-watercolor",
+      "description": "Trip-Übersicht 5 Tage (watercolor)",
+      "success": true,
+      "imagePath": "/Users/stefankummert/Documents/_Roman-Holidays/docs/spikes/infografik/gpt2/gpt2-trip-overview-watercolor-1777666986257.png",
+      "imageBytes": 3305848,
+      "elapsedSeconds": 72.375,
+      "revisedPrompt": null,
+      "usage": {
+        "input_tokens": 387,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 387
+        },
+        "output_tokens": 1372,
+        "output_tokens_details": {
+          "image_tokens": 1372,
+          "text_tokens": 0
+        },
+        "total_tokens": 1759
+      }
+    },
+    {
+      "name": "gpt2-day2-flat-illustration",
+      "description": "Day 2 Tokyo (flat-illustration alt-style)",
+      "success": true,
+      "imagePath": "/Users/stefankummert/Documents/_Roman-Holidays/docs/spikes/infografik/gpt2/gpt2-day2-flat-illustration-1777667059376.png",
+      "imageBytes": 2349117,
+      "elapsedSeconds": 73.117,
+      "revisedPrompt": null,
+      "usage": {
+        "input_tokens": 215,
+        "input_tokens_details": {
+          "image_tokens": 0,
+          "text_tokens": 215
+        },
+        "output_tokens": 1372,
+        "output_tokens_details": {
+          "image_tokens": 1372,
+          "text_tokens": 0
+        },
+        "total_tokens": 1587
+      }
+    }
+  ],
+  "completedAt": "2026-05-01T20:24:19.378Z",
+  "totalImages": 3,
+  "totalCostEstimate": 0.24,
+  "avgLatency": 73.81633333333333
+}

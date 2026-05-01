@@ -200,8 +200,9 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 | #254 | fix: Erstanmelder-Banner "Firebase-Verbindung fehlgeschlagen" entschärfen ✅ | S | merged 2026-05-01 (PR #295) — permission-denied → freundlicher Welcome-Banner statt rotem Bug-Banner |
 | #260 | spike: AI-Infografik-Generator (Tagesplan/Trip als Karte, Gemini Image) | M | Premium-Feature-Spike, vorbereitet Production-Issue v4.5 |
 | #213 | Sunset GH-Pages + alten Maps-API-Key löschen (post-#117) | S | Cleanup nach Hosting-Transition, blockiert bis 06.05.26 (Grace-Period) |
+| #300 | fix: Vibes-Suche — strukturierte Filter (Wochentag/Zeit) + Mehrfach-Add ohne Modal-Close | M | neu 2026-05-01 — "Montag geöffnet" filtert nicht real, Modal schließt nach erstem Pick |
 
-**7 Items, bis ~46h.** Klären: #72 als eigenständig oder Teilkomponente von #235. #254 könnte mit #235 zusammen umgesetzt werden (Onboarding-Pfad). #260 ist ein experimenteller Spike — Stop-Criterion 3h, sonst Vendor-Wechsel auf GPT-Image-2 in v4.5 erwägen.
+**8 Items, bis ~49h.** Klären: #72 als eigenständig oder Teilkomponente von #235. #254 könnte mit #235 zusammen umgesetzt werden (Onboarding-Pfad). #260 ist ein experimenteller Spike — Stop-Criterion 3h, sonst Vendor-Wechsel auf GPT-Image-2 in v4.5 erwägen.
 
 **Release:** `v3.2.0` — 30. Sep 2026.
 

@@ -44,3 +44,9 @@ service-account*.json
 **/service-account*.json
 *-credentials.json
 **/*-credentials.json
+
+# Spike #260 — Infografik-Generator: Output-Bilder + Trip-Dump bleiben lokal
+docs/spikes/infografik/**/*.png
+docs/spikes/infografik/**/*.jpg
+docs/spikes/infografik/**/*.jpeg
+docs/spikes/infografik/trip-*.json
