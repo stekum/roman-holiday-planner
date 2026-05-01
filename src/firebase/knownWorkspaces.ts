@@ -19,6 +19,13 @@ export interface KnownWorkspace {
   displayName?: string;
   /** Last time this workspace was the active one on this device (epoch ms). */
   lastOpened: number;
+  /**
+   * #79: Trip-Archivierung. Archivierte Trips werden im TripSwitcher-Dropdown
+   * standardmaessig ausgeblendet, koennen ueber "Archivierte anzeigen"
+   * eingeblendet und wieder un-archiviert werden. Trip-Daten in Firestore
+   * bleiben unangetastet — rein UI-State, per Device.
+   */
+  archived?: boolean;
 }
 
 export const WORKSPACE_ID_PATTERN = /^[a-z0-9][a-z0-9-]{0,39}$/;
@@ -39,7 +46,11 @@ function readRaw(): KnownWorkspace[] {
         e !== null &&
         typeof (e as KnownWorkspace).id === 'string' &&
         typeof (e as KnownWorkspace).lastOpened === 'number',
-    );
+    ).map((e) => ({
+      ...e,
+      // #79: archived ist optional, default false
+      archived: typeof (e as KnownWorkspace).archived === 'boolean' ? (e as KnownWorkspace).archived : false,
+    }));
   } catch {
     return [];
   }
@@ -139,5 +150,18 @@ export function renameWorkspace(id: string, displayName: string): void {
     ...list[idx],
     displayName: trimmed.length > 0 ? trimmed : undefined,
   };
+  writeRaw(list);
+}
+
+/**
+ * #79: Markiert einen Trip als archiviert (oder hebt die Markierung auf).
+ * Rein UI-State per Device — Firestore-Daten bleiben unangetastet.
+ * Silently no-ops wenn die ID nicht in der lokalen Registry steht.
+ */
+export function setWorkspaceArchived(id: string, archived: boolean): void {
+  const list = readRaw();
+  const idx = list.findIndex((e) => e.id === id);
+  if (idx < 0) return;
+  list[idx] = { ...list[idx], archived };
   writeRaw(list);
 }
