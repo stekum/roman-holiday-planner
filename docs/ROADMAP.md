@@ -173,7 +173,7 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 | #237 | Update-Banner für Production-PWA ✅ | S | merged 2026-04-28 (PR #253, Codex-Implementierung) |
 | #213 | Sunset GH-Pages + alten Maps-API-Key löschen (post-#117) | S | Cleanup nach Hosting-Transition |
 | #255 | Fremdwährungs-Umrechnung (Tagesbudget) ✅ | S | merged 2026-05-01 (PR #265, Claude-Implementierung) — POI-Preise in #266 als Follow-up |
-| #266 | POI-Preisranges in Heimat-Währung umrechnen (Folge zu #255) | S | neu 2026-05-01 — Stefan-Beobachtung im Realtest (Sizzler ¥2000-¥5000) |
+| #266 | POI-Preisranges in Heimat-Währung umrechnen ✅ | S | merged 2026-05-01 (PR #267 + Fix-up #268/#269 wegen Frankfurter-CORS-Bug — Lessons in #270) |
 | #256 | POI-Card-Beschreibung "Mehr lesen" / Expand ✅ | S | merged 2026-04-29 (PR #263, Claude-Implementierung) |
 | #257 | POI-Card Tag-Badge klickbar → Sprung zum Tagesplan ✅ | S | merged 2026-04-29 (PR #261, Codex-Implementierung 2m39s) |
 | #258 | Tagesplan-POI klickbar → Map-Highlight ✅ | S | merged 2026-04-29 (PR #262, Claude-Implementierung) |
