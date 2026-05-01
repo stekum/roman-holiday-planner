@@ -171,7 +171,6 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 | Issue | Titel | Size | Herkunft |
 |---|---|---|---|
 | #237 | Update-Banner für Production-PWA ✅ | S | merged 2026-04-28 (PR #253, Codex-Implementierung) |
-| #213 | Sunset GH-Pages + alten Maps-API-Key löschen (post-#117) | S | Cleanup nach Hosting-Transition |
 | #255 | Fremdwährungs-Umrechnung (Tagesbudget) ✅ | S | merged 2026-05-01 (PR #265, Claude-Implementierung) — POI-Preise in #266 als Follow-up |
 | #266 | POI-Preisranges in Heimat-Währung umrechnen ✅ | S | merged 2026-05-01 (PR #267 + Fix-up #268/#269 wegen Frankfurter-CORS-Bug — Lessons in #270) |
 | #256 | POI-Card-Beschreibung "Mehr lesen" / Expand ✅ | S | merged 2026-04-29 (PR #263, Claude-Implementierung) |
@@ -182,9 +181,9 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 | #44 | Notfall-Dashboard ✅ | M | merged 2026-05-01 (PR #289) — statische Country-Daten + tel:-Links + Versicherung |
 | #50 | Aktivitäts-Feed (wer hat was geändert) ✅ | M | merged 2026-05-01 (PR #291) — workspaces/{id}/activity Subcollection + Live-Feed im Reise-Tab |
 
-**12 Items insgesamt** (11 done, 1 open). Re-Priorisierung 2026-05-01: #45/#46 → Backlog, #270 → v4.0, #213 → v3.2 (blockiert bis 06.05.). v3.1.0 als Pre-Pfingsten-Polish geshippt mit 9 Items, v3.1.1 mit #44 (Notfall) + #50 (Activity-Feed) als Patch nachgezogen.
+**10 Items, alle done.** Re-Priorisierung 2026-05-01: #45/#46 → Backlog, #270 → v4.0, #213 → v3.2 (blockiert bis 06.05.). v3.1 komplett geshippt am 1. Mai 2026 als Pre-Pfingsten-Polish.
 
-**Release:** `v3.1.0` (1. Mai 2026, 9 Items) + `v3.1.1` (1. Mai 2026, +#44 +#50). Verbleibend: #213 in v3.2.
+**Release:** `v3.1.0` ✅ Released 2026-05-01 — 10 Items live (alle UX-Polish + Japan-Trip-Pre-Polish).
 
 ---
 
@@ -200,8 +199,9 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 | #235 | Onboarding: Interactive Quickstart-Wizard + kontextuelle Hints | L | neu 2026-04-25 — ggf. #72 absorbieren |
 | #254 | fix: Erstanmelder-Banner "Firebase-Verbindung fehlgeschlagen" entschärfen | S | User-Report 2026-04-28 |
 | #260 | spike: AI-Infografik-Generator (Tagesplan/Trip als Karte, Gemini Image) | M | Premium-Feature-Spike, vorbereitet Production-Issue v4.5 |
+| #213 | Sunset GH-Pages + alten Maps-API-Key löschen (post-#117) | S | Cleanup nach Hosting-Transition, blockiert bis 06.05.26 (Grace-Period) |
 
-**6 Items, bis ~44h.** Klären: #72 als eigenständig oder Teilkomponente von #235. #254 könnte mit #235 zusammen umgesetzt werden (Onboarding-Pfad). #260 ist ein experimenteller Spike — Stop-Criterion 3h, sonst Vendor-Wechsel auf GPT-Image-2 in v4.5 erwägen.
+**7 Items, bis ~46h.** Klären: #72 als eigenständig oder Teilkomponente von #235. #254 könnte mit #235 zusammen umgesetzt werden (Onboarding-Pfad). #260 ist ein experimenteller Spike — Stop-Criterion 3h, sonst Vendor-Wechsel auf GPT-Image-2 in v4.5 erwägen.
 
 **Release:** `v3.2.0` — 30. Sep 2026.
 
