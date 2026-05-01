@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Loader2, MapPin, Plus, X } from 'lucide-react';
 import { CityPicker, type CityPick } from '../settings/CityPicker';
 import {
@@ -64,6 +65,10 @@ export function NewTripModal({ open, onClose, existingIds }: Props) {
 
   if (!open) return null;
 
+  // #72: Portal an document.body, damit das Modal aus dem Header-
+  // Stacking-Context (sticky + backdrop-blur) entkommt — sonst legt
+  // sich Leaflet-Map (z-index 400+) über das Modal.
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -119,12 +124,12 @@ export function NewTripModal({ open, onClose, existingIds }: Props) {
     }
   }
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="new-trip-title"
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-ink/30 px-3 py-6 backdrop-blur-sm"
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-ink/30 px-3 py-6 backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === e.currentTarget && !submitting) onClose();
       }}
@@ -269,6 +274,7 @@ export function NewTripModal({ open, onClose, existingIds }: Props) {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
