@@ -23,7 +23,18 @@ import {
 } from 'firebase/firestore';
 import type { TripPlan } from '../hooks/useTripPlan';
 
-export type ConnectionStatus = 'connecting' | 'ready' | 'error';
+export type ConnectionStatus = 'connecting' | 'ready' | 'error' | 'no-membership';
+
+/**
+ * #254: Erkennt einen "permission-denied" Firestore-Error — das passiert
+ * legitim bei Erstanmeldern die noch keinem Workspace beigetreten sind.
+ * NICHT als Connectivity-Fehler behandeln (sonst irritierender roter Banner).
+ */
+function isPermissionDenied(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false;
+  const code = (err as { code?: unknown }).code;
+  return code === 'permission-denied';
+}
 
 export interface DayBudget {
   /** Tagesbudget (Zielwert). */
@@ -207,6 +218,14 @@ export function useWorkspace(): WorkspaceAPI {
           },
           (err) => {
             if (cancelled) return;
+            // #254: permission-denied bei Erstanmeldern ist legitim, kein
+            // Connectivity-Bug. Eigener Status für freundlichen Hinweis.
+            if (isPermissionDenied(err)) {
+              console.info('[Firestore] no membership yet for workspace:', workspaceId);
+              setError(null);
+              setStatus('no-membership');
+              return;
+            }
             console.error('[Firestore] workspace doc listener error:', err);
             setError(err.message);
             setStatus('error');
@@ -234,6 +253,13 @@ export function useWorkspace(): WorkspaceAPI {
           },
           (err) => {
             if (cancelled) return;
+            // #254: permission-denied = noch kein Member. Nicht als Bug zeigen.
+            if (isPermissionDenied(err)) {
+              console.info('[Firestore] pois: no membership yet:', workspaceId);
+              setError(null);
+              setStatus('no-membership');
+              return;
+            }
             console.error('[Firestore] pois listener error:', err);
             setError(err.message);
             setStatus('error');
