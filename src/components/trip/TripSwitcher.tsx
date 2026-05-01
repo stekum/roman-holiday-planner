@@ -3,12 +3,11 @@ import { ChevronDown, Check, Pencil, Pin, PinOff, Plus, Trash2, Archive, Archive
 import {
   forgetWorkspace,
   getKnownWorkspaces,
-  isValidWorkspaceId,
-  rememberWorkspace,
   renameWorkspace,
   setWorkspaceArchived,
   type KnownWorkspace,
 } from '../../firebase/knownWorkspaces';
+import { NewTripModal } from './NewTripModal';
 import {
   useActiveWorkspaceId,
   useSetActiveWorkspaceId,
@@ -37,6 +36,8 @@ export function TripSwitcher() {
   const [renameDraft, setRenameDraft] = useState('');
   // #79: Archivierte Trips standardmäßig ausblenden, optional einblendbar
   const [showArchived, setShowArchived] = useState(false);
+  // #72: Trip-Wizard-Modal Zustand
+  const [newTripModalOpen, setNewTripModalOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
 
@@ -96,12 +97,6 @@ export function TripSwitcher() {
     if (entry.id === activeId) return; // active trip kann nicht archiviert werden
     setWorkspaceArchived(entry.id, !entry.archived);
     setList(getKnownWorkspaces());
-  }
-
-  function handleCreate(id: string, displayName: string) {
-    rememberWorkspace(id, displayName || undefined);
-    setActiveId(id);
-    setOpen(false);
   }
 
   function startRename(entry: KnownWorkspace) {
@@ -320,115 +315,27 @@ export function TripSwitcher() {
           )}
 
           <div className="mt-1 border-t border-cream-dark pt-1">
-            <NewTripForm onCreate={handleCreate} existingIds={list.map((e) => e.id)} />
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                setNewTripModalOpen(true);
+              }}
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-ink/70 hover:bg-cream hover:text-ink"
+            >
+              <Plus className="h-4 w-4" />
+              Neuen Trip anlegen
+            </button>
           </div>
         </div>
       )}
+
+      <NewTripModal
+        open={newTripModalOpen}
+        onClose={() => setNewTripModalOpen(false)}
+        existingIds={list.map((e) => e.id)}
+      />
     </div>
   );
 }
 
-function NewTripForm({
-  onCreate,
-  existingIds,
-}: {
-  onCreate: (id: string, displayName: string) => void;
-  existingIds: string[];
-}) {
-  const [expanded, setExpanded] = useState(false);
-  const [id, setId] = useState('');
-  const [displayName, setDisplayName] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const idInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (expanded) idInputRef.current?.focus();
-  }, [expanded]);
-
-  function reset() {
-    setId('');
-    setDisplayName('');
-    setError(null);
-    setExpanded(false);
-  }
-
-  function submit(e: React.FormEvent) {
-    e.preventDefault();
-    const trimmedId = id.trim().toLowerCase();
-    const trimmedName = displayName.trim();
-    if (!isValidWorkspaceId(trimmedId)) {
-      setError('Nur Kleinbuchstaben, Ziffern und Bindestrich (max 40).');
-      return;
-    }
-    if (existingIds.includes(trimmedId)) {
-      setError('Trip-ID existiert bereits in der Liste.');
-      return;
-    }
-    onCreate(trimmedId, trimmedName);
-    reset();
-  }
-
-  if (!expanded) {
-    return (
-      <button
-        type="button"
-        onClick={() => setExpanded(true)}
-        className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-ink/70 hover:bg-cream hover:text-ink"
-      >
-        <Plus className="h-4 w-4" />
-        Neuen Trip anlegen
-      </button>
-    );
-  }
-
-  return (
-    <form onSubmit={submit} className="space-y-2 px-3 py-2">
-      <div>
-        <label className="block text-[10px] font-semibold uppercase tracking-wider text-ink/50">
-          Trip-ID
-        </label>
-        <input
-          ref={idInputRef}
-          type="text"
-          value={id}
-          onChange={(e) => {
-            setId(e.target.value);
-            setError(null);
-          }}
-          placeholder="z.B. japan-may26"
-          autoComplete="off"
-          className="mt-1 w-full rounded-lg border border-ink/10 bg-cream/50 px-2 py-1.5 text-sm text-ink placeholder:text-ink/30 focus:border-olive focus:outline-none"
-        />
-      </div>
-      <div>
-        <label className="block text-[10px] font-semibold uppercase tracking-wider text-ink/50">
-          Anzeigename (optional)
-        </label>
-        <input
-          type="text"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          placeholder="z.B. Japan Mai 2026"
-          autoComplete="off"
-          className="mt-1 w-full rounded-lg border border-ink/10 bg-cream/50 px-2 py-1.5 text-sm text-ink placeholder:text-ink/30 focus:border-olive focus:outline-none"
-        />
-      </div>
-      {error && <p className="text-xs text-terracotta">{error}</p>}
-      <div className="flex gap-2">
-        <button
-          type="submit"
-          className="flex-1 rounded-lg bg-olive px-3 py-1.5 text-sm font-semibold text-white hover:bg-olive-dark"
-        >
-          Anlegen
-        </button>
-        <button
-          type="button"
-          onClick={reset}
-          className="rounded-lg bg-ink/5 px-3 py-1.5 text-sm text-ink/60 hover:bg-ink/10"
-        >
-          Abbrechen
-        </button>
-      </div>
-    </form>
-  );
-}
