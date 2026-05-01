@@ -179,15 +179,13 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 | #257 | POI-Card Tag-Badge klickbar → Sprung zum Tagesplan ✅ | S | merged 2026-04-29 (PR #261, Codex-Implementierung 2m39s) |
 | #258 | Tagesplan-POI klickbar → Map-Highlight ✅ | S | merged 2026-04-29 (PR #262, Claude-Implementierung) |
 | #259 | Map-InfoWindow konsistent mit POI-Card (aiSummary sichtbar) ✅ | S | merged 2026-04-30 (PR #264, Claude-Implementierung) |
-| #33 | Zeitzonen-Awareness (lokale + Heimatzeit) | M | aus v2.0, WIP-Stash vorhanden |
-| #46 | Packing List (kategorisiert, pro Person) | M | verschoben aus v2.0 |
+| #33 | Zeitzonen-Awareness (lokale + Heimatzeit) ✅ | M | merged 2026-05-01 (PR #288) — Dual-Time-Badge im Header |
 | #44 | Notfall-Dashboard | M | aus Deferred |
-| #45 | Dokumente-Tresor (Reisepass, Buchungen) | M | aus Buffer |
 | #50 | Aktivitäts-Feed (wer hat was geändert) | M | aus Buffer |
 
-**12 Items** (1 done, 11 open). Scope deutlich über Soft-Limit (5) — bewusst akzeptiert wegen Japan-Trip-Pre-Polish (Pfingsten 2026): 7× size:S Bugs/UX-Verbesserungen aus realen User-Tests + 5× M Features. Re-Priorisierung Anfang Mai: einzelne S-Items können post-Japan rutschen wenn Zeit knapp wird, M-Features behalten Vorrang.
+**12 Items insgesamt** (9 done, 3 open). Re-Priorisierung 2026-05-01: #45 (Dokumente-Tresor) und #46 (Packing List) raus aus v3.1 → Backlog (kein Pre-Pfingsten-Pain-Point). Verbleibend offen: #44 (Notfall-Dashboard, M), #50 (Aktivitäts-Feed, M), #270 (Backend-Cache, M), #213 (GH-Pages-Sunset, S, blockiert bis 06.05.).
 
-**Release:** `v3.1.0` — 1. Aug 2026.
+**Release:** `v3.1.0` — vorgezogen 2026-05-01 als Pre-Pfingsten-Polish-Release (9 Items shipped, weitere 4 als v3.1.x später).
 
 ---
 
