@@ -14,7 +14,13 @@ import { rememberWorkspace } from './knownWorkspaces';
 import { primeEnrichmentCache } from '../lib/placesNewApi';
 import { type POI, SEED_POIS, type Vote, type Comment, type VisitStatus } from '../data/pois';
 import { DEFAULT_SETTINGS } from '../settings/defaults';
-import type { Family, Homebase, Settings, TransitDay, TripConfig } from '../settings/types';
+import type { ActivityEvent, Family, Homebase, Settings, TransitDay, TripConfig } from '../settings/types';
+import {
+  query as fsQuery,
+  orderBy as fsOrderBy,
+  limit as fsLimit,
+  serverTimestamp,
+} from 'firebase/firestore';
 import type { TripPlan } from '../hooks/useTripPlan';
 
 export type ConnectionStatus = 'connecting' | 'ready' | 'error';
@@ -69,6 +75,9 @@ export interface WorkspaceAPI {
   setHomeCurrency: (code: string) => Promise<void>;
   setHomeTimezone: (tz: string) => Promise<void>;
   setInsurance: (data: { name?: string; phone?: string; policyNumber?: string }) => Promise<void>;
+
+  // Activity-Feed (#50)
+  activity: ActivityEvent[];
 
   // Trip plan
   plan: TripPlan;
@@ -134,12 +143,14 @@ export function useWorkspace(): WorkspaceAPI {
   const [error, setError] = useState<string | null>(null);
   const [pois, setPois] = useState<POI[]>([]);
   const [doc_, setDoc_] = useState<WorkspaceDoc>(EMPTY_DOC);
+  const [activity, setActivity] = useState<ActivityEvent[]>([]);
 
   // --- Subscribe on workspace change ---
   useEffect(() => {
     let cancelled = false;
     let unsubDoc: Unsubscribe | null = null;
     let unsubPois: Unsubscribe | null = null;
+    let unsubActivity: Unsubscribe | null = null;
 
     // Reset state synchronously so consumers don't see stale data from the
     // previous workspace while the new listeners warm up.
@@ -147,6 +158,7 @@ export function useWorkspace(): WorkspaceAPI {
     setError(null);
     setPois([]);
     setDoc_(EMPTY_DOC);
+    setActivity([]);
 
     const run = async () => {
       try {
@@ -227,6 +239,32 @@ export function useWorkspace(): WorkspaceAPI {
             setStatus('error');
           },
         );
+
+        // #50: Activity-Feed Subscription — letzte 50 Events, neueste zuerst
+        const activityRef = collection(db, 'workspaces', workspaceId, 'activity');
+        unsubActivity = onSnapshot(
+          fsQuery(activityRef, fsOrderBy('createdAt', 'desc'), fsLimit(50)),
+          (snap) => {
+            if (cancelled) return;
+            const list: ActivityEvent[] = [];
+            snap.forEach((d) => {
+              const data = d.data() as Omit<ActivityEvent, 'id'>;
+              // serverTimestamp() ist initial null bis Server-Roundtrip
+              const ts =
+                typeof data.createdAt === 'number'
+                  ? data.createdAt
+                  : (data.createdAt as unknown as { toMillis?: () => number })?.toMillis?.() ??
+                    Date.now();
+              list.push({ ...data, id: d.id, createdAt: ts });
+            });
+            setActivity(list);
+          },
+          (err) => {
+            // Activity-Feed ist nicht kritisch — silently ignorieren falls Permission/Index fehlt
+            if (cancelled) return;
+            console.warn('[Firestore] activity listener error (non-critical):', err);
+          },
+        );
       } catch (err) {
         if (cancelled) return;
         console.error('[Firestore] setup error:', err);
@@ -241,6 +279,7 @@ export function useWorkspace(): WorkspaceAPI {
       cancelled = true;
       unsubDoc?.();
       unsubPois?.();
+      unsubActivity?.();
     };
   }, [workspaceId]);
 
@@ -259,12 +298,39 @@ export function useWorkspace(): WorkspaceAPI {
   );
 
   // --- POI operations ---
+  // #50: Activity-Logger — fire-and-forget, schluckt Fehler (Activity ist nicht kritisch)
+  const logActivity = useCallback(
+    (event: Omit<ActivityEvent, 'id' | 'createdAt' | 'userId' | 'userLabel'>) => {
+      try {
+        const { db, auth } = getFirebase();
+        const user = auth.currentUser;
+        if (!user) return;
+        const activityRef = collection(db, 'workspaces', workspaceId, 'activity');
+        const newId = doc(activityRef).id;
+        const docRef = doc(db, 'workspaces', workspaceId, 'activity', newId);
+        const payload = stripUndefined({
+          ...event,
+          userId: user.uid,
+          userLabel: user.displayName || user.email || user.uid.slice(0, 6),
+          createdAt: serverTimestamp(),
+        } as unknown as Record<string, unknown>);
+        void setDoc(docRef, payload).catch((err) => {
+          console.warn('[Activity] log failed:', err);
+        });
+      } catch (err) {
+        console.warn('[Activity] logger setup failed:', err);
+      }
+    },
+    [workspaceId],
+  );
+
   const addPoi = useCallback(
     async (poi: POI) => {
       const { id, ...rest } = poi;
       await setDoc(poiDocRef(id), stripUndefined(rest as Record<string, unknown>));
+      logActivity({ type: 'poi_added', poiId: id, poiTitle: poi.title });
     },
-    [poiDocRef],
+    [poiDocRef, logActivity],
   );
 
   const updatePoi = useCallback(
@@ -305,14 +371,13 @@ export function useWorkspace(): WorkspaceAPI {
   const votePoi = useCallback(
     async (id: string, familyId: string, vote: Vote) => {
       if (!familyId) return;
-      // Firestore dot-notation update — writes only the single field.
-      // 'neutral' is still a valid value so users can "unvote" back to
-      // the default without losing that they interacted.
       await updateDoc(poiDocRef(id), {
         [`votes.${familyId}`]: vote,
       });
+      const title = pois.find((p) => p.id === id)?.title;
+      logActivity({ type: 'poi_voted', poiId: id, poiTitle: title, detail: vote });
     },
-    [poiDocRef],
+    [poiDocRef, pois, logActivity],
   );
 
   const addComment = useCallback(
@@ -355,6 +420,7 @@ export function useWorkspace(): WorkspaceAPI {
 
   const removePoi = useCallback(
     async (id: string) => {
+      const removedTitle = pois.find((p) => p.id === id)?.title;
       await deleteDoc(poiDocRef(id));
       // Also clean out of trip plan
       const current = doc_.tripPlan;
@@ -363,8 +429,9 @@ export function useWorkspace(): WorkspaceAPI {
         nextPlan[day] = ids.filter((x) => x !== id);
       }
       await updateDoc(workspaceDocRef(), { tripPlan: nextPlan });
+      logActivity({ type: 'poi_removed', poiId: id, poiTitle: removedTitle });
     },
-    [poiDocRef, doc_, workspaceDocRef],
+    [poiDocRef, doc_, workspaceDocRef, pois, logActivity],
   );
 
   // --- Settings operations ---
@@ -513,14 +580,22 @@ export function useWorkspace(): WorkspaceAPI {
   const togglePoi = useCallback(
     async (dayIso: string, poiId: string) => {
       const current = doc_.tripPlan[dayIso] ?? [];
-      const next = current.includes(poiId)
+      const wasIncluded = current.includes(poiId);
+      const next = wasIncluded
         ? current.filter((x) => x !== poiId)
         : [...current, poiId];
       await updateDoc(workspaceDocRef(), {
         [`tripPlan.${dayIso}`]: next,
       });
+      const title = pois.find((p) => p.id === poiId)?.title;
+      logActivity({
+        type: wasIncluded ? 'poi_unplanned' : 'poi_planned',
+        poiId,
+        poiTitle: title,
+        dayIso,
+      });
     },
-    [doc_.tripPlan, workspaceDocRef],
+    [doc_.tripPlan, workspaceDocRef, pois, logActivity],
   );
 
   const movePoi = useCallback(
@@ -680,6 +755,7 @@ export function useWorkspace(): WorkspaceAPI {
     setHomeCurrency,
     setHomeTimezone,
     setInsurance,
+    activity,
     plan: doc_.tripPlan,
     getDay,
     togglePoi,

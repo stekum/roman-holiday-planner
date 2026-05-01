@@ -17,6 +17,7 @@ import { getHomebaseForDay, getHomebases } from '../../settings/homebases';
 import { getTransitDayForDate } from '../../settings/transitDays';
 import { TransitDayCard } from './TransitDayCard';
 import { DayBudgetCard } from './DayBudgetCard';
+import { ActivityFeed } from './ActivityFeed';
 import { getTripConfig, currencyFromCountry } from '../../settings/tripConfig';
 import type { DayBudget } from '../../firebase/useWorkspace';
 
@@ -66,6 +67,8 @@ interface Props {
    */
   onHighlight?: (id: string) => void;
   highlightedPoiId?: string | null;
+  /** #50: Activity-Feed-Events für Live-Anzeige im Trip-View. */
+  activity?: import('../../settings/types').ActivityEvent[];
 }
 
 export function DayPlanner({
@@ -97,6 +100,7 @@ export function DayPlanner({
   onSavePostTripAnalysis,
   onHighlight,
   highlightedPoiId,
+  activity,
 }: Props) {
   const routesLib = useMapsLibrary('routes');
   const [optimizing, setOptimizing] = useState(false);
@@ -359,6 +363,8 @@ export function DayPlanner({
         tripCurrency={getTripConfig(settings).currency}
         homeCurrency={settings.homeCurrency}
       />
+
+      {activity && activity.length > 0 && <ActivityFeed events={activity} />}
 
       {isGeminiConfigured && (
         <AiKidFriendlyPanel
