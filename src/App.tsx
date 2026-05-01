@@ -15,6 +15,7 @@ import { LocatePoiModal } from './components/inbox/LocatePoiModal';
 import { EditPoiModal } from './components/poi/EditPoiModal';
 import { useWorkspace } from './firebase/useWorkspace';
 import { getTripConfig, currencySymbolFromCode } from './settings/tripConfig';
+import { useExchangeRates } from './hooks/useExchangeRates';
 import { getPlacesBias } from './lib/placesBias';
 import { useActiveWorkspaceId, useSetActiveWorkspaceId } from './firebase/workspaceContext';
 import { useWorkspaceSync } from './firebase/useWorkspaceSync';
@@ -333,6 +334,14 @@ function AppInner({ user, profile }: AppInnerProps) {
     if (tab !== 'trip') setTab('trip');
   }, [activeDay, days, tab]);
 
+  // #266: Wechselkurse einmal pro App-Mount laden, an PoiList +
+  // DayBudgetCard weiterreichen. Lazy: nur wenn Trip-Currency != Heimat.
+  const tripCurrencyForRates = getTripConfig(settings).currency ?? 'EUR';
+  const homeCurrencyResolved = settings.homeCurrency ?? 'EUR';
+  const ratesEnabled =
+    tripCurrencyForRates.toUpperCase() !== homeCurrencyResolved.toUpperCase();
+  const { data: exchangeRates } = useExchangeRates(tripCurrencyForRates, ratesEnabled);
+
   const connectionBanner =
     status === 'connecting' ? (
       <div className="flex items-center gap-2 bg-olive/10 px-4 py-2 text-xs text-olive-dark">
@@ -492,6 +501,8 @@ function AppInner({ user, profile }: AppInnerProps) {
               categories={getTripConfig(settings).categories}
               onSetVisitStatus={(id, status) => void setVisitStatus(id, status)}
               currencySymbol={currencySymbolFromCode(getTripConfig(settings).currency)}
+              homeCurrency={homeCurrencyResolved}
+              exchangeRates={exchangeRates}
             />
             </>
           )}
