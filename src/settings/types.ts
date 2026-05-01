@@ -82,6 +82,12 @@ export interface Settings {
    * Default: 'EUR'.
    */
   homeCurrency?: string;
+  /**
+   * Heimat-Zeitzone (IANA, z.B. "Europe/Berlin") fuer die Dual-Time-Anzeige
+   * im Header (#33). Wenn nicht gesetzt: Browser-Default
+   * (Intl.DateTimeFormat().resolvedOptions().timeZone).
+   */
+  homeTimezone?: string;
 }
 
 export interface TransitDay {

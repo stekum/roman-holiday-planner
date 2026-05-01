@@ -7,6 +7,7 @@ import { DEFAULT_SETTINGS } from '../../settings/defaults';
 import { TripDatesEditor } from './TripDatesEditor';
 import { TripConfigEditor } from './TripConfigEditor';
 import { HomeCurrencyEditor } from './HomeCurrencyEditor';
+import { HomeTimezoneEditor } from './HomeTimezoneEditor';
 import { FamilyEditor } from './FamilyEditor';
 import { HomebasesEditor } from './HomebasesEditor';
 import { TransitDaysEditor } from './TransitDaysEditor';
@@ -28,6 +29,8 @@ interface Props {
   onSetTripConfig: (cfg: TripConfig) => void;
   /** #255: Heimat-Währung speichern (ISO-4217). */
   onSetHomeCurrency: (code: string) => void;
+  /** #33: Heimat-Zeitzone speichern (IANA). */
+  onSetHomeTimezone: (tz: string) => void;
   /** Optional — if present, shows a „Lokale Daten hochladen"-Button. */
   onMigrateFromLocal?: (data: {
     pois: POI[];
@@ -95,6 +98,7 @@ export function SettingsView({
   onSetTransitDays,
   onSetTripConfig,
   onSetHomeCurrency,
+  onSetHomeTimezone,
   onMigrateFromLocal,
   isAdmin,
   myFamilyId,
@@ -143,6 +147,10 @@ export function SettingsView({
       <HomeCurrencyEditor
         value={settings.homeCurrency ?? 'EUR'}
         onChange={onSetHomeCurrency}
+      />
+      <HomeTimezoneEditor
+        value={settings.homeTimezone}
+        onChange={onSetHomeTimezone}
       />
       <HomebasesEditor
         homebases={getHomebases(settings)}
