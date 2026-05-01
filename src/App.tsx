@@ -134,6 +134,7 @@ function AppInner({ user, profile }: AppInnerProps) {
     setHomeCurrency,
     setHomeTimezone,
     setInsurance,
+    activity,
     plan,
     getDay,
     togglePoi,
@@ -556,6 +557,7 @@ function AppInner({ user, profile }: AppInnerProps) {
                 setHighlightedPoiId((prev) => (prev === id ? null : id))
               }
               highlightedPoiId={highlightedPoiId}
+              activity={activity}
             />
           )}
           {tab === 'settings' && (

@@ -4,6 +4,30 @@ export interface Family {
   color: string; // hex
 }
 
+/**
+ * #50: Activity-Feed-Event. Wird in Firestore unter workspaces/{id}/activity
+ * persistiert und in der UI als Live-Feed angezeigt.
+ */
+export interface ActivityEvent {
+  id: string;
+  /** Wer hat's getan? Firebase Auth uid. */
+  userId: string;
+  /** Display-Name oder Email — für UI-Anzeige ohne extra Lookup. */
+  userLabel?: string;
+  /** Was ist passiert? */
+  type: 'poi_added' | 'poi_removed' | 'poi_voted' | 'poi_planned' | 'poi_unplanned' | 'day_cleared';
+  /** Optional: betroffene POI-ID (für Click-Through). */
+  poiId?: string;
+  /** Optional: Titel des betroffenen POI (für Anzeige ohne Lookup). */
+  poiTitle?: string;
+  /** Optional: betroffener Tag (ISO YYYY-MM-DD) z.B. bei poi_planned. */
+  dayIso?: string;
+  /** Optional: extra Details (z.B. Vote-Wert). */
+  detail?: string;
+  /** Server-Timestamp der Erstellung (ms since epoch). */
+  createdAt: number;
+}
+
 export interface Homebase {
   name: string;
   address: string;

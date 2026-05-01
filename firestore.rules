@@ -132,6 +132,14 @@ service cloud.firestore {
                     || isMember(workspaceId);
         allow write: if isAdmin() || isMember(workspaceId);
       }
+
+      // #50: Activity-Feed-Events. Members koennen lesen + neue Events
+      // schreiben. Update/Delete bewusst nicht erlaubt — Activity ist
+      // append-only Audit-Log.
+      match /activity/{eventId} {
+        allow read: if isAdmin() || isMember(workspaceId);
+        allow create: if isAdmin() || isMember(workspaceId);
+      }
     }
 
     // #228 — Invite-Tokens. Owner generiert, Empfänger liest + markiert
