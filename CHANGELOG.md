@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.2.0](https://github.com/stekum/roman-holiday-planner/compare/v3.1.0...v3.2.0) (2026-05-01)
+
+
+### ✨ Features
+
+* **#44:** notfall-dashboard in settings — botschaft + notruf + versicherung ([#289](https://github.com/stekum/roman-holiday-planner/issues/289)) ([207dc0c](https://github.com/stekum/roman-holiday-planner/commit/207dc0c7c3c16be0fb0f35d41956580a35817ecd)), closes [#44](https://github.com/stekum/roman-holiday-planner/issues/44)
+* **#50:** activity-feed — wer hat was geändert (live-sync) ([#291](https://github.com/stekum/roman-holiday-planner/issues/291)) ([d7eda59](https://github.com/stekum/roman-holiday-planner/commit/d7eda590711eaa15c645a86a201f0c1e59900564)), closes [#50](https://github.com/stekum/roman-holiday-planner/issues/50)
+
+
+### 📝 Documentation
+
+* **roadmap:** [#44](https://github.com/stekum/roman-holiday-planner/issues/44) done — notfall-dashboard live auf prod ([ee3da32](https://github.com/stekum/roman-holiday-planner/commit/ee3da320413cba781f352d03b2d149fd7033ea1e))
+* **roadmap:** [#50](https://github.com/stekum/roman-holiday-planner/issues/50) done — activity-feed live auf prod ([a2862ad](https://github.com/stekum/roman-holiday-planner/commit/a2862adb3c4eb81a3285592bf51f14249ace4683))
+
 ## [3.1.0](https://github.com/stekum/roman-holiday-planner/compare/v3.0.0...v3.1.0) (2026-05-01)
 
 
