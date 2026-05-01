@@ -124,12 +124,12 @@ export function NewTripModal({ open, onClose, existingIds }: Props) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="new-trip-title"
-      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/30 px-3 pb-3 pt-12 backdrop-blur-sm sm:items-center sm:p-6"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-ink/30 px-3 py-6 backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === e.currentTarget && !submitting) onClose();
       }}
     >
-      <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-cream shadow-2xl shadow-ink/30">
+      <div className="relative my-auto w-full max-w-md overflow-hidden rounded-3xl bg-cream shadow-2xl shadow-ink/30">
         <div className="flex items-center gap-3 border-b border-cream-dark/50 bg-white px-5 py-4">
           <Plus className="h-5 w-5 text-terracotta" />
           <h2
