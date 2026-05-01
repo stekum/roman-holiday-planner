@@ -193,7 +193,7 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 
 | Issue | Titel | Size | Herkunft |
 |---|---|---|---|
-| #79 | Trip-Archivierung | S | aus v3.0 |
+| #79 | Trip-Archivierung ✅ | S | merged 2026-05-01 (PR #293 + Mobile-Touch-Hotfix #294) — KnownWorkspace.archived + TripSwitcher-Toggle |
 | #72 | Trip-Erstellungs-Wizard | M | aus v3.0-beta |
 | #122 | Multi-Language Support (DE + EN + evtl. JP) | L | aus v2.0 |
 | #235 | Onboarding: Interactive Quickstart-Wizard + kontextuelle Hints | L | neu 2026-04-25 — ggf. #72 absorbieren |
