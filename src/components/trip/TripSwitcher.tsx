@@ -240,10 +240,10 @@ export function TripSwitcher() {
                           ? 'Standard-Trip — beim App-Start wird dieser geöffnet (klicken zum Lösen)'
                           : 'Als Standard-Trip festlegen (öffnet bei App-Start auf allen Geräten)'
                       }
-                      className={`rounded-lg p-1.5 transition disabled:opacity-50 ${
+                      className={`rounded-lg p-2 transition disabled:opacity-50 ${
                         defaultWorkspaceId === entry.id
                           ? 'text-terracotta hover:bg-terracotta/10'
-                          : 'text-ink/30 opacity-0 hover:bg-olive/10 hover:text-olive-dark group-hover:opacity-100'
+                          : 'text-ink/30 opacity-40 hover:bg-olive/10 hover:text-olive-dark hover:opacity-100'
                       }`}
                     >
                       {defaultWorkspaceId === entry.id ? (
@@ -257,7 +257,7 @@ export function TripSwitcher() {
                       onClick={() => startRename(entry)}
                       aria-label={`${entry.displayName || entry.id} umbenennen`}
                       title="Anzeigename ändern"
-                      className="rounded-lg p-1.5 text-ink/30 opacity-0 transition hover:bg-olive/10 hover:text-olive-dark group-hover:opacity-100"
+                      className="rounded-lg p-2 text-ink/30 opacity-40 transition hover:bg-olive/10 hover:text-olive-dark hover:opacity-100"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </button>
@@ -275,10 +275,10 @@ export function TripSwitcher() {
                             ? 'Wiederherstellen — taucht wieder im Dropdown auf'
                             : 'Archivieren — wird im Dropdown ausgeblendet'
                         }
-                        className={`rounded-lg p-1.5 transition ${
+                        className={`rounded-lg p-2 transition ${
                           entry.archived
                             ? 'text-olive opacity-100 hover:bg-olive/10'
-                            : 'text-ink/30 opacity-0 hover:bg-olive/10 hover:text-olive-dark group-hover:opacity-100'
+                            : 'text-ink/30 opacity-40 hover:bg-olive/10 hover:text-olive-dark hover:opacity-100'
                         }`}
                       >
                         {entry.archived ? (
@@ -294,7 +294,7 @@ export function TripSwitcher() {
                         onClick={() => handleForget(entry.id)}
                         aria-label={`${entry.displayName || entry.id} aus Liste entfernen`}
                         title="Aus Liste entfernen (Trip-Daten bleiben in Firestore erhalten)"
-                        className="mr-2 rounded-lg p-1.5 text-ink/30 opacity-0 transition hover:bg-terracotta/10 hover:text-terracotta group-hover:opacity-100"
+                        className="mr-2 rounded-lg p-2 text-ink/30 opacity-40 transition hover:bg-terracotta/10 hover:text-terracotta hover:opacity-100"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
