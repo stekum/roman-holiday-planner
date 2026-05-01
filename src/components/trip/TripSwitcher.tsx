@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronDown, Check, Pencil, Pin, PinOff, Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, Check, Pencil, Pin, PinOff, Plus, Trash2, Archive, ArchiveRestore } from 'lucide-react';
 import {
   forgetWorkspace,
   getKnownWorkspaces,
   isValidWorkspaceId,
   rememberWorkspace,
   renameWorkspace,
+  setWorkspaceArchived,
   type KnownWorkspace,
 } from '../../firebase/knownWorkspaces';
 import {
@@ -34,6 +35,8 @@ export function TripSwitcher() {
   const [list, setList] = useState<KnownWorkspace[]>(() => getKnownWorkspaces());
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameDraft, setRenameDraft] = useState('');
+  // #79: Archivierte Trips standardmäßig ausblenden, optional einblendbar
+  const [showArchived, setShowArchived] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
 
@@ -67,6 +70,16 @@ export function TripSwitcher() {
   );
   const activeLabel = activeEntry?.displayName || activeId;
 
+  // #79: Archivierte Trips ausblenden (außer wenn aktiv ODER showArchived=true)
+  const visibleList = useMemo(
+    () => list.filter((e) => !e.archived || e.id === activeId || showArchived),
+    [list, activeId, showArchived],
+  );
+  const archivedCount = useMemo(
+    () => list.filter((e) => e.archived && e.id !== activeId).length,
+    [list, activeId],
+  );
+
   function handleSelect(id: string) {
     if (id !== activeId) setActiveId(id);
     setOpen(false);
@@ -75,6 +88,13 @@ export function TripSwitcher() {
   function handleForget(id: string) {
     if (id === activeId) return; // never remove the active one
     forgetWorkspace(id);
+    setList(getKnownWorkspaces());
+  }
+
+  // #79: Archivieren / Wiederherstellen
+  function handleToggleArchived(entry: KnownWorkspace) {
+    if (entry.id === activeId) return; // active trip kann nicht archiviert werden
+    setWorkspaceArchived(entry.id, !entry.archived);
     setList(getKnownWorkspaces());
   }
 
@@ -143,7 +163,7 @@ export function TripSwitcher() {
             Trips
           </p>
           <ul className="space-y-0.5">
-            {list.map((entry) => (
+            {visibleList.map((entry) => (
               <li key={entry.id}>
                 {renamingId === entry.id ? (
                   <div className="flex items-center gap-1 px-3 py-2">
@@ -244,6 +264,33 @@ export function TripSwitcher() {
                     {entry.id !== activeId && (
                       <button
                         type="button"
+                        onClick={() => handleToggleArchived(entry)}
+                        aria-label={
+                          entry.archived
+                            ? `${entry.displayName || entry.id} wiederherstellen`
+                            : `${entry.displayName || entry.id} archivieren`
+                        }
+                        title={
+                          entry.archived
+                            ? 'Wiederherstellen — taucht wieder im Dropdown auf'
+                            : 'Archivieren — wird im Dropdown ausgeblendet'
+                        }
+                        className={`rounded-lg p-1.5 transition ${
+                          entry.archived
+                            ? 'text-olive opacity-100 hover:bg-olive/10'
+                            : 'text-ink/30 opacity-0 hover:bg-olive/10 hover:text-olive-dark group-hover:opacity-100'
+                        }`}
+                      >
+                        {entry.archived ? (
+                          <ArchiveRestore className="h-3.5 w-3.5" />
+                        ) : (
+                          <Archive className="h-3.5 w-3.5" />
+                        )}
+                      </button>
+                    )}
+                    {entry.id !== activeId && (
+                      <button
+                        type="button"
                         onClick={() => handleForget(entry.id)}
                         aria-label={`${entry.displayName || entry.id} aus Liste entfernen`}
                         title="Aus Liste entfernen (Trip-Daten bleiben in Firestore erhalten)"
@@ -257,6 +304,20 @@ export function TripSwitcher() {
               </li>
             ))}
           </ul>
+
+          {archivedCount > 0 && (
+            <div className="border-t border-cream-dark pt-1">
+              <button
+                type="button"
+                onClick={() => setShowArchived((v) => !v)}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-left text-xs text-ink/60 hover:bg-cream hover:text-ink"
+                aria-pressed={showArchived}
+              >
+                <Archive className="h-3 w-3" />
+                {showArchived ? 'Archivierte ausblenden' : `Archivierte anzeigen (${archivedCount})`}
+              </button>
+            </div>
+          )}
 
           <div className="mt-1 border-t border-cream-dark pt-1">
             <NewTripForm onCreate={handleCreate} existingIds={list.map((e) => e.id)} />
