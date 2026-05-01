@@ -174,6 +174,7 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 | #213 | Sunset GH-Pages + alten Maps-API-Key löschen (post-#117) | S | Cleanup nach Hosting-Transition |
 | #255 | Fremdwährungs-Umrechnung (Tagesbudget) ✅ | S | merged 2026-05-01 (PR #265, Claude-Implementierung) — POI-Preise in #266 als Follow-up |
 | #266 | POI-Preisranges in Heimat-Währung umrechnen ✅ | S | merged 2026-05-01 (PR #267 + Fix-up #268/#269 wegen Frankfurter-CORS-Bug — Lessons in #270) |
+| #270 | infra: Wechselkurse via Firebase Function 1×/Woche cachen | M | Folge-Cleanup zu #266 — vermeidet 1500/Monat API-Limit + Vendor-Lock-in |
 | #256 | POI-Card-Beschreibung "Mehr lesen" / Expand ✅ | S | merged 2026-04-29 (PR #263, Claude-Implementierung) |
 | #257 | POI-Card Tag-Badge klickbar → Sprung zum Tagesplan ✅ | S | merged 2026-04-29 (PR #261, Codex-Implementierung 2m39s) |
 | #258 | Tagesplan-POI klickbar → Map-Highlight ✅ | S | merged 2026-04-29 (PR #262, Claude-Implementierung) |
@@ -212,6 +213,38 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 ## Rom-Trip (Herbst 2026)
 
 Zweiter Multi-Trip auf gereifter Architektur. App-Stand: v3.2. Bugs während Rom-Trip → `v3.2.x`-Patches.
+
+---
+
+## v3.3 — UX & Visual Polish vor Stores (Ziel: 31. Dezember 2026)
+
+**Zweck:** Pre-Store-Polish — App soll sich auf Mobile flüssig anfühlen, eigene visuelle Handschrift haben, Tablet/Desktop-tauglich für Zuhause-Planung sein. Voraussetzung dafür dass v4.0 (Capacitor/Stores) nicht "ein bisschen langweilig" ins App-Store-Review geht.
+
+**Epic:** #271
+
+| Issue | Titel | Size | Kategorie |
+|---|---|---|---|
+| #272 | spike: Recherche moderne Travel-App-Patterns | S | Research |
+| #273 | feat: Tablet/Desktop-Layout (3-Spalten) | L | Layout |
+| #274 | feat: Map-Pins farblich nach Kategorie + Custom-Marker | M | Map |
+| #275 | feat: Mobile Resize (Drag-Handle, Snap 30/50/70%) | M | Mobile |
+| #276 | feat: Mobile Vollbild-Toggle (FAB) | S | Mobile |
+| #277 | feat: Bottom-Sheet-Pattern für POI-Card | M | Component |
+| #278 | refactor: Information-Density-Audit | M | Audit |
+| #279 | refactor: Design-Token-System + DESIGN.md | M | Foundation |
+| #280 | feat: Visual Refresh — Iconography + Display-Font + Empty States | M | Visual |
+| #281 | feat: Dark Mode | M | Visual |
+| #282 | feat: Skeleton-Loader [STRETCH] | S | Polish |
+| #283 | feat: Swipe-Gesten zwischen POIs [STRETCH] | S | Mobile |
+| #284 | feat: Micro-Interactions (GSAP + Haptic) [STRETCH] | S | Polish |
+| #285 | feat: Tagesplan-Timeline [STRETCH] | M | Visual |
+| #286 | feat: Trip-Hero / Cover-Image [STRETCH] | S | Visual |
+
+**15 Items** (1 Spike + 6 S + 7 M + 1 L). Über Soft-Limit (5) — bewusst, analog v3.1 Pre-Japan-Polish. **5 Items sind Stretch-Goals** und rutschen bei Zeitdruck nach v3.4.
+
+**Pflicht-Reihenfolge:** #272 Spike → #279 Tokens + #278 Density-Audit → #273 Desktop-Layout früh (beeinflusst #277). Rest parallel.
+
+**Release:** `v3.3.0` — 31. Dez 2026 (vor v4.0 Q1 2027).
 
 ---
 
@@ -262,7 +295,6 @@ Zweiter Multi-Trip auf gereifter Architektur. App-Stand: v3.2. Bugs während Rom
 | #181 | refactor: Places API Legacy → New Migration (Deprecation-Pflicht) | L |
 | #183 | ~~CI: Auto-Sync Issue-Milestone → Project-Board + Release-Field~~ | S | ✅ |
 | #190 | DevOps: Chrome DevTools MCP Server für agentisches Testing | S |
-| #270 | infra: Wechselkurse via Firebase Function 1×/Woche cachen | M |
 
 **Release:** `v2.1.x` — flexibel, Stücke als Patches.
 
