@@ -59,6 +59,9 @@ export interface PoiCardProps {
   currencySymbol?: string;
   /** #266: ISO-4217 der Heimat-Waehrung fuer Preis-Conversion. */
   homeCurrency?: string;
+  /** #266: ISO-4217 der Trip-Waehrung. Fallback wenn priceRange.currencyCode
+   *  fehlt (alte POIs vor Places-API-Integration). */
+  tripCurrency?: string;
   /** #266: Wechselkurse (lazy geladen in App.tsx). null = noch nicht geladen. */
   exchangeRates?: ExchangeRatesData | null;
 }
@@ -92,11 +95,12 @@ function formatPriceBadge(
   poi: POI,
   currencySymbol: string,
   homeCurrency?: string,
+  tripCurrency?: string,
   rates?: ExchangeRatesData | null,
 ): string {
   const range = formatPriceRange(poi.priceRange, currencySymbol);
   if (range) {
-    const conv = formatPriceRangeConverted(poi.priceRange, homeCurrency, rates);
+    const conv = formatPriceRangeConverted(poi.priceRange, homeCurrency, tripCurrency, rates);
     return conv ? `${range} ${conv}` : range;
   }
   return priceLevelSymbols(poi.priceLevel, currencySymbol);
@@ -106,14 +110,18 @@ function formatPriceBadge(
  * #266: Konvertiert eine PriceRange in die Heimat-Waehrung. Liefert
  * z.B. "(≈ €12-€30)" oder "(≈ €18+)" oder leeren String wenn nicht
  * moeglich/sinnvoll.
+ *
+ * Fallback: wenn priceRange.currencyCode fehlt (alte POIs ohne Places-
+ * API-Enrichment), nimm tripCurrency an.
  */
 function formatPriceRangeConverted(
   range: POI['priceRange'],
   homeCurrency: string | undefined,
+  tripCurrency: string | undefined,
   rates: ExchangeRatesData | null | undefined,
 ): string {
   if (!range || !homeCurrency || !rates) return '';
-  const from = range.currencyCode;
+  const from = range.currencyCode ?? tripCurrency;
   if (!from || from.toUpperCase() === homeCurrency.toUpperCase()) return '';
 
   const homeSymbol = currencySymbolFromCode(homeCurrency);
@@ -253,6 +261,7 @@ function CompactCard({
   homebase,
   currencySymbol = '€',
   homeCurrency,
+  tripCurrency,
   exchangeRates,
 }: PoiCardProps) {
   const [imgFailed, setImgFailed] = useState(false);
@@ -262,7 +271,7 @@ function CompactCard({
     homebase?.coords && poi.coords
       ? haversineKm(homebase.coords, poi.coords)
       : null;
-  const priceBadge = formatPriceBadge(poi, currencySymbol, homeCurrency, exchangeRates);
+  const priceBadge = formatPriceBadge(poi, currencySymbol, homeCurrency, tripCurrency, exchangeRates);
 
   return (
     <article className="flex items-center gap-3 rounded-2xl bg-white p-2 shadow-sm shadow-ink/5 transition hover:shadow-md">
@@ -415,13 +424,14 @@ function FullCard({
   onJumpToDay,
   currencySymbol = '€',
   homeCurrency,
+  tripCurrency,
   exchangeRates,
 }: PoiCardProps) {
   const [imgFailed, setImgFailed] = useState(false);
   // #256: Mehr-lesen-Toggle für description + aiSummary
   const [descExpanded, setDescExpanded] = useState(false);
   const [aiExpanded, setAiExpanded] = useState(false);
-  const priceBadge = formatPriceBadge(poi, currencySymbol, homeCurrency, exchangeRates);
+  const priceBadge = formatPriceBadge(poi, currencySymbol, homeCurrency, tripCurrency, exchangeRates);
   const familyName = family?.name ?? 'Unbekannt';
   const familyColor = family?.color ?? '#94999d';
   const distFromHome =
