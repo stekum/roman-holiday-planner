@@ -174,7 +174,6 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 | #213 | Sunset GH-Pages + alten Maps-API-Key löschen (post-#117) | S | Cleanup nach Hosting-Transition |
 | #255 | Fremdwährungs-Umrechnung (Tagesbudget) ✅ | S | merged 2026-05-01 (PR #265, Claude-Implementierung) — POI-Preise in #266 als Follow-up |
 | #266 | POI-Preisranges in Heimat-Währung umrechnen ✅ | S | merged 2026-05-01 (PR #267 + Fix-up #268/#269 wegen Frankfurter-CORS-Bug — Lessons in #270) |
-| #270 | infra: Wechselkurse via Firebase Function 1×/Woche cachen | M | Folge-Cleanup zu #266 — vermeidet 1500/Monat API-Limit + Vendor-Lock-in |
 | #256 | POI-Card-Beschreibung "Mehr lesen" / Expand ✅ | S | merged 2026-04-29 (PR #263, Claude-Implementierung) |
 | #257 | POI-Card Tag-Badge klickbar → Sprung zum Tagesplan ✅ | S | merged 2026-04-29 (PR #261, Codex-Implementierung 2m39s) |
 | #258 | Tagesplan-POI klickbar → Map-Highlight ✅ | S | merged 2026-04-29 (PR #262, Claude-Implementierung) |
@@ -183,9 +182,9 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 | #44 | Notfall-Dashboard | M | aus Deferred |
 | #50 | Aktivitäts-Feed (wer hat was geändert) | M | aus Buffer |
 
-**12 Items insgesamt** (9 done, 3 open). Re-Priorisierung 2026-05-01: #45 (Dokumente-Tresor) und #46 (Packing List) raus aus v3.1 → Backlog (kein Pre-Pfingsten-Pain-Point). Verbleibend offen: #44 (Notfall-Dashboard, M), #50 (Aktivitäts-Feed, M), #270 (Backend-Cache, M), #213 (GH-Pages-Sunset, S, blockiert bis 06.05.).
+**12 Items insgesamt** (9 done, 3 open). Re-Priorisierung 2026-05-01: #45 (Dokumente-Tresor) + #46 (Packing List) → Backlog. #270 (Wechselkurse-Backend-Cache) → v4.0 (Skalierung passt zu App-Stores-Launch). Verbleibend offen: #44 (Notfall-Dashboard, M), #50 (Aktivitäts-Feed, M), #213 (GH-Pages-Sunset, S, blockiert bis 06.05.).
 
-**Release:** `v3.1.0` — vorgezogen 2026-05-01 als Pre-Pfingsten-Polish-Release (9 Items shipped, weitere 4 als v3.1.x später).
+**Release:** `v3.1.0` — vorgezogen 2026-05-01 als Pre-Pfingsten-Polish-Release (9 Items shipped, weitere als v3.1.x Patches später).
 
 ---
 
@@ -267,6 +266,7 @@ Zweiter Multi-Trip auf gereifter Architektur. App-Stand: v3.2. Bugs während Rom
 | #182 | ops: User-Quota-Schutz gegen API-Abuse (pre-public-launch) | M | Security |
 | #114 | Apple Sign-In (Apple-Pflicht für iOS-Release) | M | Auth |
 | #155 | Native CarPlay + Android Auto Itinerary Viewer | L | Native |
+| #270 | infra: Wechselkurse via Firebase Function 1×/Woche cachen (statt Client-Calls) | M | Infra/Skalierung |
 
 **Abhängigkeiten:** Apple Developer Account ($99/Jahr), Google Play Developer ($25 einmalig).
 
