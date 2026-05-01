@@ -179,7 +179,7 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 | #258 | Tagesplan-POI klickbar → Map-Highlight ✅ | S | merged 2026-04-29 (PR #262, Claude-Implementierung) |
 | #259 | Map-InfoWindow konsistent mit POI-Card (aiSummary sichtbar) ✅ | S | merged 2026-04-30 (PR #264, Claude-Implementierung) |
 | #33 | Zeitzonen-Awareness (lokale + Heimatzeit) ✅ | M | merged 2026-05-01 (PR #288) — Dual-Time-Badge im Header |
-| #44 | Notfall-Dashboard | M | aus Deferred |
+| #44 | Notfall-Dashboard ✅ | M | merged 2026-05-01 (PR #289) — statische Country-Daten + tel:-Links + Versicherung |
 | #50 | Aktivitäts-Feed (wer hat was geändert) | M | aus Buffer |
 
 **12 Items insgesamt** (9 done, 3 open). Re-Priorisierung 2026-05-01: #45 (Dokumente-Tresor) + #46 (Packing List) → Backlog. #270 (Wechselkurse-Backend-Cache) → v4.0 (Skalierung passt zu App-Stores-Launch). Verbleibend offen: #44 (Notfall-Dashboard, M), #50 (Aktivitäts-Feed, M), #213 (GH-Pages-Sunset, S, blockiert bis 06.05.).
