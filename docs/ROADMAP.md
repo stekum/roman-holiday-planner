@@ -197,7 +197,7 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 | #72 | Trip-Erstellungs-Wizard | M | aus v3.0-beta |
 | #122 | Multi-Language Support (DE + EN + evtl. JP) | L | aus v2.0 |
 | #235 | Onboarding: Interactive Quickstart-Wizard + kontextuelle Hints | L | neu 2026-04-25 — ggf. #72 absorbieren |
-| #254 | fix: Erstanmelder-Banner "Firebase-Verbindung fehlgeschlagen" entschärfen | S | User-Report 2026-04-28 |
+| #254 | fix: Erstanmelder-Banner "Firebase-Verbindung fehlgeschlagen" entschärfen ✅ | S | merged 2026-05-01 (PR #295) — permission-denied → freundlicher Welcome-Banner statt rotem Bug-Banner |
 | #260 | spike: AI-Infografik-Generator (Tagesplan/Trip als Karte, Gemini Image) | M | Premium-Feature-Spike, vorbereitet Production-Issue v4.5 |
 | #213 | Sunset GH-Pages + alten Maps-API-Key löschen (post-#117) | S | Cleanup nach Hosting-Transition, blockiert bis 06.05.26 (Grace-Period) |
 
