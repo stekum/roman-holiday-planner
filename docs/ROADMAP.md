@@ -280,23 +280,25 @@ Zweiter Multi-Trip auf gereifter Architektur. App-Stand: v3.2. Bugs während Rom
 
 **Zweck:** DevOps-Items die nicht Japan-kritisch sind. Parallel zu v3.x wenn Zeit.
 
-| Issue | Titel | Size |
-|---|---|---|
-| #172 | CI: Playwright E2E im Pipeline | L |
-| #173 | CI: Semantic-Release (auto tag + notes) | M |
+| Issue | Titel | Size | Status |
+|---|---|---|---|
 | #117 | ~~Hosting-Migration (weg von GitHub Pages)~~ | M | ✅ |
-| #123 | Google Analytics Usage Tracking (Pre-GTM Baseline) | S |
-| #133 | Email-Notification bei Zugriffsanfrage | S |
-| #137 | Architektur-Dokumentation | M |
-| #154 | Docs: CarPlay/Android Auto Handoff | S |
+| #123 | ~~Google Analytics Usage Tracking (Pre-GTM Baseline)~~ | S | ✅ |
+| #133 | ~~Email-Notification bei Zugriffsanfrage~~ | S | ✅ |
+| #137 | ~~Architektur-Dokumentation~~ | M | ✅ |
+| #154 | ~~Docs: CarPlay/Android Auto Handoff~~ | S | ✅ |
+| #172 | ~~CI: Playwright E2E im Pipeline~~ | L | ✅ |
+| #173 | ~~CI: Semantic-Release (auto tag + notes)~~ | M | ✅ |
 | #178 | ~~perf: API-Call-Caching (fetchPlaceEnrichment + RoutePolyline) — ~€20/Monat Ersparnis~~ | S | ✅ |
-| #179 | perf: Firestore-Enrichment als Cache-SoT (statt re-fetch) | M |
-| #180 | perf: Dev-Mode-Flags für expensive APIs (Directions, Places) | S |
-| #181 | refactor: Places API Legacy → New Migration (Deprecation-Pflicht) | L |
+| #179 | ~~perf: Firestore-Enrichment als Cache-SoT (statt re-fetch)~~ | M | ✅ |
+| #180 | ~~perf: Dev-Mode-Flags für expensive APIs (Directions, Places)~~ | S | ✅ |
+| #181 | ~~refactor: Places API Legacy → New Migration (Deprecation-Pflicht)~~ | L | ✅ |
 | #183 | ~~CI: Auto-Sync Issue-Milestone → Project-Board + Release-Field~~ | S | ✅ |
-| #190 | DevOps: Chrome DevTools MCP Server für agentisches Testing | S |
+| #190 | ~~DevOps: Chrome DevTools MCP Server für agentisches Testing~~ | S | ✅ |
 
-**Release:** `v2.1.x` — flexibel, Stücke als Patches.
+**Status:** v2.1 ist **komplett abgeschlossen** — alle 13 Items closed. Weitere DevOps-Items werden direkt in passende v3.x/v4.x platziert oder neu kategorisiert.
+
+**Release:** `v2.1.x` — kontinuierlich als Patches geshippt (kein eigenes Release-Tag).
 
 ---
 
