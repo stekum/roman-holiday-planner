@@ -8,6 +8,7 @@ import { TripDatesEditor } from './TripDatesEditor';
 import { TripConfigEditor } from './TripConfigEditor';
 import { HomeCurrencyEditor } from './HomeCurrencyEditor';
 import { HomeTimezoneEditor } from './HomeTimezoneEditor';
+import { EmergencySection } from './EmergencySection';
 import { FamilyEditor } from './FamilyEditor';
 import { HomebasesEditor } from './HomebasesEditor';
 import { TransitDaysEditor } from './TransitDaysEditor';
@@ -31,6 +32,8 @@ interface Props {
   onSetHomeCurrency: (code: string) => void;
   /** #33: Heimat-Zeitzone speichern (IANA). */
   onSetHomeTimezone: (tz: string) => void;
+  /** #44: Reise-Versicherung speichern. */
+  onSetInsurance: (data: { name?: string; phone?: string; policyNumber?: string }) => void;
   /** Optional — if present, shows a „Lokale Daten hochladen"-Button. */
   onMigrateFromLocal?: (data: {
     pois: POI[];
@@ -99,6 +102,7 @@ export function SettingsView({
   onSetTripConfig,
   onSetHomeCurrency,
   onSetHomeTimezone,
+  onSetInsurance,
   onMigrateFromLocal,
   isAdmin,
   myFamilyId,
@@ -151,6 +155,10 @@ export function SettingsView({
       <HomeTimezoneEditor
         value={settings.homeTimezone}
         onChange={onSetHomeTimezone}
+      />
+      <EmergencySection
+        settings={settings}
+        onSetInsurance={onSetInsurance}
       />
       <HomebasesEditor
         homebases={getHomebases(settings)}

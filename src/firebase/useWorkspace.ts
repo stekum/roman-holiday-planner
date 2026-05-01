@@ -68,6 +68,7 @@ export interface WorkspaceAPI {
   setTripConfig: (cfg: TripConfig) => Promise<void>;
   setHomeCurrency: (code: string) => Promise<void>;
   setHomeTimezone: (tz: string) => Promise<void>;
+  setInsurance: (data: { name?: string; phone?: string; policyNumber?: string }) => Promise<void>;
 
   // Trip plan
   plan: TripPlan;
@@ -494,6 +495,15 @@ export function useWorkspace(): WorkspaceAPI {
     [workspaceDocRef],
   );
 
+  const setInsurance = useCallback(
+    async (data: { name?: string; phone?: string; policyNumber?: string }) => {
+      await updateDoc(workspaceDocRef(), {
+        'settings.insurance': stripUndefined(data as unknown as Record<string, unknown>),
+      });
+    },
+    [workspaceDocRef],
+  );
+
   // --- Trip plan operations ---
   const getDay = useCallback(
     (dayIso: string) => doc_.tripPlan[dayIso] ?? [],
@@ -669,6 +679,7 @@ export function useWorkspace(): WorkspaceAPI {
     setTripConfig,
     setHomeCurrency,
     setHomeTimezone,
+    setInsurance,
     plan: doc_.tripPlan,
     getDay,
     togglePoi,

@@ -88,6 +88,18 @@ export interface Settings {
    * (Intl.DateTimeFormat().resolvedOptions().timeZone).
    */
   homeTimezone?: string;
+  /**
+   * Reise-Versicherung-Kontakt fuers Notfall-Dashboard (#44).
+   * Optional — wenn leer wird in der UI ein "noch hinzufügen"-Hinweis angezeigt.
+   */
+  insurance?: {
+    /** Name der Versicherung, z.B. "ADAC Auslands-Krankenschutz". */
+    name?: string;
+    /** Hotline mit Ländervorwahl, z.B. "+49-89-7676-2222". */
+    phone?: string;
+    /** Versicherungsnummer / Police-Nr. */
+    policyNumber?: string;
+  };
 }
 
 export interface TransitDay {
