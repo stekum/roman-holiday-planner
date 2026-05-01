@@ -35,7 +35,7 @@ import { eachDayInRange } from './lib/dates';
 import { generateDayBriefing } from './lib/aiDayBriefing';
 import type { RouteSummary } from './components/map/RoutePolyline';
 import type { Homebase } from './settings/types';
-import { Loader2, WifiOff } from 'lucide-react';
+import { Loader2, Sparkles, WifiOff } from 'lucide-react';
 // import { persistAndUpdatePhoto } from './lib/photoStorage'; // TODO: re-enable after CORS fix (#91)
 
 // HomebasePhotoSync (vor #74) wurde entfernt — seit Multi-Homebase liefert
@@ -350,6 +350,15 @@ function AppInner({ user, profile }: AppInnerProps) {
       <div className="flex items-center gap-2 bg-olive/10 px-4 py-2 text-xs text-olive-dark">
         <Loader2 className="h-3 w-3 animate-spin" />
         Verbinde mit Firebase…
+      </div>
+    ) : status === 'no-membership' ? (
+      // #254: Erstanmelder ohne Workspace-Membership — freundlicher Hinweis
+      // statt rotem Verbindungs-Bug-Banner.
+      <div className="flex items-start gap-2 bg-ocker/15 px-4 py-2 text-xs text-ink/70">
+        <Sparkles className="mt-0.5 h-3 w-3 flex-shrink-0 text-ocker" />
+        <div>
+          <strong className="text-ink">Willkommen!</strong> Lege oben rechts deinen ersten Trip an oder warte auf eine Einladung.
+        </div>
       </div>
     ) : status === 'error' ? (
       <div className="flex items-start gap-2 bg-terracotta/10 px-4 py-2 text-xs text-terracotta">
