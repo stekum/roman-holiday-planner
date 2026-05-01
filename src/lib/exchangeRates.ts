@@ -1,12 +1,20 @@
 /**
  * #255: Wechselkurs-Helfer fuer die Tagesbudget-Conversion.
  *
- * Quelle: https://api.frankfurter.app/ — kostenlos, ECB-basiert, kein Auth.
+ * Quelle: https://open.er-api.com/v6/latest/{BASE} — kostenlos, kein Auth,
+ * **CORS-fähig** (Access-Control-Allow-Origin: *). 1500 Requests/Monat.
+ *
+ * Hinweis: Frankfurter API (urspruenglich gewaehlt) hat KEINE CORS-Header
+ * und funktioniert nicht direkt aus dem Browser — siehe Realtest #266.
+ *
  * Cache: localStorage mit Tagesdatum-Key (Rates aendern sich taeglich).
  *
- * Bewusst MINIMAL: kein Firestore-Sync (Rates sind nicht user-spezifisch),
- * kein Background-Fetch, kein Retry-Backoff. Wird nur geladen wenn ein
- * Trip in einer Fremdwaehrung laeuft (TripConfig.currency != homeCurrency).
+ * Bewusst MINIMAL: kein Firestore-Sync, kein Background-Fetch, kein
+ * Retry-Backoff. Wird nur geladen wenn ein Trip in einer Fremdwaehrung
+ * laeuft (TripConfig.currency != homeCurrency).
+ *
+ * TODO: Backend-Cache via Firebase Function 1×/Woche (siehe Folge-Issue),
+ * dann ist API-Limit irrelevant und kein Vendor-Lock-in.
  */
 
 const CACHE_KEY_PREFIX = 'rhp:exchangeRates';
@@ -49,7 +57,7 @@ function writeCache(data: ExchangeRatesData): void {
 }
 
 /**
- * Holt aktuelle Wechselkurse von Frankfurter API. Cached pro Tag in
+ * Holt aktuelle Wechselkurse von open.er-api.com. Cached pro Tag in
  * localStorage. Bei Netzwerk-Fehler: gibt evtl. Cache vom Vortag zurueck
  * (max-age 7 Tage als Fallback).
  */
@@ -58,14 +66,22 @@ export async function fetchRates(base: string): Promise<ExchangeRatesData> {
   if (cached) return cached;
 
   try {
-    const url = `https://api.frankfurter.app/latest?from=${encodeURIComponent(base)}`;
+    const url = `https://open.er-api.com/v6/latest/${encodeURIComponent(base.toUpperCase())}`;
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`Frankfurter API ${res.status}`);
-    const json = (await res.json()) as { base: string; rates: Record<string, number>; date: string };
+    if (!res.ok) throw new Error(`ExchangeRate-API ${res.status}`);
+    const json = (await res.json()) as {
+      result?: string;
+      base_code?: string;
+      rates?: Record<string, number>;
+      time_last_update_utc?: string;
+    };
+    if (json.result !== 'success' || !json.rates || !json.base_code) {
+      throw new Error(`ExchangeRate-API invalid response: ${json.result ?? 'unknown'}`);
+    }
     const data: ExchangeRatesData = {
-      base: json.base,
+      base: json.base_code,
       rates: json.rates,
-      date: json.date,
+      date: (json.time_last_update_utc ?? new Date().toISOString()).slice(0, 10),
     };
     writeCache(data);
     return data;
