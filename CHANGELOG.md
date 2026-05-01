@@ -1,5 +1,47 @@
 # Changelog
 
+## [3.1.0](https://github.com/stekum/roman-holiday-planner/compare/v3.0.0...v3.1.0) (2026-05-01)
+
+
+### ✨ Features
+
+* **#237:** show PWA update banner ([#253](https://github.com/stekum/roman-holiday-planner/issues/253)) ([3621da5](https://github.com/stekum/roman-holiday-planner/commit/3621da54a8bfd31813600f3894d6570e5745f800))
+* **#255:** fremdwährungs-umrechnung im tagesbudget ([#265](https://github.com/stekum/roman-holiday-planner/issues/265)) ([e84cf73](https://github.com/stekum/roman-holiday-planner/commit/e84cf737031480dee0b29efaba24927939861edf)), closes [#255](https://github.com/stekum/roman-holiday-planner/issues/255)
+* **#256:** "mehr lesen" toggle für poi-card description + ai-summary ([#263](https://github.com/stekum/roman-holiday-planner/issues/263)) ([8e061b6](https://github.com/stekum/roman-holiday-planner/commit/8e061b6a8d0d99a65008745d3232db1b9c19fde1)), closes [#256](https://github.com/stekum/roman-holiday-planner/issues/256)
+* **#257:** tag-badge klickbar — sprung zum tagesplan ([#261](https://github.com/stekum/roman-holiday-planner/issues/261)) ([eb01452](https://github.com/stekum/roman-holiday-planner/commit/eb014522142a599f424ae590f811f8640655b239))
+* **#258:** tagesplan-poi klickbar — highlight + map-center ([#262](https://github.com/stekum/roman-holiday-planner/issues/262)) ([7ff3b72](https://github.com/stekum/roman-holiday-planner/commit/7ff3b72bf48abb17bf8c2dd6035923f39b4c1309)), closes [#258](https://github.com/stekum/roman-holiday-planner/issues/258)
+* **#259:** infowindow zeigt aiSummary konsistent zur poi-card ([#264](https://github.com/stekum/roman-holiday-planner/issues/264)) ([8647a14](https://github.com/stekum/roman-holiday-planner/commit/8647a14c10451a550e32812f3e8030d9b71d65de)), closes [#259](https://github.com/stekum/roman-holiday-planner/issues/259)
+* **#266:** poi-preisranges in heimat-währung umrechnen ([#267](https://github.com/stekum/roman-holiday-planner/issues/267)) ([64e1114](https://github.com/stekum/roman-holiday-planner/commit/64e111412c010aa1fc0dc6ba0a8ba54038fdca57)), closes [#266](https://github.com/stekum/roman-holiday-planner/issues/266)
+* **#33:** zeitzonen-awareness — dual-time-anzeige im header ([#288](https://github.com/stekum/roman-holiday-planner/issues/288)) ([d3231c6](https://github.com/stekum/roman-holiday-planner/commit/d3231c627772b1c9964807ebe7a9291f8cdb9381)), closes [#33](https://github.com/stekum/roman-holiday-planner/issues/33)
+
+
+### 🐛 Bug Fixes
+
+* **#266:** exchange-rate-api statt frankfurter — cors-fähig ([#269](https://github.com/stekum/roman-holiday-planner/issues/269)) ([bbc0191](https://github.com/stekum/roman-holiday-planner/commit/bbc0191063bbcbff7e5593f50e852d8344d877be))
+* **#266:** tripCurrency-fallback wenn priceRange.currencyCode fehlt ([#268](https://github.com/stekum/roman-holiday-planner/issues/268)) ([566ad65](https://github.com/stekum/roman-holiday-planner/commit/566ad65dea423abba16f8dd45041ccb59f342e4d))
+
+
+### 📝 Documentation
+
+* **roadmap:** [#254](https://github.com/stekum/roman-holiday-planner/issues/254) erstanmelder-banner-bug nach v3.2 ([29addef](https://github.com/stekum/roman-holiday-planner/commit/29addef4776df35a2bc1dc1d58bc127b2ab24d3f))
+* **roadmap:** [#255](https://github.com/stekum/roman-holiday-planner/issues/255) done + [#266](https://github.com/stekum/roman-holiday-planner/issues/266) follow-up nach v3.1 ([d9ce0c8](https://github.com/stekum/roman-holiday-planner/commit/d9ce0c80ce98185baceef5d7fa2f58b33602caf1))
+* **roadmap:** [#255](https://github.com/stekum/roman-holiday-planner/issues/255) fremdwährungs-umrechnung nach v3.1 ([b41aa94](https://github.com/stekum/roman-holiday-planner/commit/b41aa94117829c4bf9bc4b1b858b3efe9adb094a))
+* **roadmap:** [#256](https://github.com/stekum/roman-holiday-planner/issues/256) + [#257](https://github.com/stekum/roman-holiday-planner/issues/257) nach v3.1 — POI-Card UX-Polish aus Stefan-Realtest ([8f75ab7](https://github.com/stekum/roman-holiday-planner/commit/8f75ab76c7b040fe1931fd44feca6be15cf0b675))
+* **roadmap:** [#256](https://github.com/stekum/roman-holiday-planner/issues/256) done — mehr-lesen-toggle live auf prod ([d283279](https://github.com/stekum/roman-holiday-planner/commit/d2832793a86527be4743a68f0799eceb84a5d46e))
+* **roadmap:** [#257](https://github.com/stekum/roman-holiday-planner/issues/257) done — tag-badge klickbar live auf prod ([88c1917](https://github.com/stekum/roman-holiday-planner/commit/88c1917673a3058ff6fd1b23a2d7aa7407604e39))
+* **roadmap:** [#258](https://github.com/stekum/roman-holiday-planner/issues/258) + [#259](https://github.com/stekum/roman-holiday-planner/issues/259) nach v3.1 — DayPlanner-UX-Konsistenz ([b9d99c0](https://github.com/stekum/roman-holiday-planner/commit/b9d99c03015b0e34a1e8dc27e917e8e983252d04))
+* **roadmap:** [#258](https://github.com/stekum/roman-holiday-planner/issues/258) done — tagesplan-poi klickbar live auf prod ([7df2973](https://github.com/stekum/roman-holiday-planner/commit/7df2973b7e23e69d863c0b927c2f7467f2c0314a))
+* **roadmap:** [#259](https://github.com/stekum/roman-holiday-planner/issues/259) done — infowindow-konsistenz live auf prod ([e38dd9f](https://github.com/stekum/roman-holiday-planner/commit/e38dd9ffa8b83e1cbbece246285dd829f5194d9c))
+* **roadmap:** [#260](https://github.com/stekum/roman-holiday-planner/issues/260) AI-Infografik-Spike nach v3.2 ([9b6c302](https://github.com/stekum/roman-holiday-planner/commit/9b6c302e22f28317065710bd2aa78a69dc5db9df))
+* **roadmap:** [#266](https://github.com/stekum/roman-holiday-planner/issues/266) done — poi-preisranges-conversion live auf prod ([1bcefba](https://github.com/stekum/roman-holiday-planner/commit/1bcefbabedadafea5e8aab909a820f57a92bdcbb))
+* **roadmap:** [#270](https://github.com/stekum/roman-holiday-planner/issues/270) (wechselkurse-backend-cache) nach v2.1 ([6e85f27](https://github.com/stekum/roman-holiday-planner/commit/6e85f2765b858692bfdf380c7d5f07a5a1f3a525))
+* **roadmap:** [#270](https://github.com/stekum/roman-holiday-planner/issues/270) nach v4.0 — backend-cache passt zur skalierungs-phase ([4a09d63](https://github.com/stekum/roman-holiday-planner/commit/4a09d6394befc05bc6bde9de70735d922166a88f))
+* **roadmap:** [#33](https://github.com/stekum/roman-holiday-planner/issues/33) done + [#45](https://github.com/stekum/roman-holiday-planner/issues/45)/[#46](https://github.com/stekum/roman-holiday-planner/issues/46) raus aus v3.1 — pre-pfingsten cut ([23565de](https://github.com/stekum/roman-holiday-planner/commit/23565de2ee2c7047106ac26aac97c2d4203d1185))
+* **roadmap:** v2.1 als komplett abgeschlossen markiert ([e376c97](https://github.com/stekum/roman-holiday-planner/commit/e376c9705060cad0e9c81cac89a51162078e10cf))
+* **roadmap:** v3.1 sync — [#237](https://github.com/stekum/roman-holiday-planner/issues/237) done + [#213](https://github.com/stekum/roman-holiday-planner/issues/213) nachgetragen ([0be31af](https://github.com/stekum/roman-holiday-planner/commit/0be31af8de3b90c4a32840bd8d5d8cb204700561))
+* **roadmap:** v3.3 UX & Visual Polish epic ([#271](https://github.com/stekum/roman-holiday-planner/issues/271)) ([#287](https://github.com/stekum/roman-holiday-planner/issues/287)) ([f77dcd8](https://github.com/stekum/roman-holiday-planner/commit/f77dcd82157f6802759fc3534f4ba8d1e2baa7b8))
+* **v3.0:** release-marker + tag-link in ROADMAP — v3.0.0 released 2026-04-27 ([8e90d53](https://github.com/stekum/roman-holiday-planner/commit/8e90d53faf0b66cd4a68cc86925f71f2c3181658))
+
 ## [3.0.0](https://github.com/stekum/roman-holiday-planner/compare/v2.2.0...v3.0.0) (2026-04-27)
 
 
