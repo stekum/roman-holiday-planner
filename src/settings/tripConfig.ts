@@ -138,3 +138,42 @@ export function timezoneFromCountry(country: string): string | undefined {
   if (['thailand'].includes(c)) return 'Asia/Bangkok';
   return undefined;
 }
+
+/**
+ * #33: Default Home-Timezone — fallback auf Browser-Locale wenn nicht
+ * explizit in Settings gesetzt.
+ */
+export function resolveHomeTimezone(homeTz: string | undefined): string {
+  if (homeTz) return homeTz;
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Berlin';
+  } catch {
+    return 'Europe/Berlin';
+  }
+}
+
+/**
+ * #33: Liefert "HH:MM" in der angegebenen IANA-Zeitzone fuer ein Datum.
+ * Bei ungueltigem timezone: Fallback auf lokale Zeit.
+ */
+export function formatTimeInZone(date: Date, timezone: string): string {
+  try {
+    return new Intl.DateTimeFormat('de-DE', {
+      timeZone: timezone,
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).format(date);
+  } catch {
+    return date.toTimeString().slice(0, 5);
+  }
+}
+
+/**
+ * #33: Kurzes Stadt-Label fuer eine Zeitzone — die letzte IANA-Komponente,
+ * Underscores zu Spaces. "Asia/Tokyo" → "Tokyo", "Europe/Berlin" → "Berlin".
+ */
+export function labelForTimezone(timezone: string): string {
+  const part = timezone.split('/').pop() ?? timezone;
+  return part.replace(/_/g, ' ');
+}

@@ -67,6 +67,7 @@ export interface WorkspaceAPI {
   setTransitDays: (list: TransitDay[]) => Promise<void>;
   setTripConfig: (cfg: TripConfig) => Promise<void>;
   setHomeCurrency: (code: string) => Promise<void>;
+  setHomeTimezone: (tz: string) => Promise<void>;
 
   // Trip plan
   plan: TripPlan;
@@ -484,6 +485,15 @@ export function useWorkspace(): WorkspaceAPI {
     [workspaceDocRef],
   );
 
+  const setHomeTimezone = useCallback(
+    async (tz: string) => {
+      await updateDoc(workspaceDocRef(), {
+        'settings.homeTimezone': tz,
+      });
+    },
+    [workspaceDocRef],
+  );
+
   // --- Trip plan operations ---
   const getDay = useCallback(
     (dayIso: string) => doc_.tripPlan[dayIso] ?? [],
@@ -658,6 +668,7 @@ export function useWorkspace(): WorkspaceAPI {
     setTransitDays,
     setTripConfig,
     setHomeCurrency,
+    setHomeTimezone,
     plan: doc_.tripPlan,
     getDay,
     togglePoi,

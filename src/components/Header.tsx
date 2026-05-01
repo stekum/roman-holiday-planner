@@ -2,6 +2,7 @@ import type { User } from 'firebase/auth';
 import { Compass, Route, Settings as SettingsIcon } from 'lucide-react';
 import { UserMenu } from './auth/UserMenu';
 import { TripSwitcher } from './trip/TripSwitcher';
+import { DualTimeBadge } from './DualTimeBadge';
 
 export type Tab = 'discover' | 'trip' | 'settings';
 
@@ -16,6 +17,10 @@ interface Props {
    * states and for trips that haven't set a city.
    */
   cityName?: string;
+  /** #33: IANA-Zeitzone des Trips fuer Dual-Time-Anzeige. */
+  tripTimezone?: string;
+  /** #33: IANA-Heimat-Zeitzone (resolved, nicht raw aus Settings). */
+  homeTimezone?: string;
 }
 
 const TABS: { id: Tab; label: string; Icon: typeof Compass; activeClass: string }[] = [
@@ -24,7 +29,7 @@ const TABS: { id: Tab; label: string; Icon: typeof Compass; activeClass: string 
   { id: 'settings', label: 'Settings', Icon: SettingsIcon, activeClass: 'bg-ink text-cream' },
 ];
 
-export function Header({ tab, onTabChange, user, cityName }: Props) {
+export function Header({ tab, onTabChange, user, cityName, tripTimezone, homeTimezone }: Props) {
   const title = cityName ? `${cityName} Holiday Planner` : 'Holiday Planner';
   return (
     <header className="sticky top-0 z-30 border-b border-cream-dark bg-cream/90 backdrop-blur">
@@ -37,6 +42,9 @@ export function Header({ tab, onTabChange, user, cityName }: Props) {
             {title}
           </h1>
           <TripSwitcher />
+          {homeTimezone && (
+            <DualTimeBadge tripTimezone={tripTimezone} homeTimezone={homeTimezone} />
+          )}
         </div>
         <div className="flex items-center gap-2">
           <nav className="flex flex-shrink-0 gap-1 rounded-full bg-white p-1 shadow-sm shadow-ink/5">

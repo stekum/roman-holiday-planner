@@ -14,7 +14,7 @@ import { AddPoiMenu, type AddMode } from './components/add/AddPoiMenu';
 import { LocatePoiModal } from './components/inbox/LocatePoiModal';
 import { EditPoiModal } from './components/poi/EditPoiModal';
 import { useWorkspace } from './firebase/useWorkspace';
-import { getTripConfig, currencySymbolFromCode } from './settings/tripConfig';
+import { getTripConfig, currencySymbolFromCode, resolveHomeTimezone } from './settings/tripConfig';
 import { useExchangeRates } from './hooks/useExchangeRates';
 import { getPlacesBias } from './lib/placesBias';
 import { useActiveWorkspaceId, useSetActiveWorkspaceId } from './firebase/workspaceContext';
@@ -132,6 +132,7 @@ function AppInner({ user, profile }: AppInnerProps) {
     setTransitDays,
     setTripConfig,
     setHomeCurrency,
+    setHomeTimezone,
     plan,
     getDay,
     togglePoi,
@@ -406,7 +407,14 @@ function AppInner({ user, profile }: AppInnerProps) {
 
   const content = (
     <div className="flex h-full flex-col">
-      <Header tab={tab} onTabChange={setTab} user={user} cityName={cityName} />
+      <Header
+        tab={tab}
+        onTabChange={setTab}
+        user={user}
+        cityName={cityName}
+        tripTimezone={getTripConfig(settings).timezone}
+        homeTimezone={resolveHomeTimezone(settings.homeTimezone)}
+      />
       <PwaUpdateBanner />
       {connectionBanner}
       <main className="flex flex-1 flex-col overflow-hidden">
@@ -560,6 +568,7 @@ function AppInner({ user, profile }: AppInnerProps) {
               onSetTransitDays={(list) => void setTransitDays(list)}
               onSetTripConfig={(cfg) => void setTripConfig(cfg)}
               onSetHomeCurrency={(code) => void setHomeCurrency(code)}
+              onSetHomeTimezone={(tz) => void setHomeTimezone(tz)}
               onMigrateFromLocal={workspace.migrateFromLocal}
               isAdmin={isAdmin}
               myFamilyId={myFamilyId}
