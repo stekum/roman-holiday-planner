@@ -502,6 +502,7 @@ function AppInner({ user, profile }: AppInnerProps) {
               onSetVisitStatus={(id, status) => void setVisitStatus(id, status)}
               currencySymbol={currencySymbolFromCode(getTripConfig(settings).currency)}
               homeCurrency={homeCurrencyResolved}
+              tripCurrency={tripCurrencyForRates}
               exchangeRates={exchangeRates}
             />
             </>
