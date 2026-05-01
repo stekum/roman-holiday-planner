@@ -75,6 +75,13 @@ export interface Settings {
   transitDays?: TransitDay[];
   /** Wenn nicht gesetzt → DEFAULT_TRIP_CONFIG (Rom/Italien/Deutsch). */
   tripConfig?: TripConfig;
+  /**
+   * Heimat-Währung des Workspace (ISO-4217, z.B. "EUR"). Wird für die
+   * Conversion-Anzeige genutzt — wenn TripConfig.currency abweicht (z.B.
+   * Japan = JPY), zeigt die App zusätzliche EUR-Werte an. (#255)
+   * Default: 'EUR'.
+   */
+  homeCurrency?: string;
 }
 
 export interface TransitDay {

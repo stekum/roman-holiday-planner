@@ -130,6 +130,7 @@ function AppInner({ user, profile }: AppInnerProps) {
     setHomebases,
     setTransitDays,
     setTripConfig,
+    setHomeCurrency,
     plan,
     getDay,
     togglePoi,
@@ -546,6 +547,7 @@ function AppInner({ user, profile }: AppInnerProps) {
               onSetHomebases={(list) => void setHomebases(list)}
               onSetTransitDays={(list) => void setTransitDays(list)}
               onSetTripConfig={(cfg) => void setTripConfig(cfg)}
+              onSetHomeCurrency={(code) => void setHomeCurrency(code)}
               onMigrateFromLocal={workspace.migrateFromLocal}
               isAdmin={isAdmin}
               myFamilyId={myFamilyId}

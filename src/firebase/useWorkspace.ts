@@ -66,6 +66,7 @@ export interface WorkspaceAPI {
   setHomebases: (list: Homebase[]) => Promise<void>;
   setTransitDays: (list: TransitDay[]) => Promise<void>;
   setTripConfig: (cfg: TripConfig) => Promise<void>;
+  setHomeCurrency: (code: string) => Promise<void>;
 
   // Trip plan
   plan: TripPlan;
@@ -474,6 +475,15 @@ export function useWorkspace(): WorkspaceAPI {
     [workspaceDocRef],
   );
 
+  const setHomeCurrency = useCallback(
+    async (code: string) => {
+      await updateDoc(workspaceDocRef(), {
+        'settings.homeCurrency': code,
+      });
+    },
+    [workspaceDocRef],
+  );
+
   // --- Trip plan operations ---
   const getDay = useCallback(
     (dayIso: string) => doc_.tripPlan[dayIso] ?? [],
@@ -647,6 +657,7 @@ export function useWorkspace(): WorkspaceAPI {
     setHomebases,
     setTransitDays,
     setTripConfig,
+    setHomeCurrency,
     plan: doc_.tripPlan,
     getDay,
     togglePoi,
