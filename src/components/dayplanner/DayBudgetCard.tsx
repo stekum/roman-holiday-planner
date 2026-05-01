@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Wallet, AlertTriangle } from 'lucide-react';
 import type { DayBudget } from '../../firebase/useWorkspace';
+import { useExchangeRates } from '../../hooks/useExchangeRates';
+import { convertAmount, formatConverted } from '../../lib/exchangeRates';
+import { currencySymbolFromCode } from '../../settings/tripConfig';
 
 interface Props {
   dayIso: string;
@@ -8,12 +11,23 @@ interface Props {
   onChange: (dayIso: string, b: DayBudget) => void;
   /** Waehrungs-Symbol aus TripConfig-Land abgeleitet, default '€'. */
   currencySymbol?: string;
+  /** ISO-4217 der Trip-Waehrung (#255), z.B. 'JPY'. Default 'EUR'. */
+  tripCurrency?: string;
+  /** ISO-4217 der Heimat-Waehrung (#255), z.B. 'EUR'. Default 'EUR'. */
+  homeCurrency?: string;
 }
 
 // Parent gibt `key={activeDay}` — bei Tag-Wechsel wird die Komponente neu
 // gemountet und initialisiert State aus Props. Das vermeidet den
 // setState-in-useEffect-Anti-Pattern.
-export function DayBudgetCard({ dayIso, budget, onChange, currencySymbol = '€' }: Props) {
+export function DayBudgetCard({
+  dayIso,
+  budget,
+  onChange,
+  currencySymbol = '€',
+  tripCurrency = 'EUR',
+  homeCurrency = 'EUR',
+}: Props) {
   const [budgetStr, setBudgetStr] = useState<string>(
     budget?.budget ? String(budget.budget) : '',
   );
@@ -28,6 +42,20 @@ export function DayBudgetCard({ dayIso, budget, onChange, currencySymbol = '€'
   const isWarning = budgetNum > 0 && pct >= 80 && pct < 100;
   const isOver = budgetNum > 0 && spentNum > budgetNum;
   const hasData = budgetNum > 0 || spentNum > 0;
+
+  // #255: Conversion-Anzeige aktivieren wenn Trip- und Heimat-Waehrung
+  // verschieden sind. Lazy-Load via Hook — wenn EUR=EUR, kein API-Call.
+  const conversionEnabled =
+    tripCurrency.toUpperCase() !== homeCurrency.toUpperCase();
+  const { data: rates } = useExchangeRates(tripCurrency, conversionEnabled);
+  const homeSymbol = currencySymbolFromCode(homeCurrency);
+  const convert = (amount: number): string | null => {
+    if (!conversionEnabled || !rates || amount <= 0) return null;
+    const value = convertAmount(amount, tripCurrency, homeCurrency, rates);
+    return value === null ? null : formatConverted(value, homeCurrency, homeSymbol);
+  };
+  const budgetConverted = convert(budgetNum);
+  const spentConverted = convert(spentNum);
 
   const commit = () => {
     onChange(dayIso, { budget: budgetNum, spent: spentNum });
@@ -79,6 +107,9 @@ export function DayBudgetCard({ dayIso, budget, onChange, currencySymbol = '€'
               className="w-full bg-transparent text-ink outline-none"
             />
           </div>
+          {budgetConverted && (
+            <span className="mt-1 block text-[10px] text-ink/50">{budgetConverted}</span>
+          )}
         </label>
         <label className="block">
           <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-ink/50">
@@ -98,6 +129,9 @@ export function DayBudgetCard({ dayIso, budget, onChange, currencySymbol = '€'
               className="w-full bg-transparent text-ink outline-none"
             />
           </div>
+          {spentConverted && (
+            <span className="mt-1 block text-[10px] text-ink/50">{spentConverted}</span>
+          )}
         </label>
       </div>
 

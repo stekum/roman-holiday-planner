@@ -356,6 +356,8 @@ export function DayPlanner({
         budget={dayBudget}
         onChange={onSetDayBudget}
         currencySymbol={currencyFromCountry(getTripConfig(settings).country)}
+        tripCurrency={getTripConfig(settings).currency}
+        homeCurrency={settings.homeCurrency}
       />
 
       {isGeminiConfigured && (

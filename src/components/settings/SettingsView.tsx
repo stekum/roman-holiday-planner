@@ -6,6 +6,7 @@ import type { TripPlan } from '../../hooks/useTripPlan';
 import { DEFAULT_SETTINGS } from '../../settings/defaults';
 import { TripDatesEditor } from './TripDatesEditor';
 import { TripConfigEditor } from './TripConfigEditor';
+import { HomeCurrencyEditor } from './HomeCurrencyEditor';
 import { FamilyEditor } from './FamilyEditor';
 import { HomebasesEditor } from './HomebasesEditor';
 import { TransitDaysEditor } from './TransitDaysEditor';
@@ -25,6 +26,8 @@ interface Props {
   onSetHomebases: (list: Homebase[]) => void;
   onSetTransitDays: (list: TransitDay[]) => void;
   onSetTripConfig: (cfg: TripConfig) => void;
+  /** #255: Heimat-Währung speichern (ISO-4217). */
+  onSetHomeCurrency: (code: string) => void;
   /** Optional — if present, shows a „Lokale Daten hochladen"-Button. */
   onMigrateFromLocal?: (data: {
     pois: POI[];
@@ -91,6 +94,7 @@ export function SettingsView({
   onSetHomebases,
   onSetTransitDays,
   onSetTripConfig,
+  onSetHomeCurrency,
   onMigrateFromLocal,
   isAdmin,
   myFamilyId,
@@ -135,6 +139,10 @@ export function SettingsView({
       <TripConfigEditor
         tripConfig={settings.tripConfig}
         onChange={onSetTripConfig}
+      />
+      <HomeCurrencyEditor
+        value={settings.homeCurrency ?? 'EUR'}
+        onChange={onSetHomeCurrency}
       />
       <HomebasesEditor
         homebases={getHomebases(settings)}
