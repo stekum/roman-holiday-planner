@@ -74,3 +74,68 @@ export function formatWeeklyHours(weekdayText?: string[]): string {
     })
     .join('\n');
 }
+
+/**
+ * Strukturiertes Pendant zu OpeningHoursPeriod aus dem Google Places SDK.
+ * Wir definieren ein eigenes Interface, damit der Helper auch ohne Live-SDK
+ * (z.B. in Tests oder bei Mock-Daten) lauffähig ist.
+ *
+ * Konvention: day 0=Sunday, …, 6=Saturday — identisch zum Places API
+ * (regularOpeningHours.periods[].open.day) und zu Date.getDay().
+ */
+export interface PlacesPeriod {
+  open: { day: number; hour: number; minute: number };
+  close?: { day: number; hour: number; minute: number } | null;
+}
+
+/**
+ * #300: Filtert Places-Treffer auf einen bestimmten Wochentag (+ optional
+ * Uhrzeit) — wird in der Vibes-Suche client-side gegen das strukturierte
+ * `regularOpeningHours.periods`-Schema angewandt.
+ *
+ * Fail-open: wenn keine Periods bekannt sind (Place hat keine Hours-Daten),
+ * geben wir true zurück — lieber einen falschen Treffer behalten als einen
+ * echten wegfiltern wegen fehlender Metadaten.
+ *
+ * Edge-Cases:
+ *   • 24/7-Places: ein einzelnes Period mit `open.hour=0, open.minute=0` und
+ *     `close == null` → immer offen
+ *   • Cross-midnight: close.day liegt einen Tag nach open.day — Zeit wird
+ *     in Minuten +24h geshiftet
+ *   • openAt fehlt → nur Wochentags-Match prüfen
+ */
+export function isOpenOnDayAt(
+  periods: PlacesPeriod[] | undefined | null,
+  weekday: number,
+  openAt?: string,
+): boolean {
+  if (!periods || periods.length === 0) return true;
+  // 24/7: ein einzelner Period ohne close
+  if (periods.length === 1 && !periods[0].close && periods[0].open.hour === 0 && periods[0].open.minute === 0) {
+    return true;
+  }
+  const targetMin = openAt ? parseHHmm(openAt) : null;
+  return periods.some((p) => {
+    if (p.open.day !== weekday) return false;
+    if (targetMin === null) return true;
+    const openMin = p.open.hour * 60 + p.open.minute;
+    if (!p.close) {
+      // Period ohne close: ab open offen bis Tagesende
+      return targetMin >= openMin;
+    }
+    const closeBase = p.close.hour * 60 + p.close.minute;
+    // Cross-midnight: close auf nächstem Tag → +24h
+    const crossMidnight = p.close.day !== p.open.day;
+    const closeMin = crossMidnight ? closeBase + 24 * 60 : closeBase;
+    return targetMin >= openMin && targetMin < closeMin;
+  });
+}
+
+function parseHHmm(s: string): number | null {
+  const match = s.match(/^(\d{2}):(\d{2})$/);
+  if (!match) return null;
+  const h = Number(match[1]);
+  const min = Number(match[2]);
+  if (h < 0 || h > 23 || min < 0 || min > 59) return null;
+  return h * 60 + min;
+}

@@ -101,6 +101,16 @@ export function AddPoiMenu({
     close();
   };
 
+  /**
+   * #300: Multi-Add für die Vibes-Suche — addet, lässt das Modal aber offen,
+   * damit weitere Treffer aus derselben Suche addbar sind. Schließen erfolgt
+   * vom Child via `onCancel` (Footer-Button "Fertig" / "Abbrechen").
+   */
+  const handleSaveStay = (poi: POI) => {
+    track('add_poi', { method: 'ai-search' });
+    onAdd(poi);
+  };
+
   const bias = getPlacesBias(tripConfig, homebaseCoords);
 
   return (
@@ -193,7 +203,7 @@ export function AddPoiMenu({
               <AddFromAiSearch
                 families={families}
                 onCancel={close}
-                onSave={handleSave}
+                onSaveAndStay={handleSaveStay}
                 tripConfig={tripConfig}
               />
             )}
