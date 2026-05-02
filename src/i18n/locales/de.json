@@ -1,0 +1,18 @@
+{
+  "header": {
+    "tabs": {
+      "discover": "Entdecken",
+      "trip": "Reise",
+      "settings": "Einstellungen"
+    },
+    "title": "Holiday Planner",
+    "titleWithCity": "{{city}} Holiday Planner"
+  },
+  "settings": {
+    "language": {
+      "section": "Sprache",
+      "de": "Deutsch",
+      "en": "Englisch"
+    }
+  }
+}

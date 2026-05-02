@@ -14,6 +14,7 @@ import { AddPoiMenu, type AddMode } from './components/add/AddPoiMenu';
 import { LocatePoiModal } from './components/inbox/LocatePoiModal';
 import { EditPoiModal } from './components/poi/EditPoiModal';
 import { useWorkspace } from './firebase/useWorkspace';
+import { useSettings } from './hooks/useSettings';
 import { getTripConfig, currencySymbolFromCode, resolveHomeTimezone } from './settings/tripConfig';
 import { useExchangeRates } from './hooks/useExchangeRates';
 import { getPlacesBias } from './lib/placesBias';
@@ -84,6 +85,9 @@ function AppInner({ user, profile }: AppInnerProps) {
   const workspaceId = useActiveWorkspaceId();
   const setWorkspaceId = useSetActiveWorkspaceId();
   const workspace = useWorkspace();
+  // #122 Phase 1: UI-language is user-scoped (localStorage), not workspace-scoped.
+  // Kept on a parallel useSettings hook to bypass the workspace/Firestore layer.
+  const { settings: localSettings, setUiLanguage } = useSettings();
   // #113 Phase 1: sync workspace list between Firestore user-profile and
   // local knownWorkspaces so trips show up on all devices the user logs
   // into with the same account.
@@ -571,7 +575,7 @@ function AppInner({ user, profile }: AppInnerProps) {
           )}
           {tab === 'settings' && (
             <SettingsView
-              settings={settings}
+              settings={{ ...settings, uiLanguage: localSettings.uiLanguage }}
               onTripDates={setTripDates}
               onAddFamily={addFamily}
               onUpdateFamily={updateFamily}
@@ -586,6 +590,7 @@ function AppInner({ user, profile }: AppInnerProps) {
               isAdmin={isAdmin}
               myFamilyId={myFamilyId}
               onMyFamilyChange={setMyFamilyId}
+              onSetUiLanguage={setUiLanguage}
             />
           )}
         </div>

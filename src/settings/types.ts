@@ -124,6 +124,12 @@ export interface Settings {
     /** Versicherungsnummer / Police-Nr. */
     policyNumber?: string;
   };
+  /**
+   * UI-Sprache (#122 Phase 1). Steuert ausschließlich UI-Strings via
+   * react-i18next. Ist NICHT identisch mit `tripConfig.language`, das die
+   * Antwort-Sprache der AI-Helper definiert. Default: 'de'.
+   */
+  uiLanguage?: 'de' | 'en';
 }
 
 export interface TransitDay {

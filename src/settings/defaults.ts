@@ -25,4 +25,5 @@ export const DEFAULT_SETTINGS: Settings = {
     { id: 'default-a', name: 'Familie 1', color: FAMILY_COLOR_PALETTE[0].hex },
     { id: 'default-b', name: 'Familie 2', color: FAMILY_COLOR_PALETTE[1].hex },
   ],
+  uiLanguage: 'de',
 };
