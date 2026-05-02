@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AlertTriangle, Upload } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { Family, Homebase, Settings, TransitDay, TripConfig } from '../../settings/types';
 import type { POI } from '../../data/pois';
 import type { TripPlan } from '../../hooks/useTripPlan';
@@ -45,6 +46,8 @@ interface Props {
   /** Current device's "I belong to" family — for voting. */
   myFamilyId: string;
   onMyFamilyChange: (id: string) => void;
+  /** #122 Phase 1: UI-Sprache umschalten (DE/EN). */
+  onSetUiLanguage: (lng: 'de' | 'en') => void;
 }
 
 function readLocalData(): {
@@ -107,7 +110,9 @@ export function SettingsView({
   isAdmin,
   myFamilyId,
   onMyFamilyChange,
+  onSetUiLanguage,
 }: Props) {
+  const { t } = useTranslation();
   const [migrationState, setMigrationState] = useState<
     'idle' | 'uploading' | 'done' | 'error'
   >('idle');
@@ -186,6 +191,32 @@ export function SettingsView({
         onChange={onMyFamilyChange}
       />
       <WorkspaceMembersSection />
+
+      <section className="rounded-3xl border border-cream-dark bg-white p-5">
+        <h2 className="mb-3 text-lg font-semibold text-ink">
+          {t('settings.language.section')}
+        </h2>
+        <div className="flex gap-2">
+          {(['de', 'en'] as const).map((lng) => {
+            const isActive = (settings.uiLanguage ?? 'de') === lng;
+            return (
+              <button
+                key={lng}
+                type="button"
+                onClick={() => onSetUiLanguage(lng)}
+                aria-pressed={isActive}
+                className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+                  isActive
+                    ? 'bg-ink text-cream'
+                    : 'border border-cream-dark bg-white text-ink/70 hover:text-ink'
+                }`}
+              >
+                {t(`settings.language.${lng}`)}
+              </button>
+            );
+          })}
+        </div>
+      </section>
 
       {onMigrateFromLocal && localPoiCount > 0 && (
         <section className="rounded-3xl border-2 border-dashed border-olive/40 bg-white p-5">

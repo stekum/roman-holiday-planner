@@ -1,5 +1,6 @@
 import type { User } from 'firebase/auth';
 import { Compass, Route, Settings as SettingsIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { UserMenu } from './auth/UserMenu';
 import { TripSwitcher } from './trip/TripSwitcher';
 import { DualTimeBadge } from './DualTimeBadge';
@@ -23,14 +24,14 @@ interface Props {
   homeTimezone?: string;
 }
 
-const TABS: { id: Tab; label: string; Icon: typeof Compass; activeClass: string }[] = [
-  { id: 'discover', label: 'Entdecken', Icon: Compass, activeClass: 'bg-terracotta text-white' },
-  { id: 'trip', label: 'Reise', Icon: Route, activeClass: 'bg-olive text-white' },
-  { id: 'settings', label: 'Settings', Icon: SettingsIcon, activeClass: 'bg-ink text-cream' },
-];
-
 export function Header({ tab, onTabChange, user, cityName, tripTimezone, homeTimezone }: Props) {
-  const title = cityName ? `${cityName} Holiday Planner` : 'Holiday Planner';
+  const { t } = useTranslation();
+  const tabs: { id: Tab; label: string; Icon: typeof Compass; activeClass: string }[] = [
+    { id: 'discover', label: t('header.tabs.discover'), Icon: Compass, activeClass: 'bg-terracotta text-white' },
+    { id: 'trip', label: t('header.tabs.trip'), Icon: Route, activeClass: 'bg-olive text-white' },
+    { id: 'settings', label: t('header.tabs.settings'), Icon: SettingsIcon, activeClass: 'bg-ink text-cream' },
+  ];
+  const title = cityName ? t('header.titleWithCity', { city: cityName }) : t('header.title');
   return (
     <header className="sticky top-0 z-30 border-b border-cream-dark bg-cream/90 backdrop-blur">
       <div className="mx-auto flex max-w-2xl items-center justify-between gap-2 px-4 py-3">
@@ -48,7 +49,7 @@ export function Header({ tab, onTabChange, user, cityName, tripTimezone, homeTim
         </div>
         <div className="flex items-center gap-2">
           <nav className="flex flex-shrink-0 gap-1 rounded-full bg-white p-1 shadow-sm shadow-ink/5">
-            {TABS.map(({ id, label, Icon, activeClass }) => (
+            {tabs.map(({ id, label, Icon, activeClass }) => (
               <button
                 key={id}
                 type="button"

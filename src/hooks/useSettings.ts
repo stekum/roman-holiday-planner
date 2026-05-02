@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import i18n from '../i18n';
 import { DEFAULT_SETTINGS } from '../settings/defaults';
 import type { Family, Settings } from '../settings/types';
 
@@ -16,6 +17,7 @@ function loadInitial(): Settings {
         Array.isArray(parsed.families) && parsed.families.length > 0
           ? parsed.families
           : DEFAULT_SETTINGS.families,
+      uiLanguage: parsed.uiLanguage === 'en' ? 'en' : 'de',
     };
   } catch {
     return DEFAULT_SETTINGS;
@@ -33,8 +35,21 @@ export function useSettings() {
     }
   }, [settings]);
 
+  // Keep i18n language in sync with persisted settings (covers initial mount
+  // and any later mutation, e.g. dev-tools editing localStorage).
+  useEffect(() => {
+    const target = settings.uiLanguage ?? 'de';
+    if (i18n.language !== target) {
+      void i18n.changeLanguage(target);
+    }
+  }, [settings.uiLanguage]);
+
   const setTripDates = useCallback((tripStart: string, tripEnd: string) => {
     setSettings((prev) => ({ ...prev, tripStart, tripEnd }));
+  }, []);
+
+  const setUiLanguage = useCallback((lng: 'de' | 'en') => {
+    setSettings((prev) => ({ ...prev, uiLanguage: lng }));
   }, []);
 
   const addFamily = useCallback((family: Omit<Family, 'id'>) => {
@@ -70,6 +85,7 @@ export function useSettings() {
   return {
     settings,
     setTripDates,
+    setUiLanguage,
     addFamily,
     updateFamily,
     removeFamily,
