@@ -198,7 +198,7 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 | #122 | Multi-Language Support (DE + EN + evtl. JP) | L | aus v2.0 |
 | #235 | Onboarding: Interactive Quickstart-Wizard + kontextuelle Hints | L | neu 2026-04-25 — ggf. #72 absorbieren |
 | #254 | fix: Erstanmelder-Banner "Firebase-Verbindung fehlgeschlagen" entschärfen ✅ | S | merged 2026-05-01 (PR #295) — permission-denied → freundlicher Welcome-Banner statt rotem Bug-Banner |
-| #260 | spike: AI-Infografik-Generator (Tagesplan/Trip als Karte, Gemini Image) | M | Premium-Feature-Spike, vorbereitet Production-Issue v4.5 |
+| #260 | ~~spike: AI-Infografik-Generator (Tagesplan/Trip als Karte)~~ ✅ done 2026-05-01 | M | GPT-Image-2 als Plan A → Production-Issue [#302](https://github.com/stekum/roman-holiday-planner/issues/302) angelegt für v4.5 |
 | #213 | Sunset GH-Pages + alten Maps-API-Key löschen (post-#117) | S | Cleanup nach Hosting-Transition, blockiert bis 06.05.26 (Grace-Period) |
 | #300 | fix: Vibes-Suche — strukturierte Filter (Wochentag/Zeit) + Mehrfach-Add ohne Modal-Close | M | neu 2026-05-01 — "Montag geöffnet" filtert nicht real, Modal schließt nach erstem Pick |
 
@@ -312,6 +312,7 @@ Bündelt alle Issues rund um Monetarisierung, Marketing und professionellen Laun
 | #142 | Business Model & Pricing Strategy | L | Monetization |
 | #143 | Monetization Tech: IAP + Subscriptions | L | Monetization |
 | #148 | Analytics & Unit Economics | M | Monetization |
+| #302 | feat: AI-Infografik-Generator (Production, post-Spike #260) | L | Premium Feature / Marketing-Hook |
 | #144 | ASO — App Store Optimization | M | Marketing |
 | #145 | Marketing Website + SEO | L | Marketing |
 | #146 | Launch Campaign Playbook | M | Marketing |
