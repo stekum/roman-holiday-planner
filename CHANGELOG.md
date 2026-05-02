@@ -1,5 +1,38 @@
 # Changelog
 
+## [3.2.0](https://github.com/stekum/roman-holiday-planner/compare/v3.1.0...v3.2.0) (2026-05-02)
+
+
+### ✨ Features
+
+* **#44:** notfall-dashboard in settings — botschaft + notruf + versicherung ([#289](https://github.com/stekum/roman-holiday-planner/issues/289)) ([207dc0c](https://github.com/stekum/roman-holiday-planner/commit/207dc0c7c3c16be0fb0f35d41956580a35817ecd)), closes [#44](https://github.com/stekum/roman-holiday-planner/issues/44)
+* **#50:** activity-feed — wer hat was geändert (live-sync) ([#291](https://github.com/stekum/roman-holiday-planner/issues/291)) ([d7eda59](https://github.com/stekum/roman-holiday-planner/commit/d7eda590711eaa15c645a86a201f0c1e59900564)), closes [#50](https://github.com/stekum/roman-holiday-planner/issues/50)
+* **#72:** trip-erstellungs-wizard als modal mit citypicker ([#296](https://github.com/stekum/roman-holiday-planner/issues/296)) ([774def1](https://github.com/stekum/roman-holiday-planner/commit/774def1cf668d960a7411ecaae0f0a87e95bf6b5)), closes [#72](https://github.com/stekum/roman-holiday-planner/issues/72)
+* **#79:** trip-archivierung im trip-switcher ([#293](https://github.com/stekum/roman-holiday-planner/issues/293)) ([758ef35](https://github.com/stekum/roman-holiday-planner/commit/758ef35de79be1b6345daff6c633fbb653c5b6df)), closes [#79](https://github.com/stekum/roman-holiday-planner/issues/79)
+* **i18n:** flag emojis next to language buttons ([#307](https://github.com/stekum/roman-holiday-planner/issues/307)) ([62f4a19](https://github.com/stekum/roman-holiday-planner/commit/62f4a193f85a9cf4260ce33d2e5e7622d36ee083)), closes [#122](https://github.com/stekum/roman-holiday-planner/issues/122)
+* **i18n:** react-i18next foundation + header proof ([#305](https://github.com/stekum/roman-holiday-planner/issues/305)) ([2581d1a](https://github.com/stekum/roman-holiday-planner/commit/2581d1aed9992d77ef7f98fcee350565552c93aa)), closes [#304](https://github.com/stekum/roman-holiday-planner/issues/304) [#122](https://github.com/stekum/roman-holiday-planner/issues/122)
+
+
+### 🐛 Bug Fixes
+
+* **#254:** erstanmelder-banner — permission-denied freundlich behandeln ([#295](https://github.com/stekum/roman-holiday-planner/issues/295)) ([759b0c3](https://github.com/stekum/roman-holiday-planner/commit/759b0c363a1ea4e500c20e6c44d05e79fa7efccf)), closes [#254](https://github.com/stekum/roman-holiday-planner/issues/254)
+* **#300:** vibes-suche — strukturierter weekday-filter + mehrfach-add ([#308](https://github.com/stekum/roman-holiday-planner/issues/308)) ([79b21f3](https://github.com/stekum/roman-holiday-planner/commit/79b21f39a50a80d935f5dc9b7fb87b050341382f)), closes [#300](https://github.com/stekum/roman-holiday-planner/issues/300)
+* **#72:** modal via portal — escapes header stacking-context ([#298](https://github.com/stekum/roman-holiday-planner/issues/298)) ([b9b1404](https://github.com/stekum/roman-holiday-planner/commit/b9b1404b03bcb3d922337c5d3a40087ee4429061))
+* **#72:** modal-overflow auf mobile — zentriert + scrollbar ([#297](https://github.com/stekum/roman-holiday-planner/issues/297)) ([29e6f12](https://github.com/stekum/roman-holiday-planner/commit/29e6f12287f88c2fe71ab74b58231b4da363195e))
+* **#79:** mobile-touch-targets im trip-switcher dropdown ([#294](https://github.com/stekum/roman-holiday-planner/issues/294)) ([8f7b106](https://github.com/stekum/roman-holiday-planner/commit/8f7b106d9a414ece639accf2bdbb8cc69885996a))
+
+
+### 📝 Documentation
+
+* **roadmap:** [#254](https://github.com/stekum/roman-holiday-planner/issues/254) done — erstanmelder-banner-fix live auf prod ([dd05198](https://github.com/stekum/roman-holiday-planner/commit/dd0519856a31e95c310a78bc0ba7c94eabdee9b4))
+* **roadmap:** [#260](https://github.com/stekum/roman-holiday-planner/issues/260) spike done → [#302](https://github.com/stekum/roman-holiday-planner/issues/302) production für v4.5 verlinkt ([#303](https://github.com/stekum/roman-holiday-planner/issues/303)) ([db7a5cb](https://github.com/stekum/roman-holiday-planner/commit/db7a5cb41269d2c251048dd5a69556b4bd4ad7d1))
+* **roadmap:** [#300](https://github.com/stekum/roman-holiday-planner/issues/300) done, [#213](https://github.com/stekum/roman-holiday-planner/issues/213) nach v3.3 verschoben ([#309](https://github.com/stekum/roman-holiday-planner/issues/309)) ([100480f](https://github.com/stekum/roman-holiday-planner/commit/100480fa59550e7abcce0c745ad5650301745468))
+* **roadmap:** [#304](https://github.com/stekum/roman-holiday-planner/issues/304) i18n-foundation in v3.2, [#122](https://github.com/stekum/roman-holiday-planner/issues/122) nach v3.3 verschieben ([#306](https://github.com/stekum/roman-holiday-planner/issues/306)) ([aa373a1](https://github.com/stekum/roman-holiday-planner/commit/aa373a16e47748b9b410693465a16ca836187ef9))
+* **roadmap:** [#44](https://github.com/stekum/roman-holiday-planner/issues/44) done — notfall-dashboard live auf prod ([ee3da32](https://github.com/stekum/roman-holiday-planner/commit/ee3da320413cba781f352d03b2d149fd7033ea1e))
+* **roadmap:** [#50](https://github.com/stekum/roman-holiday-planner/issues/50) done — activity-feed live auf prod ([a2862ad](https://github.com/stekum/roman-holiday-planner/commit/a2862adb3c4eb81a3285592bf51f14249ace4683))
+* **roadmap:** [#79](https://github.com/stekum/roman-holiday-planner/issues/79) done — trip-archivierung live auf prod ([e1e48bb](https://github.com/stekum/roman-holiday-planner/commit/e1e48bb65dd216e7ab15dffe7db397de2bb1e76b))
+* **roadmap:** drift-fix v3.1↔v3.2 — [#213](https://github.com/stekum/roman-holiday-planner/issues/213) in v3.2-tabelle nachgezogen ([09c0ec0](https://github.com/stekum/roman-holiday-planner/commit/09c0ec08396b8ee00d824d8b6f223953f86af3af))
+
 ## [3.1.0](https://github.com/stekum/roman-holiday-planner/compare/v3.0.0...v3.1.0) (2026-05-01)
 
 
