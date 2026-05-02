@@ -199,10 +199,9 @@ Kein neuer Feature-Scope. Patch-Releases (`v3.0.1`, `v3.0.2`) für Bugs die unte
 | #235 | Onboarding: Interactive Quickstart-Wizard + kontextuelle Hints | L | neu 2026-04-25 — ggf. #72 absorbieren |
 | #254 | fix: Erstanmelder-Banner "Firebase-Verbindung fehlgeschlagen" entschärfen ✅ | S | merged 2026-05-01 (PR #295) — permission-denied → freundlicher Welcome-Banner statt rotem Bug-Banner |
 | #260 | ~~spike: AI-Infografik-Generator (Tagesplan/Trip als Karte)~~ ✅ done 2026-05-01 | M | GPT-Image-2 als Plan A → Production-Issue [#302](https://github.com/stekum/roman-holiday-planner/issues/302) angelegt für v4.5 |
-| #213 | Sunset GH-Pages + alten Maps-API-Key löschen (post-#117) | S | Cleanup nach Hosting-Transition, blockiert bis 06.05.26 (Grace-Period) |
-| #300 | fix: Vibes-Suche — strukturierte Filter (Wochentag/Zeit) + Mehrfach-Add ohne Modal-Close | M | neu 2026-05-01 — "Montag geöffnet" filtert nicht real, Modal schließt nach erstem Pick |
+| #300 | ~~fix: Vibes-Suche — strukturierte Filter (Wochentag/Zeit) + Mehrfach-Add ohne Modal-Close~~ ✅ done 2026-05-02 | M | merged PR #308 — strukturierter weekday-Filter + addedPlaceIds-Set + Toast |
 
-**8 Items, bis ~46h.** Klären: #72 als eigenständig oder Teilkomponente von #235. #254 könnte mit #235 zusammen umgesetzt werden (Onboarding-Pfad). #260 ist ein experimenteller Spike — Stop-Criterion 3h, sonst Vendor-Wechsel auf GPT-Image-2 in v4.5 erwägen. #304 ist nur die i18n-Foundation; volle Komponenten-Migration trackt #122 in v3.3.
+**7 Items, bis ~45h.** Klären: #72 als eigenständig oder Teilkomponente von #235. #254 könnte mit #235 zusammen umgesetzt werden (Onboarding-Pfad). #260 ist ein experimenteller Spike — Stop-Criterion 3h, sonst Vendor-Wechsel auf GPT-Image-2 in v4.5 erwägen. #304 ist nur die i18n-Foundation; volle Komponenten-Migration trackt #122 in v3.3. #213 GH-Pages-Sunset wurde nach v3.3 verschoben.
 
 **Release:** `v3.2.0` — 30. Sep 2026.
 
@@ -223,6 +222,7 @@ Zweiter Multi-Trip auf gereifter Architektur. App-Stand: v3.2. Bugs während Rom
 | Issue | Titel | Size | Kategorie |
 |---|---|---|---|
 | #122 | feat: Multi-Language Komponenten-Migration (DE + EN, weitere möglich) | L | aus v3.2 verschoben 2026-05-02 — Foundation in v3.2 als #304 erledigt |
+| #213 | cleanup: Sunset GH-Pages + alten Maps-API-Key löschen (post-#117) | S | aus v3.2 verschoben 2026-05-02 — war auf 06.05. Grace-Period-Ende geblockt, Cleanup ohne Zeitdruck |
 | #272 | spike: Recherche moderne Travel-App-Patterns | S | Research |
 | #273 | feat: Tablet/Desktop-Layout (3-Spalten) | L | Layout |
 | #274 | feat: Map-Pins farblich nach Kategorie + Custom-Marker | M | Map |
@@ -239,7 +239,7 @@ Zweiter Multi-Trip auf gereifter Architektur. App-Stand: v3.2. Bugs während Rom
 | #285 | feat: Tagesplan-Timeline [STRETCH] | M | Visual |
 | #286 | feat: Trip-Hero / Cover-Image [STRETCH] | S | Visual |
 
-**16 Items** (1 Spike + 6 S + 7 M + 2 L). Über Soft-Limit (5) — bewusst, analog v3.1 Pre-Japan-Polish. **5 Items sind Stretch-Goals** und rutschen bei Zeitdruck nach v3.4.
+**17 Items** (1 Spike + 7 S + 7 M + 2 L). Über Soft-Limit (5) — bewusst, analog v3.1 Pre-Japan-Polish. **5 Items sind Stretch-Goals** und rutschen bei Zeitdruck nach v3.4.
 
 **Pflicht-Reihenfolge:** #272 Spike → #279 Tokens + #278 Density-Audit → #273 Desktop-Layout früh (beeinflusst #277). Rest parallel.
 
