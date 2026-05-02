@@ -197,21 +197,25 @@ export function SettingsView({
           {t('settings.language.section')}
         </h2>
         <div className="flex gap-2">
-          {(['de', 'en'] as const).map((lng) => {
-            const isActive = (settings.uiLanguage ?? 'de') === lng;
+          {([
+            { code: 'de', flag: '🇩🇪' },
+            { code: 'en', flag: '🇬🇧' },
+          ] as const).map(({ code, flag }) => {
+            const isActive = (settings.uiLanguage ?? 'de') === code;
             return (
               <button
-                key={lng}
+                key={code}
                 type="button"
-                onClick={() => onSetUiLanguage(lng)}
+                onClick={() => onSetUiLanguage(code)}
                 aria-pressed={isActive}
-                className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+                className={`flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-semibold transition ${
                   isActive
                     ? 'bg-ink text-cream'
                     : 'border border-cream-dark bg-white text-ink/70 hover:text-ink'
                 }`}
               >
-                {t(`settings.language.${lng}`)}
+                <span aria-hidden="true" className="text-base">{flag}</span>
+                {t(`settings.language.${code}`)}
               </button>
             );
           })}
